@@ -891,6 +891,53 @@
     <!-- 12 -->
     <section class="slide" aria-label="Slide 12">
       <p class="eyebrow">Bloco 2 &middot; A caixa</p>
+      <h2>Onde a borda <em>cresce</em>? <code>box-sizing</code></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <label class="ctl"><span>padding</span><input type="range" id="zP" min="0" max="40" value="20"><output></output></label>
+          <label class="ctl"><span>border</span><input type="range" id="zB" min="0" max="20" value="8"><output></output></label>
+          <div class="btns">
+            <button class="btn on" id="zContent">content-box (padrão)</button>
+            <button class="btn" id="zBorder">border-box</button>
+          </div>
+          <pre class="code" id="zCode"></pre>
+          <p class="lead fb" id="zFb"></p>
+        </div>
+        <div class="pane">
+          <div class="mstage" style="flex-direction:column;gap:.9rem;align-content:center">
+            <div style="width:260px;height:14px;border-left:2px solid var(--ink-dim);border-right:2px solid var(--ink-dim);display:flex;align-items:center"><div style="flex:1;border-top:2px dashed var(--ink-dim)"></div></div>
+            <p class="hint" style="margin:-.5rem 0 0">a régua = os 260px que pedimos</p>
+            <div class="glow-target" id="zBox" style="width:260px;height:70px;display:grid;place-items:center;font-family:var(--font-mono);font-size:.8rem;background:rgba(22,168,156,.18);border:8px solid #4f7cac;padding:20px;color:var(--ink)"><span id="zRead"></span></div>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Pergunta: se eu escrevo <code>width: 260px</code>, a caixa tem 260px na tela? Depende do <code>box-sizing</code>.</li>
+          <li><code>content-box</code> (padrão do navegador): o width é só do conteúdo. Padding e borda são somados por fora, a caixa fica maior.</li>
+          <li><code>border-box</code>: o width já inclui padding e borda. A borda cresce pra dentro e o conteúdo encolhe. A caixa tem sempre o tamanho que eu escrevi.</li>
+          <li>Por isso o reset <code>* { box-sizing: border-box; }</code> é comum: o número que eu escrevo é o tamanho que eu vejo. Os slides deste deck usam esse reset.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Começar no content-box, aumentar padding e borda: a caixa passa da régua. Trocar pra border-box: volta a caber nos 260px.</li>
+          <li>Voltar ao slide da borda e comentar: &ldquo;ali a borda crescia pra dentro porque o reset está ligado&rdquo;.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Dois elementos com <code>width: 50%</code> e padding que não cabem lado a lado. Com border-box cabem.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Com border-box, <code>width: 200px</code>, padding 20px e borda 5px: quantos pixels de largura a caixa tem? (200)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" aria-label="Slide 13">
+      <p class="eyebrow">Bloco 2 &middot; A caixa</p>
       <h2>Adivinhe: até onde a cor <em>pinta</em>?</h2>
       <div class="demo wide">
         <div class="pane lab">
@@ -938,8 +985,8 @@
       </aside>
     </section>
 
-    <!-- 13 -->
-    <section class="slide" aria-label="Slide 13">
+    <!-- 14 -->
+    <section class="slide" aria-label="Slide 14">
       <p class="eyebrow">Bloco 3 &middot; Posição</p>
       <h2><code>position: relative</code> &mdash; ajustar o lugar</h2>
       <div class="demo wide">
@@ -984,8 +1031,8 @@
       </aside>
     </section>
 
-    <!-- 14 -->
-    <section class="slide" aria-label="Slide 14">
+    <!-- 15 -->
+    <section class="slide" aria-label="Slide 15">
       <p class="eyebrow">Bloco 3 &middot; Posição</p>
       <h2><code>position: absolute</code> &mdash; em <em>cima</em> de tudo</h2>
       <div class="demo wide">
@@ -1034,8 +1081,8 @@
       </aside>
     </section>
 
-    <!-- 15 -->
-    <section class="slide" aria-label="Slide 15">
+    <!-- 16 -->
+    <section class="slide" aria-label="Slide 16">
       <p class="eyebrow">Juntando tudo</p>
       <h2>Um card de <em>personagem</em></h2>
       <div class="demo wide">
@@ -1069,8 +1116,8 @@
       </aside>
     </section>
 
-    <!-- 16 -->
-    <section class="slide" aria-label="Slide 16">
+    <!-- 17 -->
+    <section class="slide" aria-label="Slide 17">
       <p class="eyebrow">Fecho &middot; Cola</p>
       <h2>O que levar pra casa</h2>
       <div class="tagtable wide">
@@ -1106,8 +1153,8 @@
       </aside>
     </section>
 
-    <!-- 17 -->
-    <section class="slide" aria-label="Slide 17">
+    <!-- 18 -->
+    <section class="slide" aria-label="Slide 18">
       <p class="eyebrow">Mão na massa</p>
       <h2>Vista a página do seu jogo</h2>
       <ul class="bullets wide">
@@ -1142,7 +1189,7 @@
     <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
     <div class="progress"><div class="progress__fill" id="pfill"></div></div>
     <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
-    <span class="count" id="count">01 / 17</span>
+    <span class="count" id="count">01 / 18</span>
     <button id="btnTheme" aria-label="Alternar tema">tema</button>
   </div>
 </div>
@@ -1172,6 +1219,7 @@
     'padding': 'Espaço DENTRO da caixa, entre o conteúdo e a borda. O fundo pinta o padding.',
     'border': 'A borda, em 3 partes: tamanho, tipo e cor. Ex: 2px solid navy.',
     'border-radius': 'Arredonda os cantos. 50% numa caixa quadrada vira um círculo!',
+    'box-sizing': 'Define o que o width mede. content-box (padrão): só o conteúdo. border-box: conteúdo + padding + borda.',
     'margin': 'Espaço FORA da caixa, empurrando os vizinhos. O fundo NÃO pinta a margin.',
     'content': 'O conteúdo: texto, imagem... O tamanho dele é o width (e o height).',
     'position': 'Como o elemento é posicionado: static (normal), relative (ajustável) ou absolute (livre, em cima de tudo).',
@@ -1356,7 +1404,29 @@
     draw();
   })();
 
-  /* ---------- 12: adivinhe ---------- */
+  /* ---------- 12: box-sizing ---------- */
+  (function(){
+    var p = $('#zP'), b = $('#zB'), box = $('#zBox'), read = $('#zRead'), code = $('#zCode'), fb = $('#zFb'),
+        bc = $('#zContent'), bb = $('#zBorder'), mode = 'content-box';
+    function draw(){
+      box.style.boxSizing = mode; box.style.padding = p.value + 'px'; box.style.borderWidth = b.value + 'px';
+      var tot = box.offsetWidth;
+      read.textContent = 'largura real: ' + tot + 'px';
+      code.innerHTML = L('.caixa {') + L('  '+P('width')+': 260px;') + L('  '+P('padding')+': '+p.value+'px;') +
+        L('  '+P('border')+': '+b.value+'px solid;') + L('  '+P('box-sizing')+': '+mode+';') + L('}');
+      fb.textContent = mode === 'content-box'
+        ? 'O width é só do conteúdo: padding e borda vão por fora, somando ' + (tot - 260) + 'px a mais.'
+        : 'O width inclui padding e borda: a caixa fica sempre com 260px e o conteúdo encolhe.';
+      bc.classList.toggle('on', mode === 'content-box'); bb.classList.toggle('on', mode === 'border-box');
+      outs();
+    }
+    [p, b].forEach(function(e){ e.addEventListener('input', draw); });
+    bc.addEventListener('click', function(){ mode = 'content-box'; draw(); });
+    bb.addEventListener('click', function(){ mode = 'border-box'; draw(); });
+    draw();
+  })();
+
+  /* ---------- 13: adivinhe ---------- */
   (function(){
     var opts = $$('#gOpts button'), fb = $('#gFb'), wrap = $('#gWrap'), hint = $('#gHint');
     opts.forEach(function(o){
