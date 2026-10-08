@@ -1,0 +1,1244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSS 4 - Flexbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    color-scheme: dark;
+    /* paleta: navy #123f63 / slate #8fa3c4 / teal #16a89c / lime #bcd230 / orange #f2a63b */
+    --navy:#123f63;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+    --font-display:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body:"Barlow", system-ui, -apple-system, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      color-scheme: light;
+      --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+      --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+      --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+    --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+    --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:clamp(15px,1.1vw,18px); line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  .deck{ position:fixed; inset:0; display:grid; grid-template-rows:1fr auto; }
+  .stage{ position:relative; overflow:hidden; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+    padding:clamp(2rem,6vw,5.5rem) clamp(1.6rem,7vw,7rem) clamp(3.2rem,8vh,5rem);
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .34s ease, transform .34s ease, visibility 0s linear .34s;
+    overflow-y:auto;
+  }
+  .slide.active{
+    opacity:1; visibility:visible; transform:none;
+    transition:opacity .38s ease, transform .38s ease;
+  }
+  .slide > *{ max-width:60ch; }
+  .slide .wide{ max-width:min(1080px,92vw); }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0; display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before{ content:""; width:1.8rem; height:2px; background:var(--accent); display:inline-block; }
+
+  h1,h2{ font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.02; text-transform:uppercase; letter-spacing:.005em; }
+  h1{ font-size:clamp(2.9rem,9vw,6.2rem); }
+  h2{ font-size:clamp(2rem,5vw,3.6rem); }
+  h2 em, h1 em{ font-style:normal; color:var(--accent); }
+  h1 code, h2 code{ text-transform:none; font-size:.82em; vertical-align:.04em; }
+
+  .lead{ font-size:clamp(1.15rem,2.1vw,1.7rem); color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+  .slide p{ margin:0; }
+  strong{ font-weight:600; color:var(--ink); }
+  .hl{ color:var(--accent); font-weight:600; }
+  .hl-amber{ color:var(--amber); font-weight:600; }
+
+  code, kbd{
+    font-family:var(--font-mono); font-size:.92em;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:5px;
+    padding:.1em .45em;
+  }
+  kbd{ box-shadow:0 2px 0 var(--line); }
+
+  .subtitle{ font-family:var(--font-mono); color:var(--ink-dim); font-size:clamp(.95rem,1.6vw,1.15rem); letter-spacing:.02em; }
+
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.35rem); }
+  ul.bullets li{ display:flex; gap:.7rem; align-items:baseline; }
+  ul.bullets li::before{ content:"▸"; color:var(--accent); flex:none; }
+
+  .callout{
+    border-left:3px solid var(--amber); background:var(--bg-elev);
+    padding:1rem 1.2rem; border-radius:0 10px 10px 0; font-size:clamp(1.02rem,1.8vw,1.3rem);
+  }
+  .callout.good{ border-color:var(--accent); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:.55rem; }
+  .chips span{
+    font-family:var(--font-mono); font-size:.92rem;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.4em .9em;
+  }
+  .chips.done span{ color:var(--ink-dim); }
+
+  .kv{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.9rem; }
+  .kv > div{ display:flex; flex-direction:column; gap:.3rem; }
+  .kv .k{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .kv .v{ font-size:1.05rem; }
+
+  /* trio de blocos da agenda */
+  .trio{ display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .trio > div{
+    background:var(--bg-elev); border:1px solid var(--line); border-top:4px solid var(--c,var(--accent));
+    border-radius:12px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.5rem;
+  }
+  .trio .k{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:1.6rem; line-height:1; }
+  .trio .tags{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .trio .t1{ --c:var(--accent); } .trio .t2{ --c:var(--amber); } .trio .t3{ --c:var(--lime); }
+
+  /* footer chrome */
+  .chrome{
+    display:flex; align-items:center; gap:1rem;
+    padding:.55rem clamp(1rem,4vw,2.4rem); border-top:1px solid var(--line);
+    background:var(--bg); font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+    z-index:10;
+  }
+  .chrome .label{ letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progress{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; min-width:60px; }
+  .progress__fill{ height:100%; background:var(--accent); width:0; transition:width .35s ease; }
+  .chrome .count{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .chrome button{
+    font:inherit; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line);
+    border-radius:7px; padding:.3em .7em; cursor:pointer;
+  }
+  .chrome button:hover{ color:var(--ink); border-color:var(--accent); }
+  .chrome button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .zones{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+  .zone{ pointer-events:auto; border:none; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; }
+  .zone:focus, .zone:focus-visible{ outline:none; }
+  .zone.prev{ width:28%; }
+  .zone.spacer{ flex:1; cursor:default; pointer-events:none; }
+  .zone.next{ width:40%; }
+
+  /* faixa tricolor no topo */
+  .brandbar{ position:absolute; left:0; right:0; top:0; height:5px; display:flex; z-index:8; }
+  .brandbar i{ flex:1; }
+  .brandbar i:nth-child(1){ background:var(--accent); }
+  .brandbar i:nth-child(2){ background:var(--lime); }
+  .brandbar i:nth-child(3){ background:var(--amber); }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide, .slide.active, .progress__fill{ transition:none; }
+  }
+
+  /* código e demonstração lado a lado */
+  pre.code{
+    font-family:var(--font-mono); font-size:clamp(.78rem,1.3vw,.98rem); line-height:1.6;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; margin:0; overflow-x:auto; color:var(--ink);
+    white-space:pre; tab-size:2;
+  }
+  pre.code .t{ color:var(--accent); }
+  pre.code .at{ color:var(--amber); }
+  pre.code .v{ color:var(--slate); }
+  pre.code .c{ color:var(--ink-dim); font-style:italic; }
+
+  .demo{ display:grid; gap:.9rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .demo{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .demo .pane{ display:flex; flex-direction:column; gap:.45rem; min-width:0; }
+  .demo .pane-label{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-dim);
+  }
+  /* o "navegador": estilos padrão, sem CSS nenhum — e clicável por cima das zonas de navegação */
+  .render{
+    color-scheme:light;
+    position:relative; z-index:6;
+    background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .render :is(h1,h2,h3){ font-family:inherit; text-transform:none; letter-spacing:0; color:inherit; margin:.35em 0; line-height:1.2; }
+  .render h1{ font-size:2em; font-weight:700; }
+  .render h2{ font-size:1.5em; font-weight:700; }
+  .render p{ margin:.7em 0; }
+  .render a{ color:#00e; text-decoration:underline; }
+  .render table{ border-collapse:separate; border-spacing:2px; }
+  .render th, .render td{ padding:1px; text-align:left; }
+  .render th{ font-weight:700; text-align:center; }
+  .render table[border] th, .render table[border] td{ border:1px solid #808080; }
+  .render input, .render button{ font-family:system-ui, sans-serif; font-size:13px; }
+  .render > :first-child{ margin-top:0; }
+  .render > :last-child{ margin-bottom:0; }
+
+  .tagtable{ display:grid; grid-template-columns:auto 1fr; gap:.55rem 1.1rem; align-items:baseline; }
+  .tagtable code{ white-space:nowrap; }
+  .tagtable .grp{
+    grid-column:1/-1; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent); margin-top:.4rem;
+  }
+
+  /* diagrama da página semântica */
+  .layout{ display:grid; gap:.5rem; font-family:var(--font-mono); font-size:.9rem; }
+  .layout > div{
+    border:2px dashed var(--line); border-radius:10px; padding:.8rem 1rem;
+    display:flex; justify-content:space-between; gap:1rem; color:var(--ink-dim);
+  }
+  .layout b{ color:var(--accent); font-weight:500; }
+  .layout .main{ min-height:7rem; align-items:flex-start; }
+  .layout .hd b, .layout .ft b{ color:var(--amber); }
+  .layout .hd, .layout .ft{ border-style:solid; border-color:var(--amber); }
+
+  /* ===== CSS 1: extras ===== */
+  .slide aside.notes{ display:none; }
+  .lab, pre.code, .tabs, .seg, .btns, .swatches{ position:relative; z-index:6; }
+  pre.code .ln{ display:block; }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.5rem); }
+
+  /* dicas ao passar o mouse */
+  .prop{ border-bottom:1px dotted var(--accent); cursor:help; border-radius:2px; transition:background .15s; }
+  .prop:hover, .prop:focus-visible{ background:color-mix(in srgb, var(--accent) 24%, transparent); outline:none; }
+  #tip{
+    position:fixed; z-index:60; max-width:min(330px,86vw); left:0; top:0;
+    background:var(--ink); color:var(--bg); padding:.65rem .85rem; border-radius:10px;
+    font-size:.92rem; line-height:1.4; pointer-events:none; opacity:0; transform:translateY(5px);
+    transition:opacity .15s ease, transform .15s ease; box-shadow:var(--shadow);
+  }
+  #tip.show{ opacity:1; transform:none; }
+  #tip b{ display:block; font-family:var(--font-mono); font-weight:500; font-size:.82rem; letter-spacing:.04em; margin-bottom:.15rem; color:var(--accent-ink); background:var(--accent); width:max-content; padding:.05em .5em; border-radius:4px; }
+
+  @keyframes glow{
+    0%,100%{ box-shadow:0 0 0 0 transparent; }
+    50%{ box-shadow:0 0 0 7px color-mix(in srgb, var(--accent) 55%, transparent); }
+  }
+  @keyframes pop{ 0%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+  .glow{ animation:glow .9s ease-in-out infinite; }
+
+  /* controles */
+  .btn{
+    font-family:var(--font-mono); font-size:.85rem; color:var(--ink); background:var(--bg-elev);
+    border:1px solid var(--line); border-radius:8px; padding:.45em .9em; cursor:pointer;
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .btn:hover{ border-color:var(--accent); }
+  .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn.on{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .btn.big{ font-size:1.05rem; padding:.7em 1.3em; font-weight:500; }
+  .btns, .seg, .tabs{ display:flex; flex-wrap:wrap; gap:.5rem; }
+  .ctl{ display:grid; grid-template-columns:8.5rem 1fr 4rem; align-items:center; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .ctl output{ text-align:right; color:var(--ink); }
+  .ctl select, .ctl input[type=color]{ grid-column:2/4; font:inherit; background:var(--bg-elev); color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.3em .5em; height:2.1rem; }
+  .ctl input[type=text]{ grid-column:2/4; font:inherit; font-size:1rem; background:var(--bg-elev); color:var(--ink); border:1px solid var(--accent); border-radius:7px; padding:.35em .6em; }
+  input[type=range]{ accent-color:var(--accent); width:100%; }
+  .lab{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .hint{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim); }
+  .hint b{ color:var(--amber); font-weight:500; }
+
+  /* a mini-página liga/desliga CSS */
+  .mini{
+    background:#fff; color:#1a1a1a; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem; box-shadow:var(--shadow);
+    transition:background .6s ease, color .6s ease, padding .6s ease, border-radius .6s ease;
+  }
+  .mini h1{ font-family:inherit; text-transform:none; font-size:2em; margin:.3em 0; line-height:1.15; color:inherit; transition:all .6s ease; }
+  .mini p{ margin:.6em 0; transition:all .6s ease; }
+  .mini button{ font-family:inherit; font-size:13px; transition:all .6s ease; }
+  .mini .tag{ display:inline-block; font-family:inherit; font-size:1em; transition:all .6s ease; }
+  .mini.on{ background:#123f63; color:#e4ecf3; font-family:"Barlow", system-ui, sans-serif; padding:1.8rem 1.8rem; border-radius:18px; }
+  .mini.on h1{ font-family:"Barlow Condensed", "Arial Narrow", sans-serif; text-transform:uppercase; color:#2ec9bd; font-size:2.6em; letter-spacing:.01em; }
+  .mini.on p{ color:#c9d6e2; }
+  .mini.on button{ background:#f2a63b; color:#3a2300; border:none; border-radius:999px; padding:.7em 1.4em; font-weight:600; font-size:15px; }
+  .mini.on .tag{ background:#16a89c; color:#fff; border-radius:6px; padding:.1em .6em; font-size:.85em; }
+
+  /* abas de "como o css entra" */
+  .tabs button{ font-family:var(--font-mono); font-size:.9rem; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line); border-radius:8px 8px 0 0; padding:.5em 1em; cursor:pointer; }
+  .tabs button.on{ color:var(--ink); border-color:var(--accent); border-bottom-color:var(--bg-elev); box-shadow:inset 0 3px 0 var(--accent); }
+  .tp{ display:none; }
+  .tp.on{ display:flex; flex-direction:column; gap:.8rem; }
+  .files{ display:grid; gap:.8rem; grid-template-columns:1fr; }
+  @media (min-width:800px){ .files{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .fname{ font-family:var(--font-mono); font-size:.78rem; color:var(--amber); letter-spacing:.06em; margin-bottom:.3rem; display:block; }
+  .verdict{ font-family:var(--font-mono); font-size:.88rem; padding:.45em .9em; border-radius:8px; width:max-content; max-width:100%; }
+  .verdict.bad{ background:color-mix(in srgb, var(--amber) 20%, transparent); color:var(--amber); }
+  .verdict.ok{ background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--accent); }
+
+  /* anatomia de uma regra */
+  .k-seletor{ color:var(--accent); } .k-propriedade{ color:var(--amber); } .k-valor{ color:var(--slate); }
+  .k-seletor, .k-propriedade, .k-valor, .k-fim{ border-radius:4px; }
+  body[data-hover="seletor"] .k-seletor, body[data-hover="propriedade"] .k-propriedade,
+  body[data-hover="valor"] .k-valor, body[data-hover="fim"] .k-fim{ animation:glow .9s ease-in-out infinite; }
+  .legend{ display:flex; flex-wrap:wrap; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; }
+  .legend span{ background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.3em .85em; }
+  .semi.miss::after{ content:"\2190 faltou!"; color:#ff6b5e; font-size:.8em; margin-left:.4rem; }
+  .s-h1{ font-family:"Times New Roman", serif; font-weight:700; margin:0; color:#16a89c; font-size:40px; line-height:1.1; transition:all .35s ease; }
+  .s-h1.broken{ color:#1a1a1a; font-size:32px; }
+
+  /* amostras */
+  .sample{ color-scheme:light; background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px; padding:1.2rem; box-shadow:var(--shadow); font-family:"Times New Roman", serif; min-height:7rem; }
+  .sample p{ margin:0; padding:.6rem .8rem; border-radius:6px; transition:all .25s ease; }
+  .swatches{ display:flex; flex-wrap:wrap; gap:.45rem; }
+  .sw{ font-family:var(--font-mono); font-size:.76rem; border:2px solid var(--line); border-radius:8px; padding:.35em .6em; cursor:pointer; color:#111; }
+  .sw:hover{ border-color:var(--accent); }
+  .sw.dark{ color:#fff; }
+
+  /* caixa: diagrama */
+  .bm{ max-width:560px; }
+  .bm-margin, .bm-border, .bm-padding, .bm-content{ position:relative; border-radius:6px; transition:filter .2s; }
+  .bm-tag{ position:absolute; top:.25rem; left:.55rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#1a1a1a; font-weight:500; pointer-events:none; }
+  .bm-margin{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.38) 8px 16px); padding:2.1rem 1.4rem 1.4rem; border:2px dashed #f2a63b; cursor:help; }
+  .bm-border{ background:#4f7cac; padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-border .bm-tag{ color:#fff; }
+  .bm-padding{ background:rgba(188,210,48,.92); padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-content{ background:#16a89c; color:#fff; padding:1.3rem .6rem; text-align:center; font-family:var(--font-mono); cursor:help; }
+  .bm-content .bm-tag{ display:none; }
+  body[data-hover="margin"] .bm-margin, body[data-hover="border"] .bm-border,
+  body[data-hover="padding"] .bm-padding, body[data-hover="content"] .bm-content{ animation:glow .9s ease-in-out infinite; filter:brightness(1.15); }
+
+  /* caixa: laboratório */
+  .mstage{ min-height:310px; display:grid; place-items:center; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .mwrap{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.35) 8px 16px); outline:1px dashed #f2a63b; transition:padding .12s; }
+  .mbox{ border-style:solid; border-color:#4f7cac; background:rgba(188,210,48,.95); background-clip:padding-box; transition:padding .12s, border-width .12s; }
+  .mcontent{ background:#16a89c; color:#fff; height:70px; display:grid; place-items:center; font-family:var(--font-mono); font-size:.8rem; transition:width .12s; }
+
+  /* padding: 1, 2, 3 ou 4 valores */
+  .sh-grid{ display:grid; grid-template-columns:auto auto auto; grid-template-rows:auto auto auto; gap:.35rem; align-items:center; justify-items:center; justify-content:center; }
+  .sh-b{ font-family:var(--font-mono); font-size:.85rem; color:var(--accent); min-width:4.2rem; text-align:center; }
+  .sh-box{ background:rgba(188,210,48,.95); border:2px solid #4f7cac; transition:padding .2s ease; }
+  .sh-in{ background:#16a89c; color:#fff; font-family:var(--font-mono); font-size:.8rem; padding:.9rem 1rem; }
+
+  /* borda */
+  .bdbox{ width:150px; height:150px; display:grid; place-items:center; text-align:center; font-family:var(--font-mono); font-size:.8rem; background:rgba(22,168,156,.18); transition:all .15s; }
+
+  /* position */
+  .stack{ display:flex; flex-direction:column; gap:.5rem; width:min(100%,300px); padding:1rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; }
+  .blk{ background:var(--slate); color:#0c1f2e; font-family:var(--font-mono); font-weight:500; padding:.8rem 1rem; border-radius:8px; height:3rem; display:flex; align-items:center; }
+  .slot{ border:2px dashed var(--ink-dim); border-radius:8px; height:3rem; }
+  .slot .blk{ background:var(--accent); color:var(--accent-ink); width:calc(100% + 0px); transition:top .15s, left .15s; }
+  .slot .blk.moved{ width:60%; }
+  .ign{ opacity:.55; text-decoration:line-through; }
+  .pg{ position:relative; border:2px dashed var(--ink-dim); border-radius:12px; padding:2.2rem 1.2rem 1.2rem; height:310px; background:var(--bg-elev); }
+  .pg-l, .pr-l{ position:absolute; top:.4rem; left:.7rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); }
+  .pr{ position:static; margin:1.6rem 0 0 auto; width:68%; height:190px; border:2px solid var(--accent); border-radius:10px; background:color-mix(in srgb, var(--accent) 10%, transparent); }
+  .pr.rel{ position:relative; }
+  .pr-l{ position:static; display:block; padding:.4rem .7rem; color:var(--accent); }
+  .ch{ position:absolute; width:38px; height:38px; border-radius:8px; background:var(--amber); color:#3a2300; display:grid; place-items:center; font-size:1.2rem; z-index:2; }
+  .ch.pop{ animation:pop .35s ease; }
+
+  /* card de personagem */
+  .card{ background:#fff; color:#1a1a1a; font-family:"Times New Roman", serif; max-width:280px; transition:all .45s ease; }
+  .card h3{ margin:0 0 .3em; font-size:1.4em; font-family:inherit; text-transform:none; }
+  .card p{ margin:0; }
+  .ln.new{ background:color-mix(in srgb, var(--accent) 26%, transparent); border-radius:4px; }
+  .quiz-opt{ text-align:left; }
+  .quiz-opt.right{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .quiz-opt.wrong{ background:color-mix(in srgb, #ff6b5e 25%, transparent); border-color:#ff6b5e; }
+  .fb{ min-height:3rem; }
+
+  /* anotações do professor (nunca aparecem pro aluno sem apertar N) */
+  #notesPanel{
+    position:fixed; right:12px; bottom:52px; width:min(390px,92vw); max-height:72vh; overflow:auto; z-index:40;
+    background:var(--bg-elev); border:1px solid var(--amber); border-radius:12px; padding:.9rem 1.05rem;
+    box-shadow:var(--shadow); font-size:.9rem; line-height:1.45;
+  }
+  #notesPanel[hidden]{ display:none; }
+  #notesPanel .np-h{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:.4rem; }
+  #notesPanel h4{ margin:.7rem 0 .2rem; font-family:var(--font-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); font-weight:500; }
+  #notesPanel ul{ margin:0; padding-left:1.1rem; } #notesPanel li{ margin:.15rem 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    .glow, .ch.pop, body[data-hover] *{ animation:none !important; }
+  }
+
+  /* ===== Tema VS Code Dark+ nos blocos de código ===== */
+  pre.code{
+    background:#1e1e1e; color:#d4d4d4; border:1px solid #3c3c3c; border-radius:8px;
+    font-family:Consolas, "Cascadia Code", "Cascadia Mono", "Courier New", monospace;
+    font-size:clamp(.85rem,1.35vw,1.05rem); line-height:1.55; padding:1rem 1.2rem;
+    box-shadow:0 10px 30px -16px rgba(0,0,0,.6); color-scheme:dark;
+  }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.4rem); }
+  pre.code .t{ color:#569cd6; }
+  pre.code .at{ color:#9cdcfe; }
+  pre.code .v{ color:#ce9178; }
+  pre.code .n{ color:#b5cea8; }
+  pre.code .sel{ color:#d7ba7d; }
+  pre.code .c, pre.code .hint{ color:#6a9955; font-style:italic; font-family:inherit; font-size:inherit; }
+  pre.code .prop{ color:#9cdcfe; border-bottom-color:#9cdcfe; }
+  pre.code .prop:hover, pre.code .prop:focus-visible{ background:rgba(86,156,214,.28); }
+  pre.code .k-seletor{ color:#d7ba7d; } pre.code .k-propriedade{ color:#9cdcfe; } pre.code .k-valor{ color:#ce9178; }
+  pre.code .ln.new{ background:rgba(255,255,255,.1); }
+  pre.code .ign{ opacity:.5; }
+  .fname{ color:#cccccc; background:#2d2d2d; display:inline-block; padding:.2em .8em; border-radius:6px 6px 0 0; margin-bottom:0; border:1px solid #3c3c3c; border-bottom:none; }
+  .fname + pre.code{ border-top-left-radius:0; }
+
+  /* ===== CSS 4: Flexbox ===== */
+  .fxlab{ display:flex; flex-direction:column; gap:.8rem; position:relative; z-index:6; min-width:0; }
+  .fxlab .goal{ background:color-mix(in srgb, var(--amber) 16%, transparent); border-left:4px solid var(--amber); border-radius:0 8px 8px 0; padding:.6rem .9rem; font-size:1.02rem; }
+  .fx-grid{ display:grid; gap:1rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .fx-grid{ grid-template-columns:1fr 1.15fr; align-items:start; } }
+  .fx-l, .fx-r{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .fx-g{ display:flex; flex-direction:column; gap:.3rem; }
+  .fx-gl{ font-family:var(--font-mono); font-size:.78rem; color:var(--ink-dim); width:max-content; }
+  .fx-g .seg .btn{ font-size:.78rem; padding:.35em .7em; }
+  .fx-stage{ background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .fx{
+    border:2px dashed var(--ink-dim); border-radius:10px; background:color-mix(in srgb, var(--accent) 7%, transparent);
+    padding:6px; max-width:100%; min-width:0;
+  }
+  .cube{
+    width:52px; height:52px; flex:none; border-radius:8px; display:grid; place-items:center;
+    font-family:var(--font-mono); font-weight:700; font-size:1.05rem; color:#0c1f2e; user-select:none;
+    box-shadow:0 3px 8px -3px rgba(0,0,0,.5); flex-direction:column; line-height:1.1;
+  }
+  .cube small{ font-size:.55rem; font-weight:500; display:block; }
+  .fx.vary .cube{ height:auto; min-height:0; padding:.35rem 0; }
+  .fx.pick .cube{ cursor:pointer; width:70px; }
+  .fx-axis{ min-height:1.4rem; }
+  .vd{ font-family:var(--font-mono); font-size:.8rem; padding:.15em .7em; border-radius:999px; margin-left:.4rem; white-space:nowrap; }
+  .vd.ok{ background:var(--accent); color:var(--accent-ink); }
+  .vd.no{ background:color-mix(in srgb, #ff6b5e 25%, transparent); color:#ff8f84; }
+
+  /* display: block, inline, inline-block */
+  .dsc{ background:var(--bg-elev); border:2px dashed var(--ink-dim); border-radius:10px; padding:10px; min-height:140px; color:var(--ink); font-family:var(--font-body); line-height:1.9; }
+  .dsb{ width:90px; height:46px; background:#2ec9bd; color:#0c1f2e; font-family:var(--font-mono); font-weight:700; text-align:center; line-height:46px; border-radius:6px; margin:2px 0; }
+  .dsb:nth-child(2){ background:#f4ac4a; } .dsb:nth-child(3){ background:#c4da3c; }
+
+  /* mini site: cards em linha */
+  .msite{ background:#eef1f5; border-radius:12px; overflow:hidden; font-family:Arial,sans-serif; color:#1f2933; box-shadow:var(--shadow); }
+  .msite header{ background:#123f63; color:#fff; padding:14px 18px; }
+  .msite header h4{ margin:0 0 6px; font-size:1.2rem; }
+  .msite nav a{ color:#2ec9bd; margin-right:14px; font-size:.95rem; }
+  .msite nav{ transition:all .3s; }
+  .msite main{ padding:14px; }
+  .msite .mc{ background:#fff; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,.12); padding:14px 16px; margin:8px 0; font-size:.95rem; }
+  .msite .mc b{ display:block; }
+  .msite.on nav{ display:flex; gap:16px; justify-content:center; }
+  .msite.on nav a{ margin:0; }
+  .msite.on main{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+  .msite.on .mc{ margin:0; flex:1 1 120px; }
+
+  /* alvos do projeto */
+  .tgrid{ display:grid; gap:.7rem; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+  .tgt{ background:var(--bg-elev); border:1px solid var(--line); border-radius:10px; padding:.6rem; display:flex; flex-direction:column; gap:.4rem; }
+  .tgt .tl{ font-family:var(--font-mono); font-size:.75rem; color:var(--accent); }
+  .tgt .tf{ display:flex; height:84px; border:1px dashed var(--ink-dim); border-radius:6px; padding:3px; overflow:hidden; }
+  .tgt .cube{ width:22px; height:22px; font-size:.65rem; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="brandbar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="zones" aria-hidden="true">
+      <button class="zone prev" id="zprev" tabindex="-1" aria-label="Slide anterior"></button>
+      <span class="zone spacer"></span>
+      <button class="zone next" id="znext" tabindex="-1" aria-label="Próximo slide"></button>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide" aria-label="Slide 1">
+      <p class="eyebrow">Aula &middot; CSS parte 4</p>
+      <h1>Flexbox: organizando <em>elementos</em></h1>
+      <p class="subtitle">alinhar, espaçar e centralizar sem sofrimento</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Última aula ficou uma dúvida: como colocar os cards lado a lado? Hoje a resposta.</li>
+          <li>Flexbox é a ferramenta de layout mais usada hoje. Quem domina isso monta qualquer tela.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>No vídeo: &ldquo;display flex is amazing and it&rsquo;s my go-to&rdquo;. Grid fica pra outro dia.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Ter à mão o site da aula passada. No final eles voltam nele.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" aria-label="Slide 2">
+      <p class="eyebrow">Antes do flex &middot; display</p>
+      <h2>Como cada elemento <em>se comporta</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <div class="seg" id="dsSeg">
+            <button class="btn on" data-d="block">block</button>
+            <button class="btn" data-d="inline">inline</button>
+            <button class="btn" data-d="inline-block">inline-block</button>
+            <button class="btn" data-d="flex">flex (no pai)</button>
+          </div>
+          <pre class="code" id="dsCode"></pre>
+          <p class="hint" id="dsMsg"></p>
+        </div>
+        <div class="pane">
+          <div class="dsc glow-target" id="dsc">Veja os <span class="dsb">1</span><span class="dsb">2</span><span class="dsb">3</span> cubos dentro deste texto.</div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Todo elemento tem um <code>display</code>. Ele decide se ocupa a linha inteira ou só o espaço do conteúdo.</li>
+          <li><b>block</b>: ocupa a linha toda, cada um numa linha. Aceita largura e altura. É o padrão de <code>div</code>, <code>p</code>, <code>h1</code>.</li>
+          <li><b>inline</b>: fica na linha do texto e ignora largura e altura. É o padrão de <code>span</code> e <code>a</code>.</li>
+          <li><b>inline-block</b>: fica na linha, mas aceita largura e altura. Os dois benefícios.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>&ldquo;use inline for a continuous line and block to space things out, or inline-block if you still want the benefits of both&rdquo;.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Clicar em cada botão. Notar que <code>inline</code> ignora o tamanho dos cubos e <code>block</code> joga cada um para uma linha.</li>
+          <li>Clicar em <code>flex</code>: o display deixa de ser dos cubos e passa ao pai. Gancho pro resto da aula.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" aria-label="Slide 3">
+      <p class="eyebrow">Flexbox &middot; O básico</p>
+      <h2>Um comando, tudo <em>em linha</em></h2>
+      <div class="fxlab wide" data-fx="1" data-ctl="display" data-cubes="4" data-h="90" data-start='{"display":"block"}' data-goal="colocar os 4 cubos <b>lado a lado</b>, usando o display do container."></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Os cubos estão empilhados porque são blocos. Um <code>display: flex</code> no pai e eles se organizam em linha.</li>
+          <li>Reparem que a regra não vai nos cubos, vai na <b>caixa de fora</b>.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Alternar entre <code>block</code> e <code>flex</code> e ver os cubos se movendo suavemente.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Colocar <code>display: flex</code> nos filhos em vez do pai. Não acontece nada.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: criem uma <code>div</code> com três filhos e dêem <code>display: flex</code> a ela.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" aria-label="Slide 4">
+      <p class="eyebrow">Flexbox &middot; Container e itens</p>
+      <h2>Quem <em>manda</em> em quem</h2>
+      <div class="fxlab wide" data-fx="1" data-ctl="display,add" data-cubes="3" data-h="90" data-start='{"display":"flex"}'></div>
+      <div class="kv wide">
+        <div><span class="k">container (pai)</span><span class="v">a caixa tracejada. Recebe <code>display: flex</code> e os comandos de organização.</span></div>
+        <div><span class="k">itens (filhos)</span><span class="v">os cubos coloridos. São organizados automaticamente.</span></div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Flexbox tem dois papéis: o <b>container</b> (a caixa de fora) e os <b>itens</b> (quem está dentro).</li>
+          <li>Quase tudo se escreve no container. Os itens só recebem o que o pai decidir.</li>
+          <li>Adicionar cubos: o flex arruma o novo sem eu fazer nada.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Clicar em &ldquo;+ cubo&rdquo; algumas vezes e em &ldquo;− cubo&rdquo;. Notar que o código não muda: o pai cuida de tudo.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Se eu quero que as três <code>div</code> de dentro fiquem em linha, em qual elemento escrevo <code>display: flex</code>? (no pai)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" aria-label="Slide 5">
+      <p class="eyebrow">Flexbox &middot; Direção</p>
+      <h2><code>flex-direction</code> &mdash; para onde flui</h2>
+      <div class="fxlab wide" data-fx="1" data-ctl="direction" data-cubes="4" data-h="210" data-start='{"direction":"row"}'></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Todo flex tem um <b>eixo principal</b>: a direção em que os itens se enfileiram.</li>
+          <li><code>row</code> (padrão): em linha, da esquerda pra direita. <code>column</code>: em coluna, de cima pra baixo.</li>
+          <li>O <code>reverse</code> inverte a ordem visual, sem mexer no HTML.</li>
+          <li>Anotar: o outro eixo é o <b>transversal</b>. Isso vai importar já.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Clicar nos quatro valores e olhar o texto embaixo dizendo qual é o eixo principal.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Qual valor eu uso pra fazer um menu vertical? (<code>column</code>)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" aria-label="Slide 6">
+      <p class="eyebrow">Flexbox &middot; Eixo principal</p>
+      <h2><code>justify-content</code> &mdash; distribui</h2>
+      <div class="fxlab wide" data-fx="1" data-ctl="justify" data-cubes="3" data-h="100" data-start='{"justify":"flex-start"}' data-want='{"justify":"space-between"}' data-goal="colocar o <b>primeiro cubo na ponta esquerda</b> e o <b>último na ponta direita</b>, com o espaço sobrando no meio."></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li><code>justify-content</code> distribui os itens ao longo do <b>eixo principal</b> (em linha, é a horizontal).</li>
+          <li>Os valores principais: <code>flex-start</code> (início), <code>center</code>, <code>flex-end</code> (fim), <code>space-between</code> (espaço entre eles), <code>space-around</code> e <code>space-evenly</code>.</li>
+          <li>Menus de site usam <code>space-between</code> o tempo todo: logo de um lado, links do outro.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Com <code>align-items</code> e <code>justify-content</code> é fácil centralizar na horizontal e na vertical.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Passar por todos os valores devagar. Comparar <code>space-around</code> e <code>space-evenly</code>: o espaço das pontas muda.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: façam o menu de vocês com <code>justify-content: space-between</code>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" aria-label="Slide 7">
+      <p class="eyebrow">Flexbox &middot; Eixo transversal</p>
+      <h2><code>align-items</code> &mdash; alinha</h2>
+      <div class="fxlab wide" data-fx="1" data-ctl="align" data-cubes="4" data-h="200" data-vary="1" data-start='{"align":"flex-start"}' data-want='{"align":"flex-end"}' data-goal="alinhar todos os cubos pela <b>base</b> (parte de baixo) da caixa."></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li><code>align-items</code> trabalha no <b>outro eixo</b> (o transversal). Em linha, é o vertical.</li>
+          <li>Truque pra não confundir: <b>justify</b> = eixo principal, <b>align</b> = o outro.</li>
+          <li><code>stretch</code> (padrão): os itens esticam para preencher a altura. Os outros valores respeitam o tamanho de cada item.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Os cubos têm alturas diferentes de propósito. Passar por <code>stretch</code> (todos esticam), <code>flex-start</code> (topo), <code>center</code> e <code>flex-end</code> (base).</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Usar <code>align-items</code> esperando mexer na horizontal. Em <code>column</code> os eixos <b>trocam</b>: justify vira vertical.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" aria-label="Slide 8">
+      <p class="eyebrow">Flexbox &middot; O clássico</p>
+      <h2>Centralizar de <em>verdade</em></h2>
+      <div class="fxlab wide" data-fx="1" data-ctl="justify,align" data-cubes="1" data-h="200" data-start='{"justify":"flex-start","align":"flex-start"}' data-want='{"justify":"center","align":"center"}' data-goal="colocar o cubo <b>exatamente no centro</b> da caixa, na horizontal e na vertical."></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Centralizar na vertical foi um pesadelo no CSS por anos. Com flex são duas linhas.</li>
+          <li><code>justify-content: center</code> + <code>align-items: center</code> = no meio exato.</li>
+          <li>Uso pra sempre: centralizar título numa capa, ícone num botão, personagem na tela de um jogo.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>&ldquo;it&rsquo;s easy to center horizontally and vertically with the align items and justify content properties&rdquo;.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Deixar a turma sugerir os valores antes de clicar. Errar um dos dois e ver o cubo parar na lateral.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Se eu escolher só <code>justify-content: center</code>, o cubo fica onde? (no meio da horizontal, mas no topo)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" aria-label="Slide 9">
+      <p class="eyebrow">Flexbox &middot; Espaço entre os itens</p>
+      <h2><code>gap</code> &mdash; respiro entre eles</h2>
+      <div class="fxlab wide" data-fx="1" data-ctl="gap" data-cubes="4" data-h="90" data-start='{"gap":10}'></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li><code>gap</code> é o espaço <b>entre</b> os itens. Não mexe nas bordas da caixa.</li>
+          <li>Antes do <code>gap</code> se usava <code>margin</code> em cada item. Dava mais trabalho e sobrava espaço nas pontas.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Mexer no slider de 0 até 40 e comparar com o <code>space-between</code> do slide 6: lá o espaço é distribuído, aqui é fixo.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Qual a diferença entre <code>gap</code> e <code>justify-content: space-between</code>? (o gap é um valor fixo, o space-between divide o que sobra)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" aria-label="Slide 10">
+      <p class="eyebrow">Flexbox &middot; Quebra de linha</p>
+      <h2><code>flex-wrap</code> &mdash; quando não cabe</h2>
+      <div class="fxlab wide" data-fx="1" data-ctl="wrap,width" data-cubes="8" data-h="150" data-start='{"wrap":"nowrap","width":220,"gap":8}' data-want='{"wrap":"wrap"}' data-goal="fazer os cubos <b>quebrarem para a linha de baixo</b> quando a caixa estiver estreita, em vez de estourarem para fora."></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Por padrão (<code>nowrap</code>) o flex tenta manter tudo numa linha só. Se não cabe, os itens estouram pra fora.</li>
+          <li><code>flex-wrap: wrap</code> deixa os itens quebrarem para a linha seguinte.</li>
+          <li>Isso é o que faz uma galeria de cards se adaptar a telas pequenas.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Arrastar o slider da largura com <code>nowrap</code>: cubos saindo da caixa. Depois com <code>wrap</code>: eles descem para a linha de baixo.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Esquecer o <code>wrap</code> e achar que o layout &ldquo;quebrou&rdquo; no celular.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" aria-label="Slide 11">
+      <p class="eyebrow">Flexbox &middot; Nos itens</p>
+      <h2><code>flex-grow</code> &mdash; ocupar o que sobra</h2>
+      <div class="fxlab wide" data-fx="1" data-ctl="" data-cubes="3" data-h="100" data-cube-prop="grow" data-start='{"gap":8}'></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Esse é o primeiro comando que vai <b>no item</b>, não no pai.</li>
+          <li><code>flex-grow: 1</code> = &ldquo;cresça e ocupe o espaço livre&rdquo;. Com valores diferentes, divide-se proporcionalmente: 2 ocupa o dobro de 1.</li>
+          <li>Atalho: <code>flex: 1</code>. Três cards com <code>flex: 1</code> viram três colunas iguais.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Clicar num cubo: alterna 0, 1, 2. Dar 1 a um só e ver ele tomar o espaço. Depois 2 num e 1 nos outros.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Três cubos, todos com <code>flex-grow: 1</code>. O que acontece? (os três dividem o espaço e ficam do mesmo tamanho)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" aria-label="Slide 12">
+      <p class="eyebrow">Bônus &middot; Um item diferente</p>
+      <h2><code>align-self</code> &mdash; exceção à regra</h2>
+      <div class="fxlab wide" data-fx="1" data-ctl="" data-cubes="3" data-h="170" data-cube-prop="self" data-start='{"align":"flex-start","gap":8}'></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Slide bônus: pode pular.</li>
+          <li>O pai manda alinhar todos no topo, mas um cubo quer ficar no meio. <code>align-self</code> é a exceção só pra ele.</li>
+          <li>Útil para o projeto da face do dado (cubos na diagonal).</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Clicar nos cubos para alternar <code>flex-start</code>, <code>center</code> e <code>flex-end</code>. O pai segue em <code>flex-start</code>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" aria-label="Slide 13">
+      <p class="eyebrow">De volta ao site</p>
+      <h2>Menu e cards <em>em linha</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <button class="btn big" id="msBtn">Aplicar flexbox</button>
+          <pre class="code" id="msCode"></pre>
+        </div>
+        <div class="pane">
+          <div class="msite glow-target" id="msite">
+            <header><h4>Arena Pixel</h4><nav><a href="#">Início</a><a href="#">Ranking</a><a href="#">Inscrição</a></nav></header>
+            <main><div class="mc"><b>1º Ana</b>1200 pontos</div><div class="mc"><b>2º Lucas</b>950 pontos</div><div class="mc"><b>3º Bia</b>800 pontos</div></main>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>É o site da última aula. Menu e cards empilhados. Duas regras em dois lugares e o site muda de cara.</li>
+          <li>No <code>nav</code>: <code>display: flex</code> + <code>gap</code>. No <code>main</code>: <code>display: flex</code> + <code>flex-wrap</code> + cards com <code>flex: 1</code>.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Apertar o botão e comparar antes e depois. Se der tempo, abrir a página deles e fazer o mesmo ao vivo.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: coloquem o menu do site de vocês em linha com flexbox.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide" aria-label="Slide 14">
+      <p class="eyebrow">Fecho &middot; Cola</p>
+      <h2>O que levar pra casa</h2>
+      <div class="tagtable wide">
+        <span class="grp">No container (o pai)</span>
+        <code class="prop" data-p="display">display: flex</code><span>liga o flexbox. Os filhos viram itens.</span>
+        <code class="prop" data-p="flex-direction">flex-direction</code><span>row (linha) ou column (coluna)</span>
+        <code class="prop" data-p="justify-content">justify-content</code><span>distribui no eixo principal</span>
+        <code class="prop" data-p="align-items">align-items</code><span>alinha no eixo transversal</span>
+        <code class="prop" data-p="gap">gap</code><span>espaço entre os itens</span>
+        <code class="prop" data-p="flex-wrap">flex-wrap</code><span>wrap = quebra a linha quando não cabe</span>
+        <span class="grp">Nos itens (os filhos)</span>
+        <code class="prop" data-p="flex-grow">flex-grow / flex: 1</code><span>ocupa o espaço que sobra</span>
+        <code class="prop" data-p="align-self">align-self</code><span>alinhamento só deste item</span>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Seis comandos no pai e dois nos filhos. É o suficiente para a maior parte dos layouts.</li>
+          <li>Macete: <b>justify</b> = eixo principal, <b>align</b> = eixo transversal.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Em <code>flex-direction: column</code>, qual propriedade controla a horizontal? (<code>align-items</code>)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide" aria-label="Slide 15">
+      <p class="eyebrow">Projeto &middot; Organizando Cubos</p>
+      <h2>Seis <em>missões</em> com cubos</h2>
+      <div class="tgrid wide" id="tgrid"></div>
+      <p class="lead dim">Receba o <code>index.html</code> com os cubos e escreva só o <code>estilo.css</code> para reproduzir cada alvo.</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>O projeto: cada fase tem uma caixa com cubos e um alvo. É só descobrir quais propriedades do flexbox reproduzem o alvo.</li>
+          <li>A fase 6 é o desafio: montar as faces de um dado.</li>
+          <li>Não existe um único jeito certo: o importante é o resultado ficar igual.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Mostrar o arquivo do projeto aberto no VS Code e uma das fases resolvida ao vivo.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausar e fazer a primeira fase junto com eles. As outras, no ritmo de cada um.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Lembrar o quiz de Flexbox, que vem logo depois deste vídeo.</li>
+        </ul>
+      </aside>
+    </section>
+
+  </div>
+
+  <div class="chrome">
+    <span class="label" id="partLabel">CSS 4 &middot; Flexbox</span>
+    <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
+    <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+    <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
+    <span class="count" id="count">01 / 15</span>
+    <button id="btnTheme" aria-label="Alternar tema">tema</button>
+  </div>
+</div>
+
+<div id="tip" role="tooltip"></div>
+<div id="notesPanel" hidden></div>
+
+<script>
+(function(){
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+  /* ---------- dicas de cada propriedade ---------- */
+  var TIPS = {
+    'seletor': 'QUEM vai receber o estilo. Aqui: todos os títulos h1 da página.',
+    'propriedade': 'O QUE você quer mudar: cor, tamanho, espaço...',
+    'valor': 'COMO deve ficar: a cor, o número, a palavra.',
+    'chaves': 'As chaves abrem e fecham a regra. Tudo entre elas pertence ao seletor.',
+    'pontovirgula': 'Fecha a linha. Sem ele, o navegador se perde e ignora a regra.',
+    'color': 'A cor do TEXTO. Aceita nome (red) ou hex (#16a89c).',
+    'background-color': 'A cor de FUNDO. Pinta o conteúdo e o padding, mas nunca a margin.',
+    'font-family': 'Qual fonte usar. Sempre escreva uma reserva no fim (Arial, sans-serif), caso a primeira não exista no computador.',
+    'font-size': 'Tamanho da letra. 16px é o normal; 40px é um título grandão.',
+    'font-weight': 'Grossura da letra. 400 = normal, 700 = negrito.',
+    'text-align': 'Alinha o texto dentro da caixa: left, center ou right.',
+    'width': 'Largura do CONTEÚDO (só o miolo, sem contar padding nem borda).',
+    'padding': 'Espaço DENTRO da caixa, entre o conteúdo e a borda. O fundo pinta o padding.',
+    'border': 'A borda, em 3 partes: tamanho, tipo e cor. Ex: 2px solid navy.',
+    'border-radius': 'Arredonda os cantos. 50% numa caixa quadrada vira um círculo!',
+    'margin': 'Espaço FORA da caixa, empurrando os vizinhos. O fundo NÃO pinta a margin.',
+    'content': 'O conteúdo: texto, imagem... O tamanho dele é o width (e o height).',
+    'position': 'Como o elemento é posicionado: static (normal), relative (ajustável) ou absolute (livre, em cima de tudo).',
+    'display': 'Como o elemento se comporta: block (linha inteira), inline (na linha do texto), inline-block (na linha, mas aceita tamanho) ou flex (liga o flexbox nos filhos).',
+    'flex-direction': 'A direção do eixo principal: row (linha), row-reverse, column (coluna) ou column-reverse.',
+    'justify-content': 'Distribui os itens ao longo do EIXO PRINCIPAL: flex-start, center, flex-end, space-between, space-around, space-evenly.',
+    'align-items': 'Alinha os itens no EIXO TRANSVERSAL (o outro eixo): stretch, flex-start, center ou flex-end.',
+    'gap': 'Espaço FIXO entre os itens do flex. Não mexe nas bordas da caixa.',
+    'flex-wrap': 'nowrap (padrão): tudo numa linha só. wrap: os itens quebram para a linha de baixo quando não cabem.',
+    'flex-grow': 'Quanto o ITEM cresce para ocupar o espaço livre. 0 = não cresce; 2 ocupa o dobro de 1. Atalho: flex: 1.',
+    'flex': 'Atalho dos itens. flex: 1 = cresça e divida o espaço igualmente com os irmãos.',
+    'align-self': 'Alinhamento só DESTE item, ignorando o align-items do pai.',
+    'top': 'Distância a partir de cima (e left, right e bottom: lados). Só funciona depois de definir position.'
+  };
+  var NAMES = { chaves:'chaves { }', pontovirgula:'ponto e vírgula', content:'conteúdo' };
+  function P(n){ return '<span class="prop" data-p="'+n+'">'+n+'</span>'; }
+  function L(h, extra){ return '<span class="ln'+(extra?' '+extra:'')+'">'+h+'</span>'; }
+  function outs(){ $$('input[type=range]').forEach(function(r){ var o = r.parentNode.querySelector('output'); if (o) o.textContent = r.value + (r.getAttribute('data-u') || 'px'); }); }
+
+  var tip = $('#tip');
+  function hideTip(){
+    tip.classList.remove('show');
+    document.body.removeAttribute('data-hover');
+    $$('.glow').forEach(function(g){ g.classList.remove('glow'); });
+  }
+  function showTip(el){
+    var key = el.getAttribute('data-p');
+    var txt = el.getAttribute('data-tip') || TIPS[key];
+    if (!txt) return;
+    var name = el.getAttribute('data-name') || NAMES[key] || key || el.textContent.trim();
+    tip.innerHTML = '<b></b><span></span>';
+    tip.firstChild.textContent = name;
+    tip.lastChild.textContent = txt;
+    tip.classList.add('show');
+    var r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+    var x = Math.min(Math.max(8, r.left + r.width/2 - tw/2), window.innerWidth - tw - 8);
+    var y = r.top - th - 10; if (y < 8) y = r.bottom + 10;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function onOver(e){
+    var el = e.target.closest && e.target.closest('[data-p]');
+    if (!el){ hideTip(); return; }
+    document.body.setAttribute('data-hover', el.getAttribute('data-prop') || el.getAttribute('data-p'));
+    var slide = el.closest('.slide');
+    $$('.glow').forEach(function(g){ g.classList.remove('glow'); });
+    if (slide && el.closest('pre.code, .tagtable')) $$('.glow-target', slide).forEach(function(g){ g.classList.add('glow'); });
+    showTip(el);
+  }
+  document.addEventListener('mouseover', onOver);
+  document.addEventListener('click', function(e){ if (e.target.closest && e.target.closest('[data-p]')) onOver(e); });
+  document.addEventListener('mouseout', function(e){ if (!e.relatedTarget) hideTip(); });
+  document.addEventListener('focusin', function(e){ if (e.target.matches && e.target.matches('[data-p]')) onOver(e); });
+
+  /* ---------- laboratório de cubos (flexbox) ---------- */
+  var FXV = {
+    display: ['block', 'flex'],
+    direction: ['row', 'row-reverse', 'column', 'column-reverse'],
+    justify: ['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'],
+    align: ['stretch', 'flex-start', 'center', 'flex-end'],
+    wrap: ['nowrap', 'wrap']
+  };
+  var FXP = { display:'display', direction:'flex-direction', justify:'justify-content', align:'align-items', wrap:'flex-wrap', gap:'gap', width:'width' };
+  var CUBE_COLORS = ['#2ec9bd', '#f4ac4a', '#c4da3c', '#a9bce0', '#ff8f84', '#8fd3ff', '#d6a8ff', '#ffd27a'];
+  var VARY_PAD = [8, 22, 2, 14, 10, 18];
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function initFlex(root){
+    var ctl = (root.getAttribute('data-ctl') || '').split(',').filter(Boolean);
+    var n = parseInt(root.getAttribute('data-cubes') || '3', 10), h = parseInt(root.getAttribute('data-h') || '170', 10);
+    var vary = root.getAttribute('data-vary') === '1', cp = root.getAttribute('data-cube-prop');
+    var goal = root.getAttribute('data-goal'), want = root.getAttribute('data-want') ? JSON.parse(root.getAttribute('data-want')) : null;
+    var st = { display:'flex', direction:'row', justify:'flex-start', align:'stretch', gap:0, wrap:'nowrap', width:0 };
+    var start = root.getAttribute('data-start'); if (start){ var o = JSON.parse(start); Object.keys(o).forEach(function(k){ st[k] = o[k]; }); }
+    var grow = [], self = [];
+    for (var q = 0; q < 12; q++){ grow.push(0); self.push('auto'); }
+
+    root.innerHTML = (goal ? '<div class="goal"><b>Missão:</b> ' + goal + '</div>' : '')
+      + '<div class="fx-grid"><div class="fx-l"><div class="fx-ctl"></div><pre class="code"></pre><p class="hint fx-msg"></p></div>'
+      + '<div class="fx-r"><div class="fx-stage"><div class="fx"></div></div><p class="hint fx-axis"></p></div></div>';
+    var ctlBox = $('.fx-ctl', root), code = $('pre', root), msg = $('.fx-msg', root), axis = $('.fx-axis', root), fx = $('.fx', root);
+    if (vary) fx.classList.add('vary');
+    if (cp) fx.classList.add('pick');
+    var cubes = [];
+    function makeCubes(){
+      fx.innerHTML = '';
+      for (var i = 0; i < n; i++){
+        var c = document.createElement('div'); c.className = 'cube'; c.style.background = CUBE_COLORS[i % CUBE_COLORS.length];
+        if (vary) c.style.padding = VARY_PAD[i % VARY_PAD.length] + 'px 0';
+        c.setAttribute('data-i', i);
+        c.innerHTML = '<span>' + (i + 1) + '</span>' + (cp ? '<small></small>' : '');
+        fx.appendChild(c);
+      }
+      cubes = $$('.cube', fx);
+    }
+    makeCubes();
+
+    var segs = {};
+    ctl.forEach(function(name){
+      var g = document.createElement('div'); g.className = 'fx-g';
+      if (name === 'add'){
+        g.innerHTML = '<span class="fx-gl">itens</span><div class="seg"><button class="btn" data-a="1">+ cubo</button><button class="btn" data-a="-1">&minus; cubo</button></div>';
+        $$('button', g).forEach(function(b){
+          b.addEventListener('click', function(){ n = Math.max(1, Math.min(8, n + parseInt(b.getAttribute('data-a'), 10))); makeCubes(); apply(false); });
+        });
+      } else if (name === 'gap' || name === 'width'){
+        var mn = name === 'gap' ? 0 : 120, mx = name === 'gap' ? 40 : 420, val = name === 'width' ? (st.width || 420) : st.gap;
+        if (name === 'width') st.width = val;
+        g.innerHTML = '<label class="ctl"><span class="prop" data-p="' + FXP[name] + '">' + FXP[name] + '</span><input type="range" min="' + mn + '" max="' + mx + '" value="' + val + '"><output></output></label>';
+        $('input', g).addEventListener('input', function(){ st[name] = parseInt(this.value, 10); apply(false); });
+      } else {
+        g.innerHTML = '<span class="fx-gl prop" data-p="' + FXP[name] + '">' + FXP[name] + '</span><div class="seg"></div>';
+        segs[name] = $('.seg', g);
+        FXV[name].forEach(function(v){
+          var b = document.createElement('button'); b.className = 'btn'; b.textContent = v; b.setAttribute('data-v', v);
+          b.addEventListener('click', function(){ st[name] = v; apply(true); });
+          segs[name].appendChild(b);
+        });
+      }
+      ctlBox.appendChild(g);
+    });
+    if (!ctl.length) ctlBox.hidden = true;
+
+    if (cp){
+      var cycleG = [0, 1, 2], cycleS = ['auto', 'flex-start', 'center', 'flex-end'];
+      fx.addEventListener('click', function(e){
+        var c = e.target.closest('.cube'); if (!c) return;
+        var i = parseInt(c.getAttribute('data-i'), 10);
+        if (cp === 'grow') grow[i] = cycleG[(cycleG.indexOf(grow[i]) + 1) % cycleG.length];
+        else self[i] = cycleS[(cycleS.indexOf(self[i]) + 1) % cycleS.length];
+        apply(true);
+      });
+    }
+
+    function axisText(){
+      var col = st.direction.indexOf('column') === 0;
+      return '<b>eixo principal:</b> ' + (col ? '&darr; vertical' : '&rarr; horizontal') + ' &middot; <b>eixo transversal:</b> ' + (col ? '&rarr; horizontal' : '&darr; vertical');
+    }
+
+    function apply(animate){
+      var before = null;
+      if (animate && !REDUCE) before = cubes.map(function(c){ return c.getBoundingClientRect(); });
+      var flex = st.display === 'flex';
+      fx.style.display = st.display;
+      fx.style.flexDirection = st.direction; fx.style.justifyContent = st.justify; fx.style.alignItems = st.align;
+      fx.style.flexWrap = st.wrap; fx.style.gap = st.gap + 'px';
+      fx.style.height = flex ? h + 'px' : 'auto';
+      fx.style.width = (ctl.indexOf('width') > -1 && st.width) ? st.width + 'px' : '';
+      cubes.forEach(function(c, i){
+        c.style.flexGrow = cp === 'grow' ? grow[i] : ''; c.style.alignSelf = cp === 'self' ? self[i] : '';
+        if (cp === 'grow'){ c.style.width = grow[i] ? 'auto' : '70px'; $('small', c).textContent = 'grow: ' + grow[i]; }
+        if (cp === 'self') $('small', c).textContent = self[i];
+      });
+      if (before){
+        cubes.forEach(function(c, i){
+          var a = c.getBoundingClientRect(), dx = before[i] ? before[i].left - a.left : 0, dy = before[i] ? before[i].top - a.top : 0;
+          if (dx || dy){ c.style.transition = 'none'; c.style.transform = 'translate(' + dx + 'px,' + dy + 'px)'; }
+        });
+        void fx.offsetWidth;
+        cubes.forEach(function(c){ if (c.style.transform){ c.style.transition = 'transform .4s ease'; c.style.transform = ''; } });
+      }
+      Object.keys(segs).forEach(function(k){ $$('button', segs[k]).forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-v') === String(st[k])); }); });
+      var lines = L('<span class="sel">.caixa</span> {') + L('  ' + P('display') + ': <span class="v">' + st.display + '</span>;');
+      if (flex){
+        ctl.forEach(function(k){
+          if (k === 'display' || k === 'add') return;
+          var v = k === 'gap' ? st.gap + 'px' : k === 'width' ? st.width + 'px' : st[k];
+          lines += L('  ' + P(FXP[k]) + ': ' + (/^\d/.test(v) ? '<span class="n">' + v + '</span>' : '<span class="v">' + v + '</span>') + ';');
+        });
+        if (cp === 'self') lines += L('  ' + P('align-items') + ': <span class="v">' + st.align + '</span>;');
+      }
+      lines += L('}');
+      var extra = '';
+      for (var i = 0; i < n; i++){
+        if (cp === 'grow' && grow[i]) extra += L('<span class="sel">.cubo' + (i + 1) + '</span> { ' + P('flex-grow') + ': <span class="n">' + grow[i] + '</span>; }');
+        if (cp === 'self' && self[i] !== 'auto') extra += L('<span class="sel">.cubo' + (i + 1) + '</span> { ' + P('align-self') + ': <span class="v">' + self[i] + '</span>; }');
+      }
+      if (cp && !extra) extra = L('<span class="cm">/* clique nos cubos para dar propriedades a eles */</span>');
+      code.innerHTML = lines + extra;
+      axis.innerHTML = (flex && (ctl.indexOf('direction') > -1 || ctl.indexOf('justify') > -1 || ctl.indexOf('align') > -1)) ? axisText() : '';
+      if (want){
+        var ok = Object.keys(want).every(function(k){ return String(st[k]) === String(want[k]); });
+        msg.innerHTML = ok ? '<span class="vd ok">missão cumprida!</span>' : '<span class="vd no">ainda não: continue testando os valores</span>';
+      } else msg.innerHTML = '';
+      outs();
+    }
+    apply(false);
+  }
+  $$('.fxlab').forEach(initFlex);
+
+  /* ---------- 2: display ---------- */
+  (function(){
+    var c = $('#dsc'), boxes = $$('.dsb', c), code = $('#dsCode'), msg = $('#dsMsg');
+    var hints = {
+      'block': 'Cada elemento ocupa a linha inteira, mesmo sendo pequeno. Aceita width e height.',
+      'inline': 'Fica na linha do texto. width e height são IGNORADOS: os cubos viraram só texto colorido.',
+      'inline-block': 'Fica na linha como o inline, mas aceita width e height. O melhor dos dois mundos.',
+      'flex': 'O display flex vai no PAI: os cubos viram itens e se enfileiram sozinhos.'
+    };
+    function draw(d){
+      var f = d === 'flex';
+      c.style.display = f ? 'flex' : ''; c.style.gap = f ? '8px' : ''; c.style.alignItems = f ? 'center' : ''; c.style.flexWrap = f ? 'wrap' : '';
+      boxes.forEach(function(b){ b.style.display = f ? '' : d; });
+      code.innerHTML = f
+        ? L('<span class="sel">.caixa</span> {') + L('  ' + P('display') + ': <span class="v">flex</span>;') + L('}')
+        : L('<span class="sel">.cubo</span> {') + L('  ' + P('display') + ': <span class="v">' + d + '</span>;') + L('  ' + P('width') + ': <span class="n">90px</span>;') + L('  ' + P('height') + ': <span class="n">46px</span>;') + L('}');
+      msg.textContent = hints[d];
+    }
+    $$('#dsSeg button').forEach(function(b){
+      b.addEventListener('click', function(){ $$('#dsSeg button').forEach(function(x){ x.classList.toggle('on', x === b); }); draw(b.getAttribute('data-d')); });
+    });
+    draw('block');
+  })();
+
+  /* ---------- 13: de volta ao site ---------- */
+  (function(){
+    var s = $('#msite'), btn = $('#msBtn'), code = $('#msCode');
+    function draw(){
+      var on = s.classList.contains('on');
+      code.innerHTML = on
+        ? L('<span class="sel">nav</span> {') + L('  ' + P('display') + ': <span class="v">flex</span>;') + L('  ' + P('gap') + ': <span class="n">16px</span>;') + L('  ' + P('justify-content') + ': <span class="v">center</span>;') + L('}')
+          + L('<span class="sel">main</span> {') + L('  ' + P('display') + ': <span class="v">flex</span>;') + L('  ' + P('flex-wrap') + ': <span class="v">wrap</span>;') + L('  ' + P('gap') + ': <span class="n">14px</span>;') + L('}')
+          + L('<span class="sel">.card</span> {') + L('  ' + P('flex') + ': <span class="n">1</span>;') + L('}')
+        : L('<span class="cm">/* sem flexbox: tudo empilhado */</span>');
+      btn.textContent = on ? 'Desfazer' : 'Aplicar flexbox'; btn.classList.toggle('on', on);
+    }
+    btn.addEventListener('click', function(){ s.classList.toggle('on'); draw(); });
+    draw();
+  })();
+
+  /* ---------- 15: alvos do projeto ---------- */
+  (function(){
+    var T = [
+      ['Fase 1 · lado a lado', 4, 'gap:6px'],
+      ['Fase 2 · no centro', 1, 'justify-content:center;align-items:center'],
+      ['Fase 3 · nas pontas', 3, 'justify-content:space-between;align-items:center'],
+      ['Fase 4 · coluna à direita', 3, 'flex-direction:column;align-items:flex-end;gap:6px'],
+      ['Fase 5 · quebra de linha', 8, 'flex-wrap:wrap;gap:5px;justify-content:center;width:120px;margin:0 auto'],
+      ['Fase 6 · dado (face 3)', 3, 'justify-content:space-between', ['flex-start', 'center', 'flex-end']]
+    ];
+    var g = $('#tgrid');
+    T.forEach(function(t){
+      var d = document.createElement('div'); d.className = 'tgt';
+      var cubes = ''; for (var i = 0; i < t[1]; i++) cubes += '<div class="cube" style="background:' + CUBE_COLORS[i % 8] + ';' + (t[3] ? 'align-self:' + t[3][i] : '') + '">' + (i + 1) + '</div>';
+      d.innerHTML = '<span class="tl">' + t[0] + '</span><div class="tf" style="' + t[2] + '">' + cubes + '</div>';
+      g.appendChild(d);
+    });
+  })();
+
+  /* ---------- cores de sintaxe (VS Code) nos blocos gerados ---------- */
+  (function(){
+    var busy = false;
+    function tok(v){
+      return v.replace(/(\S+)/g, function(t){ return '<span class="' + (/^[#\d.-]/.test(t) ? 'n' : 'v') + '">' + t + '</span>'; });
+    }
+    function hl(pre){
+      if (busy) return; busy = true;
+      var w = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT), list = [], n;
+      while ((n = w.nextNode())) list.push(n);
+      list.forEach(function(t){
+        var p = t.parentNode; if (p.matches('.v,.n,.sel,.hint,.t,.at,.c')) return;
+        var x = t.nodeValue, m, h = null;
+        if ((m = x.match(/^:\s(.*?)(;?)\s*$/)) && m[1]) h = ': ' + tok(m[1]) + m[2];
+        else if ((m = x.match(/^(\s*)([.#]?[\w-]+)(\s*\{)$/))) h = m[1] + '<span class="sel">' + m[2] + '</span>' + m[3];
+        if (h !== null){ var sp = document.createElement('span'); sp.innerHTML = h; while (sp.firstChild) p.insertBefore(sp.firstChild, t); p.removeChild(t); }
+      });
+      busy = false;
+    }
+    $$('pre.code').forEach(function(pre){
+      new MutationObserver(function(){ hl(pre); }).observe(pre, { childList:true });
+      hl(pre);
+    });
+  })();
+
+  /* ---------- navegação + anotações ---------- */
+  var slides = $$('.slide'), total = slides.length;
+  var pfill = $('#pfill'), count = $('#count'), partLabel = $('#partLabel'), panel = $('#notesPanel');
+  var i = 0, pop = null;
+  function pad(n){ return (n<10?'0':'') + n; }
+
+  function notesHTML(){
+    var n = slides[i].querySelector('aside.notes');
+    return n ? n.innerHTML : '<h4>Sem anotações</h4>';
+  }
+  function updateNotes(){
+    panel.innerHTML = '<div class="np-h">Só você vê &middot; slide ' + (i+1) + ' &middot; N fecha &middot; P abre janela</div>' + notesHTML();
+    if (pop && !pop.closed){ pop.document.body.innerHTML = '<div class="np-h">Slide ' + (i+1) + ' / ' + total + '</div>' + notesHTML(); }
+  }
+  function openPop(){
+    pop = window.open('', 'css04notas', 'width=520,height=720');
+    if (!pop){ panel.hidden = false; return; }
+    var d = pop.document; d.title = 'Notas do professor';
+    d.head.innerHTML = '<meta charset="utf-8"><style>body{font:16px/1.5 system-ui,sans-serif;background:#0c1f2e;color:#e4ecf3;padding:1rem 1.3rem}h4{font:500 12px monospace;letter-spacing:.1em;text-transform:uppercase;color:#f4ac4a;margin:1.1rem 0 .2rem}ul{margin:0;padding-left:1.2rem}li{margin:.25rem 0}code{background:#123047;padding:.05em .35em;border-radius:4px}.np-h{font:12px monospace;color:#93a6b5}</style>';
+    panel.hidden = true; updateNotes();
+  }
+
+  function render(){
+    slides.forEach(function(s, x){ s.classList.toggle('active', x === i); s.setAttribute('aria-hidden', x === i ? 'false' : 'true'); });
+    pfill.style.width = ((i+1)/total*100) + '%';
+    count.textContent = pad(i+1) + ' / ' + pad(total);
+    var eb = slides[i].querySelector('.eyebrow');
+    partLabel.textContent = eb ? eb.textContent.replace(/\s+/g,' ').trim() : 'CSS 4';
+    if (history.replaceState) history.replaceState(null, '', '#' + (i+1));
+    hideTip(); updateNotes();
+  }
+  function go(n){
+    var nx = Math.max(0, Math.min(total-1, n));
+    if (nx === i) return;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    i = nx; render();
+  }
+  function next(){ go(i+1); } function prev(){ go(i-1); }
+
+  document.addEventListener('keydown', function(e){
+    var t = e.target, tag = t && t.tagName;
+    if (e.key === 'Escape'){ if (document.activeElement) document.activeElement.blur(); panel.hidden = true; return; }
+    if (tag === 'TEXTAREA' || tag === 'SELECT' || (tag === 'INPUT' && t.type !== 'range' && t.type !== 'color')) return;
+    if (tag === 'INPUT' && t.type === 'range' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+    if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+    if (e.key === 'n' || e.key === 'N'){ panel.hidden = !panel.hidden; return; }
+    if (e.key === 'p' || e.key === 'P'){ openPop(); return; }
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ' || e.key === 'ArrowDown'){ e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){ e.preventDefault(); prev(); }
+    else if (e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if (e.key === 'End'){ e.preventDefault(); go(total-1); }
+  });
+  $('#btnNext').addEventListener('click', next);
+  $('#btnPrev').addEventListener('click', prev);
+  $('#znext').addEventListener('click', function(){ this.blur(); next(); });
+  $('#zprev').addEventListener('click', function(){ this.blur(); prev(); });
+
+  var root = document.documentElement;
+  $('#btnTheme').addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme');
+    var isDark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  if (!isNaN(start) && start >= 1 && start <= total) i = start - 1;
+  outs(); render();
+})();
+</script>
+
+</body>
+</html>

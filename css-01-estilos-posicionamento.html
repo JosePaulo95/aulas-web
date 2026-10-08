@@ -1,0 +1,1551 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSS 1 - Estilos e posicionamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    color-scheme: dark;
+    /* paleta: navy #123f63 / slate #8fa3c4 / teal #16a89c / lime #bcd230 / orange #f2a63b */
+    --navy:#123f63;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+    --font-display:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body:"Barlow", system-ui, -apple-system, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      color-scheme: light;
+      --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+      --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+      --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+    --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+    --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:clamp(15px,1.1vw,18px); line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  .deck{ position:fixed; inset:0; display:grid; grid-template-rows:1fr auto; }
+  .stage{ position:relative; overflow:hidden; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+    padding:clamp(2rem,6vw,5.5rem) clamp(1.6rem,7vw,7rem) clamp(3.2rem,8vh,5rem);
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .34s ease, transform .34s ease, visibility 0s linear .34s;
+    overflow-y:auto;
+  }
+  .slide.active{
+    opacity:1; visibility:visible; transform:none;
+    transition:opacity .38s ease, transform .38s ease;
+  }
+  .slide > *{ max-width:60ch; }
+  .slide .wide{ max-width:min(1080px,92vw); }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0; display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before{ content:""; width:1.8rem; height:2px; background:var(--accent); display:inline-block; }
+
+  h1,h2{ font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.02; text-transform:uppercase; letter-spacing:.005em; }
+  h1{ font-size:clamp(2.9rem,9vw,6.2rem); }
+  h2{ font-size:clamp(2rem,5vw,3.6rem); }
+  h2 em, h1 em{ font-style:normal; color:var(--accent); }
+  h1 code, h2 code{ text-transform:none; font-size:.82em; vertical-align:.04em; }
+
+  .lead{ font-size:clamp(1.15rem,2.1vw,1.7rem); color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+  .slide p{ margin:0; }
+  strong{ font-weight:600; color:var(--ink); }
+  .hl{ color:var(--accent); font-weight:600; }
+  .hl-amber{ color:var(--amber); font-weight:600; }
+
+  code, kbd{
+    font-family:var(--font-mono); font-size:.92em;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:5px;
+    padding:.1em .45em;
+  }
+  kbd{ box-shadow:0 2px 0 var(--line); }
+
+  .subtitle{ font-family:var(--font-mono); color:var(--ink-dim); font-size:clamp(.95rem,1.6vw,1.15rem); letter-spacing:.02em; }
+
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.35rem); }
+  ul.bullets li{ display:flex; gap:.7rem; align-items:baseline; }
+  ul.bullets li::before{ content:"▸"; color:var(--accent); flex:none; }
+
+  .callout{
+    border-left:3px solid var(--amber); background:var(--bg-elev);
+    padding:1rem 1.2rem; border-radius:0 10px 10px 0; font-size:clamp(1.02rem,1.8vw,1.3rem);
+  }
+  .callout.good{ border-color:var(--accent); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:.55rem; }
+  .chips span{
+    font-family:var(--font-mono); font-size:.92rem;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.4em .9em;
+  }
+  .chips.done span{ color:var(--ink-dim); }
+
+  .kv{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.9rem; }
+  .kv > div{ display:flex; flex-direction:column; gap:.3rem; }
+  .kv .k{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .kv .v{ font-size:1.05rem; }
+
+  /* trio de blocos da agenda */
+  .trio{ display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .trio > div{
+    background:var(--bg-elev); border:1px solid var(--line); border-top:4px solid var(--c,var(--accent));
+    border-radius:12px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.5rem;
+  }
+  .trio .k{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:1.6rem; line-height:1; }
+  .trio .tags{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .trio .t1{ --c:var(--accent); } .trio .t2{ --c:var(--amber); } .trio .t3{ --c:var(--lime); }
+
+  /* footer chrome */
+  .chrome{
+    display:flex; align-items:center; gap:1rem;
+    padding:.55rem clamp(1rem,4vw,2.4rem); border-top:1px solid var(--line);
+    background:var(--bg); font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+    z-index:10;
+  }
+  .chrome .label{ letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progress{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; min-width:60px; }
+  .progress__fill{ height:100%; background:var(--accent); width:0; transition:width .35s ease; }
+  .chrome .count{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .chrome button{
+    font:inherit; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line);
+    border-radius:7px; padding:.3em .7em; cursor:pointer;
+  }
+  .chrome button:hover{ color:var(--ink); border-color:var(--accent); }
+  .chrome button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .zones{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+  .zone{ pointer-events:auto; border:none; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; }
+  .zone:focus, .zone:focus-visible{ outline:none; }
+  .zone.prev{ width:28%; }
+  .zone.spacer{ flex:1; cursor:default; pointer-events:none; }
+  .zone.next{ width:40%; }
+
+  /* faixa tricolor no topo */
+  .brandbar{ position:absolute; left:0; right:0; top:0; height:5px; display:flex; z-index:8; }
+  .brandbar i{ flex:1; }
+  .brandbar i:nth-child(1){ background:var(--accent); }
+  .brandbar i:nth-child(2){ background:var(--lime); }
+  .brandbar i:nth-child(3){ background:var(--amber); }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide, .slide.active, .progress__fill{ transition:none; }
+  }
+
+  /* código e demonstração lado a lado */
+  pre.code{
+    font-family:var(--font-mono); font-size:clamp(.78rem,1.3vw,.98rem); line-height:1.6;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; margin:0; overflow-x:auto; color:var(--ink);
+    white-space:pre; tab-size:2;
+  }
+  pre.code .t{ color:var(--accent); }
+  pre.code .at{ color:var(--amber); }
+  pre.code .v{ color:var(--slate); }
+  pre.code .c{ color:var(--ink-dim); font-style:italic; }
+
+  .demo{ display:grid; gap:.9rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .demo{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .demo .pane{ display:flex; flex-direction:column; gap:.45rem; min-width:0; }
+  .demo .pane-label{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-dim);
+  }
+  /* o "navegador": estilos padrão, sem CSS nenhum — e clicável por cima das zonas de navegação */
+  .render{
+    color-scheme:light;
+    position:relative; z-index:6;
+    background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .render :is(h1,h2,h3){ font-family:inherit; text-transform:none; letter-spacing:0; color:inherit; margin:.35em 0; line-height:1.2; }
+  .render h1{ font-size:2em; font-weight:700; }
+  .render h2{ font-size:1.5em; font-weight:700; }
+  .render p{ margin:.7em 0; }
+  .render a{ color:#00e; text-decoration:underline; }
+  .render table{ border-collapse:separate; border-spacing:2px; }
+  .render th, .render td{ padding:1px; text-align:left; }
+  .render th{ font-weight:700; text-align:center; }
+  .render table[border] th, .render table[border] td{ border:1px solid #808080; }
+  .render input, .render button{ font-family:system-ui, sans-serif; font-size:13px; }
+  .render > :first-child{ margin-top:0; }
+  .render > :last-child{ margin-bottom:0; }
+
+  .tagtable{ display:grid; grid-template-columns:auto 1fr; gap:.55rem 1.1rem; align-items:baseline; }
+  .tagtable code{ white-space:nowrap; }
+  .tagtable .grp{
+    grid-column:1/-1; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent); margin-top:.4rem;
+  }
+
+  /* diagrama da página semântica */
+  .layout{ display:grid; gap:.5rem; font-family:var(--font-mono); font-size:.9rem; }
+  .layout > div{
+    border:2px dashed var(--line); border-radius:10px; padding:.8rem 1rem;
+    display:flex; justify-content:space-between; gap:1rem; color:var(--ink-dim);
+  }
+  .layout b{ color:var(--accent); font-weight:500; }
+  .layout .main{ min-height:7rem; align-items:flex-start; }
+  .layout .hd b, .layout .ft b{ color:var(--amber); }
+  .layout .hd, .layout .ft{ border-style:solid; border-color:var(--amber); }
+
+  /* ===== CSS 1: extras ===== */
+  .slide aside.notes{ display:none; }
+  .lab, pre.code, .tabs, .seg, .btns, .swatches{ position:relative; z-index:6; }
+  pre.code .ln{ display:block; }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.5rem); }
+
+  /* dicas ao passar o mouse */
+  .prop{ border-bottom:1px dotted var(--accent); cursor:help; border-radius:2px; transition:background .15s; }
+  .prop:hover, .prop:focus-visible{ background:color-mix(in srgb, var(--accent) 24%, transparent); outline:none; }
+  #tip{
+    position:fixed; z-index:60; max-width:min(330px,86vw); left:0; top:0;
+    background:var(--ink); color:var(--bg); padding:.65rem .85rem; border-radius:10px;
+    font-size:.92rem; line-height:1.4; pointer-events:none; opacity:0; transform:translateY(5px);
+    transition:opacity .15s ease, transform .15s ease; box-shadow:var(--shadow);
+  }
+  #tip.show{ opacity:1; transform:none; }
+  #tip b{ display:block; font-family:var(--font-mono); font-weight:500; font-size:.82rem; letter-spacing:.04em; margin-bottom:.15rem; color:var(--accent-ink); background:var(--accent); width:max-content; padding:.05em .5em; border-radius:4px; }
+
+  @keyframes glow{
+    0%,100%{ box-shadow:0 0 0 0 transparent; }
+    50%{ box-shadow:0 0 0 7px color-mix(in srgb, var(--accent) 55%, transparent); }
+  }
+  @keyframes pop{ 0%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+  .glow{ animation:glow .9s ease-in-out infinite; }
+
+  /* controles */
+  .btn{
+    font-family:var(--font-mono); font-size:.85rem; color:var(--ink); background:var(--bg-elev);
+    border:1px solid var(--line); border-radius:8px; padding:.45em .9em; cursor:pointer;
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .btn:hover{ border-color:var(--accent); }
+  .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn.on{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .btn.big{ font-size:1.05rem; padding:.7em 1.3em; font-weight:500; }
+  .btns, .seg, .tabs{ display:flex; flex-wrap:wrap; gap:.5rem; }
+  .ctl{ display:grid; grid-template-columns:8.5rem 1fr 4rem; align-items:center; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .ctl output{ text-align:right; color:var(--ink); }
+  .ctl select, .ctl input[type=color]{ grid-column:2/4; font:inherit; background:var(--bg-elev); color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.3em .5em; height:2.1rem; }
+  .ctl input[type=text]{ grid-column:2/4; font:inherit; font-size:1rem; background:var(--bg-elev); color:var(--ink); border:1px solid var(--accent); border-radius:7px; padding:.35em .6em; }
+  input[type=range]{ accent-color:var(--accent); width:100%; }
+  .lab{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .hint{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim); }
+  .hint b{ color:var(--amber); font-weight:500; }
+
+  /* a mini-página liga/desliga CSS */
+  .mini{
+    background:#fff; color:#1a1a1a; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem; box-shadow:var(--shadow);
+    transition:background .6s ease, color .6s ease, padding .6s ease, border-radius .6s ease;
+  }
+  .mini h1{ font-family:inherit; text-transform:none; font-size:2em; margin:.3em 0; line-height:1.15; color:inherit; transition:all .6s ease; }
+  .mini p{ margin:.6em 0; transition:all .6s ease; }
+  .mini button{ font-family:inherit; font-size:13px; transition:all .6s ease; }
+  .mini .tag{ display:inline-block; font-family:inherit; font-size:1em; transition:all .6s ease; }
+  .mini.on{ background:#123f63; color:#e4ecf3; font-family:"Barlow", system-ui, sans-serif; padding:1.8rem 1.8rem; border-radius:18px; }
+  .mini.on h1{ font-family:"Barlow Condensed", "Arial Narrow", sans-serif; text-transform:uppercase; color:#2ec9bd; font-size:2.6em; letter-spacing:.01em; }
+  .mini.on p{ color:#c9d6e2; }
+  .mini.on button{ background:#f2a63b; color:#3a2300; border:none; border-radius:999px; padding:.7em 1.4em; font-weight:600; font-size:15px; }
+  .mini.on .tag{ background:#16a89c; color:#fff; border-radius:6px; padding:.1em .6em; font-size:.85em; }
+
+  /* abas de "como o css entra" */
+  .tabs button{ font-family:var(--font-mono); font-size:.9rem; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line); border-radius:8px 8px 0 0; padding:.5em 1em; cursor:pointer; }
+  .tabs button.on{ color:var(--ink); border-color:var(--accent); border-bottom-color:var(--bg-elev); box-shadow:inset 0 3px 0 var(--accent); }
+  .tp{ display:none; }
+  .tp.on{ display:flex; flex-direction:column; gap:.8rem; }
+  .files{ display:grid; gap:.8rem; grid-template-columns:1fr; }
+  @media (min-width:800px){ .files{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .fname{ font-family:var(--font-mono); font-size:.78rem; color:var(--amber); letter-spacing:.06em; margin-bottom:.3rem; display:block; }
+  .verdict{ font-family:var(--font-mono); font-size:.88rem; padding:.45em .9em; border-radius:8px; width:max-content; max-width:100%; }
+  .verdict.bad{ background:color-mix(in srgb, var(--amber) 20%, transparent); color:var(--amber); }
+  .verdict.ok{ background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--accent); }
+
+  /* anatomia de uma regra */
+  .k-seletor{ color:var(--accent); } .k-propriedade{ color:var(--amber); } .k-valor{ color:var(--slate); }
+  .k-seletor, .k-propriedade, .k-valor, .k-fim{ border-radius:4px; }
+  body[data-hover="seletor"] .k-seletor, body[data-hover="propriedade"] .k-propriedade,
+  body[data-hover="valor"] .k-valor, body[data-hover="fim"] .k-fim{ animation:glow .9s ease-in-out infinite; }
+  .legend{ display:flex; flex-wrap:wrap; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; }
+  .legend span{ background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.3em .85em; }
+  .semi.miss::after{ content:"\2190 faltou!"; color:#ff6b5e; font-size:.8em; margin-left:.4rem; }
+  .s-h1{ font-family:"Times New Roman", serif; font-weight:700; margin:0; color:#16a89c; font-size:40px; line-height:1.1; transition:all .35s ease; }
+  .s-h1.broken{ color:#1a1a1a; font-size:32px; }
+
+  /* amostras */
+  .sample{ color-scheme:light; background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px; padding:1.2rem; box-shadow:var(--shadow); font-family:"Times New Roman", serif; min-height:7rem; }
+  .sample p{ margin:0; padding:.6rem .8rem; border-radius:6px; transition:all .25s ease; }
+  .swatches{ display:flex; flex-wrap:wrap; gap:.45rem; }
+  .sw{ font-family:var(--font-mono); font-size:.76rem; border:2px solid var(--line); border-radius:8px; padding:.35em .6em; cursor:pointer; color:#111; }
+  .sw:hover{ border-color:var(--accent); }
+  .sw.dark{ color:#fff; }
+
+  /* caixa: diagrama */
+  .bm{ max-width:560px; }
+  .bm-margin, .bm-border, .bm-padding, .bm-content{ position:relative; border-radius:6px; transition:filter .2s; }
+  .bm-tag{ position:absolute; top:.25rem; left:.55rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#1a1a1a; font-weight:500; pointer-events:none; }
+  .bm-margin{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.38) 8px 16px); padding:2.1rem 1.4rem 1.4rem; border:2px dashed #f2a63b; cursor:help; }
+  .bm-border{ background:#4f7cac; padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-border .bm-tag{ color:#fff; }
+  .bm-padding{ background:rgba(188,210,48,.92); padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-content{ background:#16a89c; color:#fff; padding:1.3rem .6rem; text-align:center; font-family:var(--font-mono); cursor:help; }
+  .bm-content .bm-tag{ display:none; }
+  body[data-hover="margin"] .bm-margin, body[data-hover="border"] .bm-border,
+  body[data-hover="padding"] .bm-padding, body[data-hover="content"] .bm-content{ animation:glow .9s ease-in-out infinite; filter:brightness(1.15); }
+
+  /* caixa: laboratório */
+  .mstage{ min-height:310px; display:grid; place-items:center; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .mwrap{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.35) 8px 16px); outline:1px dashed #f2a63b; transition:padding .12s; }
+  .mbox{ border-style:solid; border-color:#4f7cac; background:rgba(188,210,48,.95); background-clip:padding-box; transition:padding .12s, border-width .12s; }
+  .mcontent{ background:#16a89c; color:#fff; height:70px; display:grid; place-items:center; font-family:var(--font-mono); font-size:.8rem; transition:width .12s; }
+
+  /* padding: 1, 2, 3 ou 4 valores */
+  .sh-grid{ display:grid; grid-template-columns:auto auto auto; grid-template-rows:auto auto auto; gap:.35rem; align-items:center; justify-items:center; justify-content:center; }
+  .sh-b{ font-family:var(--font-mono); font-size:.85rem; color:var(--accent); min-width:4.2rem; text-align:center; }
+  .sh-box{ background:rgba(188,210,48,.95); border:2px solid #4f7cac; transition:padding .2s ease; }
+  .sh-in{ background:#16a89c; color:#fff; font-family:var(--font-mono); font-size:.8rem; padding:.9rem 1rem; }
+
+  /* borda */
+  .bdbox{ width:150px; height:150px; display:grid; place-items:center; text-align:center; font-family:var(--font-mono); font-size:.8rem; background:rgba(22,168,156,.18); transition:all .15s; }
+
+  /* position */
+  .stack{ display:flex; flex-direction:column; gap:.5rem; width:min(100%,300px); padding:1rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; }
+  .blk{ background:var(--slate); color:#0c1f2e; font-family:var(--font-mono); font-weight:500; padding:.8rem 1rem; border-radius:8px; height:3rem; display:flex; align-items:center; }
+  .slot{ border:2px dashed var(--ink-dim); border-radius:8px; height:3rem; }
+  .slot .blk{ background:var(--accent); color:var(--accent-ink); width:calc(100% + 0px); transition:top .15s, left .15s; }
+  .slot .blk.moved{ width:60%; }
+  .ign{ opacity:.55; text-decoration:line-through; }
+  .pg{ position:relative; border:2px dashed var(--ink-dim); border-radius:12px; padding:2.2rem 1.2rem 1.2rem; height:310px; background:var(--bg-elev); }
+  .pg-l, .pr-l{ position:absolute; top:.4rem; left:.7rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); }
+  .pr{ position:static; margin:1.6rem 0 0 auto; width:68%; height:190px; border:2px solid var(--accent); border-radius:10px; background:color-mix(in srgb, var(--accent) 10%, transparent); }
+  .pr.rel{ position:relative; }
+  .pr-l{ position:static; display:block; padding:.4rem .7rem; color:var(--accent); }
+  .ch{ position:absolute; width:38px; height:38px; border-radius:8px; background:var(--amber); color:#3a2300; display:grid; place-items:center; font-size:1.2rem; z-index:2; }
+  .ch.pop{ animation:pop .35s ease; }
+
+  /* card de personagem */
+  .card{ background:#fff; color:#1a1a1a; font-family:"Times New Roman", serif; max-width:280px; transition:all .45s ease; }
+  .card h3{ margin:0 0 .3em; font-size:1.4em; font-family:inherit; text-transform:none; }
+  .card p{ margin:0; }
+  .ln.new{ background:color-mix(in srgb, var(--accent) 26%, transparent); border-radius:4px; }
+  .quiz-opt{ text-align:left; }
+  .quiz-opt.right{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .quiz-opt.wrong{ background:color-mix(in srgb, #ff6b5e 25%, transparent); border-color:#ff6b5e; }
+  .fb{ min-height:3rem; }
+
+  /* anotações do professor (nunca aparecem pro aluno sem apertar N) */
+  #notesPanel{
+    position:fixed; right:12px; bottom:52px; width:min(390px,92vw); max-height:72vh; overflow:auto; z-index:40;
+    background:var(--bg-elev); border:1px solid var(--amber); border-radius:12px; padding:.9rem 1.05rem;
+    box-shadow:var(--shadow); font-size:.9rem; line-height:1.45;
+  }
+  #notesPanel[hidden]{ display:none; }
+  #notesPanel .np-h{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:.4rem; }
+  #notesPanel h4{ margin:.7rem 0 .2rem; font-family:var(--font-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); font-weight:500; }
+  #notesPanel ul{ margin:0; padding-left:1.1rem; } #notesPanel li{ margin:.15rem 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    .glow, .ch.pop, body[data-hover] *{ animation:none !important; }
+  }
+
+  /* ===== Tema VS Code Dark+ nos blocos de código ===== */
+  pre.code{
+    background:#1e1e1e; color:#d4d4d4; border:1px solid #3c3c3c; border-radius:8px;
+    font-family:Consolas, "Cascadia Code", "Cascadia Mono", "Courier New", monospace;
+    font-size:clamp(.85rem,1.35vw,1.05rem); line-height:1.55; padding:1rem 1.2rem;
+    box-shadow:0 10px 30px -16px rgba(0,0,0,.6); color-scheme:dark;
+  }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.4rem); }
+  pre.code .t{ color:#569cd6; }
+  pre.code .at{ color:#9cdcfe; }
+  pre.code .v{ color:#ce9178; }
+  pre.code .n{ color:#b5cea8; }
+  pre.code .sel{ color:#d7ba7d; }
+  pre.code .c, pre.code .hint{ color:#6a9955; font-style:italic; font-family:inherit; font-size:inherit; }
+  pre.code .prop{ color:#9cdcfe; border-bottom-color:#9cdcfe; }
+  pre.code .prop:hover, pre.code .prop:focus-visible{ background:rgba(86,156,214,.28); }
+  pre.code .k-seletor{ color:#d7ba7d; } pre.code .k-propriedade{ color:#9cdcfe; } pre.code .k-valor{ color:#ce9178; }
+  pre.code .ln.new{ background:rgba(255,255,255,.1); }
+  pre.code .ign{ opacity:.5; }
+  .fname{ color:#cccccc; background:#2d2d2d; display:inline-block; padding:.2em .8em; border-radius:6px 6px 0 0; margin-bottom:0; border:1px solid #3c3c3c; border-bottom:none; }
+  .fname + pre.code{ border-top-left-radius:0; }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="brandbar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="zones" aria-hidden="true">
+      <button class="zone prev" id="zprev" tabindex="-1" aria-label="Slide anterior"></button>
+      <span class="zone spacer"></span>
+      <button class="zone next" id="znext" tabindex="-1" aria-label="Próximo slide"></button>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide" aria-label="Slide 1">
+      <p class="eyebrow">Aula &middot; CSS parte 1</p>
+      <h1>Estilos e <em>posição</em></h1>
+      <p class="subtitle">cor, texto, a caixa de cada elemento e onde ele fica na tela</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Última aula: HTML. A página já existe, mas está pelada.</li>
+          <li>Hoje: CSS. É o que transforma isso em algo que dá orgulho de mostrar.</li>
+          <li>Lembrar o combinado: pausar, testar, ser curioso, quebrar coisa.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Abrir um site famoso e desligar o CSS (extensão ou F12 &rarr; desmarcar os estilos). Mostrar o feio.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Ter o VS Code aberto com o <code>index.html</code> da aula passada (a página do torneio).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" aria-label="Slide 2">
+      <p class="eyebrow">O plano de hoje</p>
+      <h2>Três blocos</h2>
+      <div class="trio wide">
+        <div class="t1"><span class="k">Estilo</span><span>cor e texto</span><span class="tags">color &middot; background-color &middot; font-size</span></div>
+        <div class="t2"><span class="k">A caixa</span><span>todo elemento é uma caixa</span><span class="tags">padding &middot; border &middot; margin</span></div>
+        <div class="t3"><span class="k">Posição</span><span>onde cada coisa fica</span><span class="tags">position &middot; top &middot; left</span></div>
+      </div>
+      <p class="lead dim">Dica: em todo código deste slide, passe o mouse nas palavras sublinhadas. Elas explicam sozinhas.</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>HTML = esqueleto (o que existe). CSS = roupa e posição (como aparece).</li>
+          <li>Três blocos, cada um com uma demo que eles podem mexer.</li>
+          <li>Avisar do hover: palavra sublinhada pontilhada explica ao passar o mouse.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>O vídeo resume CSS em duas peças: seletores e atributos. Hoje só atributos; seletores é a próxima aula.</li>
+          <li>Hoje todo estilo vai em <code>h1 { }</code>, <code>p { }</code> (tag simples).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" aria-label="Slide 3">
+      <p class="eyebrow">Bloco 1 &middot; Estilo</p>
+      <h2>Mesmo HTML, outra <em>cara</em></h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">a mesma página</span>
+          <div class="mini lab" id="mini">
+            <h1>Arena Pixel</h1>
+            <p>Bem-vindo ao torneio! Inscrições abertas até sexta.</p>
+            <p><span class="tag">novo</span> Rodada final no sábado.</p>
+            <button>Inscrever</button>
+          </div>
+        </div>
+        <div class="pane lab">
+          <button class="btn big" id="cssToggle">Ligar o CSS</button>
+          <pre class="code" id="miniCode" hidden><span class="ln"><span class="sel">h1</span> { <span class="at">color</span>: <span class="v">#2ec9bd</span>; <span class="at">text-transform</span>: <span class="v">uppercase</span>; }</span>
+<span class="ln"><span class="sel">body</span> { <span class="at">background-color</span>: <span class="v">#123f63</span>; }</span>
+<span class="ln"><span class="sel">button</span> { <span class="at">background-color</span>: <span class="v">orange</span>; <span class="at">border-radius</span>: <span class="v">999px</span>; }</span></pre>
+          <p class="dim" id="miniMsg">Sem CSS, o navegador usa o visual padrão dele: feio, mas funciona.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Nada no HTML mudou. Só ligamos um CSS por cima.</li>
+          <li>O HTML diz o que é cada coisa. O CSS diz como aparece.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Apertar o botão ligando e desligando algumas vezes. Deixar eles verem a transição.</li>
+          <li>Mostrar os 3 códigos que aparecem: &ldquo;é só isso que muda tudo&rdquo;.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>O que mudou: o texto ou a aparência? (aparência: o texto é igual)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" aria-label="Slide 4">
+      <p class="eyebrow">Bloco 1 &middot; Estilo</p>
+      <h2>Onde escrever o <em>CSS</em>?</h2>
+      <div class="tabs wide" role="tablist" id="tabs">
+        <button class="on" data-tab="0">style=&quot;&quot; na tag</button>
+        <button data-tab="1">&lt;style&gt; no HTML</button>
+        <button data-tab="2">arquivo .css</button>
+      </div>
+      <div class="lab wide">
+        <div class="tp on">
+          <pre class="code"><span class="ln"><span class="t">&lt;h1</span> <span class="at">style</span>=<span class="v">"color: teal; font-size: 40px;"</span><span class="t">&gt;</span>Arena Pixel<span class="t">&lt;/h1&gt;</span></span>
+<span class="ln"><span class="t">&lt;p</span> <span class="at">style</span>=<span class="v">"color: teal; font-size: 40px;"</span><span class="t">&gt;</span>Bem-vindo<span class="t">&lt;/p&gt;</span></span></pre>
+          <span class="verdict bad">funciona, mas vira bagunça: repetir em toda tag</span>
+        </div>
+        <div class="tp">
+          <pre class="code"><span class="ln"><span class="t">&lt;head&gt;</span></span>
+<span class="ln">  <span class="t">&lt;style&gt;</span></span>
+<span class="ln">    <span class="sel">h1</span> { <span class="at">color</span>: <span class="v">teal</span>; }</span>
+<span class="ln">  <span class="t">&lt;/style&gt;</span></span>
+<span class="ln"><span class="t">&lt;/head&gt;</span></span></pre>
+          <span class="verdict bad">ok pra testar rápido, mas o HTML fica cheio de CSS</span>
+        </div>
+        <div class="tp">
+          <div class="files">
+            <div><span class="fname">index.html</span><pre class="code"><span class="ln"><span class="t">&lt;head&gt;</span></span>
+<span class="ln">  <span class="t">&lt;link</span> <span class="at">rel</span>=<span class="v">"stylesheet"</span></span>
+<span class="ln">        <span class="at">href</span>=<span class="v">"estilo.css"</span><span class="t">&gt;</span></span>
+<span class="ln"><span class="t">&lt;/head&gt;</span></span></pre></div>
+            <div><span class="fname">estilo.css</span><pre class="code"><span class="ln"><span class="sel">h1</span> {</span>
+<span class="ln">  <span class="at">color</span>: <span class="v">teal</span>;</span>
+<span class="ln">}</span>
+<span class="ln"><span class="sel">p</span> {</span>
+<span class="ln">  <span class="at">font-size</span>: <span class="v">18px</span>;</span>
+<span class="ln">}</span></pre></div>
+          </div>
+          <span class="verdict ok">o jeito certo: o CSS mora num arquivo só dele</span>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Três jeitos. Passar pelos três rápido, clicando nas abas.</li>
+          <li>Nos dois primeiros, o CSS se mistura com o HTML. Fica difícil de achar.</li>
+          <li>Terceiro: arquivo próprio ligado com <code>&lt;link&gt;</code>. É o que a gente usa daqui pra frente.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>No VS Code: criar <code>estilo.css</code> na mesma pasta do <code>index.html</code>, escrever o <code>&lt;link&gt;</code> no <code>&lt;head&gt;</code>.</li>
+          <li>Mudar a cor do <code>h1</code>, salvar, F5. Mostrar que funciona.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Arquivo <code>.css</code> em outra pasta e <code>href</code> errado: nada muda e não aparece erro. Conferir o nome.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: criem o <code>estilo.css</code>, liguem no HTML e mudem a cor de um <code>h1</code>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" aria-label="Slide 5">
+      <p class="eyebrow">Bloco 1 &middot; Estilo</p>
+      <h2>Uma regra tem <em>três</em> peças</h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <pre class="code big" id="anat"><span class="ln"><span class="prop k-seletor" data-p="seletor" data-name="seletor">h1</span> <span class="prop k-fim" data-p="chaves" data-prop="fim" data-name="chaves { }">{</span></span>
+<span class="ln">  <span class="prop k-propriedade" data-p="propriedade">color</span>: <span class="prop k-valor" data-p="valor">teal</span><span class="prop k-fim semi" id="semi" data-p="pontovirgula" data-prop="fim" data-name="ponto e vírgula">;</span></span>
+<span class="ln">  <span class="prop k-propriedade" data-p="propriedade">font-size</span>: <span class="prop k-valor" data-p="valor">40px</span><span class="prop k-fim" data-p="pontovirgula" data-prop="fim" data-name="ponto e vírgula">;</span></span>
+<span class="ln"><span class="prop k-fim" data-p="chaves" data-name="chaves { }">}</span></span></pre>
+          <div class="legend">
+            <span class="k-seletor">seletor: quem</span>
+            <span class="k-propriedade">propriedade: o quê</span>
+            <span class="k-valor">valor: como</span>
+          </div>
+          <div class="btns"><button class="btn" id="brk">Esquecer o ;</button></div>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="sample"><h1 class="s-h1 glow-target" id="sh1">Arena Pixel</h1></div>
+          <p class="hint" id="brkMsg">Passe o mouse em cada pedaço do código.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Toda regra: <b>seletor</b> (quem), <b>propriedade</b> (o quê), <b>valor</b> (como).</li>
+          <li>Chaves abrem e fecham a regra. Cada linha termina com ponto e vírgula.</li>
+          <li>Seletor hoje: só o nome da tag. Na próxima aula a gente escolhe &ldquo;qual parágrafo&rdquo;.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Passar o mouse em cada peça: o pedaço brilha na legenda.</li>
+          <li>Apertar &ldquo;Esquecer o ;&rdquo;: o título perde cor E tamanho. Uma falha estraga as duas linhas.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Esquecer <code>;</code> ou <code>}</code>. O CSS não avisa, só para de funcionar. Procurar isso primeiro.</li>
+          <li>Escrever <code>font_size</code> ou <code>fontsize</code>. É com hífen.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" aria-label="Slide 6">
+      <p class="eyebrow">Bloco 1 &middot; Estilo</p>
+      <h2>Cor do texto e do <em>fundo</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <div class="seg" id="colTarget">
+            <button class="btn on" data-t="color">color (texto)</button>
+            <button class="btn" data-t="background-color">background-color (fundo)</button>
+          </div>
+          <div class="swatches" id="swatches">
+            <button class="sw" data-c="red" style="background:red">red</button>
+            <button class="sw" data-c="tomato" style="background:tomato">tomato</button>
+            <button class="sw" data-c="gold" style="background:gold">gold</button>
+            <button class="sw" data-c="skyblue" style="background:skyblue">skyblue</button>
+            <button class="sw" data-c="cornflowerblue" style="background:cornflowerblue">cornflowerblue</button>
+            <button class="sw" data-c="white" style="background:white">white</button>
+            <button class="sw dark" data-c="black" style="background:black">black</button>
+            <button class="sw dark" data-c="#16a89c" style="background:#16a89c">#16a89c</button>
+            <button class="sw dark" data-c="#123f63" style="background:#123f63">#123f63</button>
+            <button class="sw" data-c="#f2a63b" style="background:#f2a63b">#f2a63b</button>
+          </div>
+          <label class="ctl"><span>escolher qualquer cor</span><input type="color" id="colPick" value="#16a89c"></label>
+          <pre class="code" id="colCode"></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="sample"><p class="glow-target" id="colPrev">Olá, +ROBOTIC! Teste as cores.</p></div>
+          <p class="hint">Nome da cor: fácil de ler, mas são poucas. <b>Hex</b> (<code>#16a89c</code>): qualquer cor do mundo.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Duas propriedades: <code>color</code> = letra, <code>background-color</code> = fundo.</li>
+          <li>Valor pode ser nome em inglês ou hex. Hex = mais opções.</li>
+          <li>Hex: # + 6 caracteres. Não precisa decorar, é só copiar.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Extensão <b>ColorZilla</b> (ou o conta-gotas do Chrome) pega o hex de qualquer site.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Alternar entre texto e fundo, clicar nas cores. Depois usar o seletor de cor livre.</li>
+          <li>Colocar texto claro em fundo claro de propósito: &ldquo;não dá pra ler&rdquo;. Contraste importa.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem e coloquem <code>body { background-color: ...; }</code> na cor que quiserem.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" aria-label="Slide 7">
+      <p class="eyebrow">Bloco 1 &middot; Estilo</p>
+      <h2>Mexendo no <em>texto</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <label class="ctl"><span>font-family</span>
+            <select id="txFam">
+              <option value="Arial, sans-serif">Arial</option>
+              <option value="Georgia, serif">Georgia</option>
+              <option value="&quot;Courier New&quot;, monospace">Courier New</option>
+              <option value="Verdana, sans-serif">Verdana</option>
+            </select></label>
+          <label class="ctl"><span>font-size</span><input type="range" id="txSize" min="12" max="64" value="24"><output></output></label>
+          <label class="ctl"><span>font-weight</span>
+            <select id="txW"><option value="400">400 (normal)</option><option value="700">700 (negrito)</option></select></label>
+          <div class="seg" id="txAlign">
+            <button class="btn on" data-a="left">left</button>
+            <button class="btn" data-a="center">center</button>
+            <button class="btn" data-a="right">right</button>
+          </div>
+          <pre class="code" id="txCode"></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="sample"><p class="glow-target" id="txPrev">Aperte START para jogar!</p></div>
+          <p class="hint">Sempre escreva uma fonte <b>reserva</b> no final: se a primeira não existir no computador, vale a segunda.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Quatro propriedades de texto: família, tamanho, grossura e alinhamento.</li>
+          <li><code>font-size</code> em <code>px</code>: 16px é o normal.</li>
+          <li><code>text-align</code> alinha o texto dentro da caixa (não a caixa na tela).</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Sempre mais de uma fonte no <code>font-family</code>, caso a primeira não carregue.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Passar o mouse nas palavras do código: o texto de exemplo brilha.</li>
+          <li>Mostrar fontes do Google Fonts como curiosidade, sem ensinar o <code>&lt;link&gt;</code> hoje.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" aria-label="Slide 8">
+      <p class="eyebrow">Bloco 2 &middot; A caixa</p>
+      <h2>Tudo na web é uma <em>caixa</em></h2>
+      <div class="demo wide">
+        <div class="pane">
+          <div class="bm lab">
+            <div class="bm-margin" data-p="margin"><span class="bm-tag">margin</span>
+              <div class="bm-border" data-p="border"><span class="bm-tag">border</span>
+                <div class="bm-padding" data-p="padding"><span class="bm-tag">padding</span>
+                  <div class="bm-content" data-p="content" data-name="conteúdo">conteúdo</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pane">
+          <ul class="bullets">
+            <li><span class="hl">conteúdo</span>: o texto ou a imagem</li>
+            <li><span class="hl">padding</span>: respiro por dentro</li>
+            <li><span class="hl">border</span>: a moldura</li>
+            <li><span class="hl-amber">margin</span>: distância dos vizinhos</li>
+          </ul>
+          <p class="dim">Passe o mouse em cada camada.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Toda tag vira uma caixa. Caixas dentro de caixas (lembram das tabelas?).</li>
+          <li>4 camadas, de dentro pra fora: conteúdo, padding, border, margin.</li>
+          <li>Analogia: foto na parede. Foto = conteúdo, passe-partout = padding, moldura = border, espaço até a outra foto = margin.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Abrir um site, F12, passar o mouse num elemento na aba <b>Elements</b>.</li>
+          <li>Mostrar o diagrama colorido no painel <b>Computed</b> (ou na aba Layout).</li>
+          <li>As cores do Chrome são parecidas com as daqui: azul = conteúdo, verde = padding, amarelo = border, laranja = margin.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>O box model do Chrome serve pra depurar quando algo fica estranho.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: abram um site e achem o box model de um botão.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" aria-label="Slide 9">
+      <p class="eyebrow">Bloco 2 &middot; A caixa</p>
+      <h2>Mexa nas <em>camadas</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <label class="ctl"><span>width</span><input type="range" id="bxW" min="60" max="240" step="10" value="140"><output></output></label>
+          <label class="ctl"><span>padding</span><input type="range" id="bxP" min="0" max="40" value="16"><output></output></label>
+          <label class="ctl"><span>border</span><input type="range" id="bxB" min="0" max="16" value="4"><output></output></label>
+          <label class="ctl"><span>margin</span><input type="range" id="bxM" min="0" max="40" value="20"><output></output></label>
+          <pre class="code" id="bxCode"></pre>
+        </div>
+        <div class="pane">
+          <div class="mstage glow-target"><div class="mwrap" id="bxWrap"><div class="mbox" id="bxBox"><div class="mcontent" id="bxCont">conteúdo</div></div></div></div>
+          <p class="hint">Cores: <b>teal</b> = conteúdo &middot; <b>lime</b> = padding &middot; <b>azul</b> = border &middot; <b>laranja</b> = margin</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Cada slider é uma propriedade. Mexer um de cada vez e ver qual camada cresce.</li>
+          <li><code>width</code> só mexe no conteúdo. O padding, a border e a margin crescem por fora.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Deixar os alunos sugerirem valores: &ldquo;vou botar 40 de padding&rdquo;.</li>
+          <li>Mostrar que a caixa inteira fica maior que o <code>width</code>: 140 + padding + border.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Preferir tamanhos em % do elemento pai pra <code>width</code>, senão o conteúdo pode sair da tela. Hoje só px.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: deem <code>padding: 20px</code> a um botão ou parágrafo e vejam a diferença.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" aria-label="Slide 10">
+      <p class="eyebrow">Bloco 2 &middot; A caixa</p>
+      <h2>1, 2 ou 4 valores? <em>Digite!</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <label class="ctl"><span>padding:</span><input type="text" id="shIn" value="20px 40px" autocomplete="off" spellcheck="false"></label>
+          <div class="btns" id="shBtns">
+            <button class="btn" data-v="30px">30px</button>
+            <button class="btn" data-v="10px 40px">10px 40px</button>
+            <button class="btn" data-v="5px 20px 40px">5px 20px 40px</button>
+            <button class="btn" data-v="10px 20px 30px 40px">10px 20px 30px 40px</button>
+          </div>
+          <p class="lead" id="shMsg"></p>
+          <p class="hint">Com 4 valores a ordem é a do <b>relógio</b>: cima, direita, baixo, esquerda.</p>
+        </div>
+        <div class="pane">
+          <div class="mstage glow-target">
+            <div class="sh-grid">
+              <span></span><span class="sh-b" id="shT"></span><span></span>
+              <span class="sh-b" id="shL"></span>
+              <div class="sh-box" id="shBox"><div class="sh-in">conteúdo</div></div>
+              <span class="sh-b" id="shR"></span>
+              <span></span><span class="sh-b" id="shB"></span><span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Padding aceita 1, 2, 3 ou 4 valores. Parece confuso, mas tem lógica.</li>
+          <li>1 valor: os 4 lados iguais.</li>
+          <li>2 valores: primeiro = cima e baixo; segundo = esquerda e direita.</li>
+          <li>4 valores: sentido do relógio, começando por cima. Cima, direita, baixo, esquerda.</li>
+          <li><code>margin</code> funciona exatamente igual.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Também dá pra mexer num lado só: <code>padding-left: 10px</code>, <code>margin-top</code> e assim por diante.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Digitar valores diferentes no campo. Apostar com a turma antes: &ldquo;quanto vai ficar em cima?&rdquo;.</li>
+          <li>Digitar 5 valores de propósito: mostrar que dá erro.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Se eu quero 10px em cima e embaixo, e 30px nos lados, quantos valores uso? (2: <code>10px 30px</code>)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" aria-label="Slide 11">
+      <p class="eyebrow">Bloco 2 &middot; A caixa</p>
+      <h2>A <em>borda</em> em três partes</h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <label class="ctl"><span>tamanho</span><input type="range" id="bdW" min="0" max="14" value="4"><output></output></label>
+          <label class="ctl"><span>tipo</span>
+            <select id="bdS"><option>solid</option><option>dashed</option><option>dotted</option><option>double</option></select></label>
+          <label class="ctl"><span>cor</span><input type="color" id="bdC" value="#16a89c"></label>
+          <label class="ctl"><span>border-radius</span><input type="range" id="bdR" min="0" max="75" value="12"><output></output></label>
+          <div class="btns"><button class="btn" id="bdCircle">virar círculo (50%)</button></div>
+          <pre class="code" id="bdCode"></pre>
+        </div>
+        <div class="pane">
+          <div class="mstage"><div class="bdbox glow-target" id="bdBox">borda</div></div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li><code>border</code> junta três coisas na mesma linha: tamanho, tipo, cor. Nessa ordem.</li>
+          <li>99% das vezes o tipo é <code>solid</code>. Os outros são pra ocasiões específicas.</li>
+          <li><code>border-radius</code> arredonda os cantos. Com 50% numa caixa quadrada vira círculo. Bom pra avatar de personagem.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Passar por <code>dashed</code>, <code>dotted</code>, <code>double</code>. Terminar no botão de círculo.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Escrever só <code>border: 2px red</code> sem o tipo: não aparece nada. O tipo é obrigatório.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" aria-label="Slide 12">
+      <p class="eyebrow">Bloco 2 &middot; A caixa</p>
+      <h2>Adivinhe: até onde a cor <em>pinta</em>?</h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <pre class="code"><span class="ln"><span class="sel">.caixa</span> {</span>
+<span class="ln">  <span class="prop" data-p="background-color">background-color</span>: <span class="v">orange</span>;</span>
+<span class="ln">  <span class="prop" data-p="padding">padding</span>: <span class="v">24px</span>;</span>
+<span class="ln">  <span class="prop" data-p="border">border</span>: <span class="v">6px solid navy</span>;</span>
+<span class="ln">  <span class="prop" data-p="margin">margin</span>: <span class="v">24px</span>;</span>
+<span class="ln">}</span></pre>
+          <div class="btns" id="gOpts" style="flex-direction:column;align-items:stretch">
+            <button class="btn quiz-opt" data-a="1">a) só o conteúdo</button>
+            <button class="btn quiz-opt" data-a="2">b) conteúdo + padding (até a borda)</button>
+            <button class="btn quiz-opt" data-a="3">c) tudo, até a margin</button>
+          </div>
+          <p class="lead fb" id="gFb"></p>
+        </div>
+        <div class="pane">
+          <div class="mstage">
+            <div class="mwrap" id="gWrap" style="background:none;outline:2px dashed var(--ink-dim);padding:24px">
+              <div style="background:orange;border:6px solid navy;padding:24px;color:#3a2300;font-family:var(--font-mono);font-size:.85rem">conteúdo</div>
+            </div>
+          </div>
+          <p class="hint" id="gHint">Faça sua aposta antes de ver a resposta.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Pedir pra turma votar antes de clicar. Mãos levantadas ou chat.</li>
+          <li>Resposta: o fundo pinta conteúdo + padding. A margin é transparente: é espaço vazio entre vizinhos.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Sacada do vídeo: o <code>background-color</code> aparece no padding, mas não na margin.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Depois da resposta, mostrar o tracejado cinza: &ldquo;essa área é a margin, e está sem cor&rdquo;.</li>
+          <li>Detalhe técnico se alguém perguntar: o fundo passa por baixo da borda (dá pra ver com <code>dashed</code>). Não precisa aprofundar.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Pra afastar um elemento do vizinho, uso padding ou margin? (margin)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" aria-label="Slide 13">
+      <p class="eyebrow">Bloco 3 &middot; Posição</p>
+      <h2><code>position: relative</code> &mdash; ajustar o lugar</h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <div class="seg" id="rlPos">
+            <button class="btn on" data-p="static">static</button>
+            <button class="btn" data-p="relative">relative</button>
+          </div>
+          <label class="ctl"><span>top</span><input type="range" id="rlT" min="-20" max="50" value="0"><output></output></label>
+          <label class="ctl"><span>left</span><input type="range" id="rlL" min="0" max="120" value="40"><output></output></label>
+          <pre class="code" id="rlCode"></pre>
+        </div>
+        <div class="pane">
+          <div class="stack glow-target">
+            <div class="blk">A</div>
+            <div class="slot"><div class="blk" id="rlB">B</div></div>
+            <div class="blk">C</div>
+          </div>
+          <p class="hint">A caixa tracejada é o lugar original. Com <b>relative</b> o resto da página <b>não se mexe</b>.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Normalmente cada elemento fica um embaixo do outro, na ordem do HTML. Isso é <code>static</code> (o padrão).</li>
+          <li><code>relative</code> deixa a caixa se mover a partir do lugar onde ela estaria.</li>
+          <li><code>top</code> e <code>left</code> só funcionam depois que a posição é <code>relative</code> (ou absolute).</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Com <code>static</code>, mexer nos sliders: nada acontece. O código fica riscado (&ldquo;ignorado&rdquo;).</li>
+          <li>Trocar pra <code>relative</code> e mexer de novo. A, C e o espaço de B não se mexem.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Colocar <code>top: 50px</code> e nada acontecer. Esqueceram o <code>position</code>.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem e movam um parágrafo com <code>position: relative; left: 30px;</code>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide" aria-label="Slide 14">
+      <p class="eyebrow">Bloco 3 &middot; Posição</p>
+      <h2><code>position: absolute</code> &mdash; em <em>cima</em> de tudo</h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <div class="seg" id="abPar">
+            <button class="btn on" data-r="1">pai com position: relative</button>
+            <button class="btn" data-r="0">pai sem position</button>
+          </div>
+          <div class="seg" id="abCorner">
+            <button class="btn on" data-c="tl">cima-esquerda</button>
+            <button class="btn" data-c="tr">cima-direita</button>
+            <button class="btn" data-c="bl">baixo-esquerda</button>
+            <button class="btn" data-c="br">baixo-direita</button>
+          </div>
+          <pre class="code" id="abCode"></pre>
+        </div>
+        <div class="pane">
+          <div class="pg">
+            <span class="pg-l">página</span>
+            <div class="pr rel" id="abPr"><span class="pr-l">pai</span><div class="ch" id="abCh">&#9733;</div></div>
+          </div>
+          <p class="hint" id="abMsg"></p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li><code>absolute</code> tira a caixa do fluxo e deixa colocar em qualquer lugar, inclusive em cima de outras.</li>
+          <li>Mas ela mede a posição a partir de <b>quem?</b> Do pai mais próximo que tenha <code>position</code>.</li>
+          <li>Receita do vídeo: <code>relative</code> no pai, <code>absolute</code> no filho.</li>
+          <li>Pra jogos: personagem em cima do cenário, moeda no canto, barra de vida.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Com o pai <code>relative</code>, clicar nos 4 cantos: a estrela vai pro canto do pai.</li>
+          <li>Trocar pra &ldquo;pai sem position&rdquo;: a estrela pula pro canto da <b>página</b>, longe do pai. É o erro que todo mundo comete.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>top, left, bottom e right também aceitam porcentagem.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Por que a estrela escapou do pai? (o pai não tinha <code>position</code>)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide" aria-label="Slide 15">
+      <p class="eyebrow">Juntando tudo</p>
+      <h2>Um card de <em>personagem</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <pre class="code" id="cdCode"></pre>
+          <div class="btns">
+            <button class="btn on" id="cdNext">Próxima propriedade &rarr;</button>
+            <button class="btn" id="cdReset">Recomeçar</button>
+          </div>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="sample"><div class="card glow-target" id="card"><h3>Robô Bit</h3><p>Vida: 80 &middot; Ataque: 12</p></div></div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Tudo o que vimos, um passo de cada vez. Cada clique adiciona uma linha de CSS.</li>
+          <li>Pedir pra turma adivinhar a próxima mudança antes de clicar.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Clicar uma vez por vez. Passar o mouse nas propriedades: o card brilha.</li>
+          <li>Depois reproduzir o mesmo card ao vivo no VS Code (ver a versão pronta do aluno).</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Texto escuro em fundo escuro: ao mudar o <code>background-color</code>, mudar o <code>color</code> também.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 16 -->
+    <section class="slide" aria-label="Slide 16">
+      <p class="eyebrow">Fecho &middot; Cola</p>
+      <h2>O que levar pra casa</h2>
+      <div class="tagtable wide">
+        <span class="grp">Cor e texto</span>
+        <code class="prop" data-p="color">color</code><span>cor da letra</span>
+        <code class="prop" data-p="background-color">background-color</code><span>cor de fundo</span>
+        <code class="prop" data-p="font-family">font-family</code><span>qual fonte (sempre com reserva)</span>
+        <code class="prop" data-p="font-size">font-size</code><span>tamanho da letra</span>
+        <code class="prop" data-p="font-weight">font-weight</code><span>grossura: 400 normal, 700 negrito</span>
+        <code class="prop" data-p="text-align">text-align</code><span>alinha o texto na caixa</span>
+        <span class="grp">A caixa</span>
+        <code class="prop" data-p="width">width</code><span>largura do conteúdo</span>
+        <code class="prop" data-p="padding">padding</code><span>espaço por dentro (1, 2 ou 4 valores)</span>
+        <code class="prop" data-p="border">border</code><span>tamanho, tipo e cor</span>
+        <code class="prop" data-p="border-radius">border-radius</code><span>cantos arredondados</span>
+        <code class="prop" data-p="margin">margin</code><span>espaço por fora</span>
+        <span class="grp">Posição</span>
+        <code class="prop" data-p="position">position</code><span>static &middot; relative &middot; absolute</span>
+        <code class="prop" data-p="top">top / left / right / bottom</code><span>distância, depois de definir position</span>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Essa é a cola. O PDF &ldquo;Guia de referências: propriedades CSS&rdquo; tem a lista completa.</li>
+          <li>Passar o mouse nas propriedades: cada uma tem a explicação em uma frase.</li>
+          <li>Não é pra decorar. Com o tempo, o uso dá a memória.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Qual a diferença entre padding e margin?</li>
+          <li>O que acontece se eu usar <code>top</code> sem <code>position</code>?</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 17 -->
+    <section class="slide" aria-label="Slide 17">
+      <p class="eyebrow">Mão na massa</p>
+      <h2>Vista a página do seu jogo</h2>
+      <ul class="bullets wide">
+        <li>Crie o <code>estilo.css</code> e ligue no HTML com <code>&lt;link&gt;</code></li>
+        <li>Dê cor de fundo à página e cor ao texto do <code>h1</code></li>
+        <li>Escolha uma fonte e um tamanho pro <code>p</code></li>
+        <li>Dê <code>padding</code>, <code>border</code> e <code>border-radius</code> a um parágrafo</li>
+        <li>Afaste dois parágrafos com <code>margin</code></li>
+      </ul>
+      <p class="lead">Desafio: uma imagem com <code>position: absolute</code> em cima de um card <code>relative</code>.</p>
+      <p class="lead dim">Mas e se eu quiser estilizar só <em>um</em> parágrafo, não todos? No próximo vídeo: <span class="hl">seletores e classes</span>.</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Hoje todo estilo vale pra <b>todas</b> as tags do mesmo tipo. Isso vai incomodar eles: ótimo. Próxima aula resolve.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausar o vídeo aqui. Dar tempo. Quem terminar, faz o desafio do <code>absolute</code>.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Não esquecer o quiz &ldquo;estilos e posicionamento&rdquo; depois deste vídeo.</li>
+        </ul>
+      </aside>
+    </section>
+
+  </div>
+
+  <div class="chrome">
+    <span class="label" id="partLabel">CSS 1 &middot; Estilos e posição</span>
+    <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
+    <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+    <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
+    <span class="count" id="count">01 / 17</span>
+    <button id="btnTheme" aria-label="Alternar tema">tema</button>
+  </div>
+</div>
+
+<div id="tip" role="tooltip"></div>
+<div id="notesPanel" hidden></div>
+
+<script>
+(function(){
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+  /* ---------- dicas de cada propriedade ---------- */
+  var TIPS = {
+    'seletor': 'QUEM vai receber o estilo. Aqui: todos os títulos h1 da página.',
+    'propriedade': 'O QUE você quer mudar: cor, tamanho, espaço...',
+    'valor': 'COMO deve ficar: a cor, o número, a palavra.',
+    'chaves': 'As chaves abrem e fecham a regra. Tudo entre elas pertence ao seletor.',
+    'pontovirgula': 'Fecha a linha. Sem ele, o navegador se perde e ignora a regra.',
+    'color': 'A cor do TEXTO. Aceita nome (red) ou hex (#16a89c).',
+    'background-color': 'A cor de FUNDO. Pinta o conteúdo e o padding, mas nunca a margin.',
+    'font-family': 'Qual fonte usar. Sempre escreva uma reserva no fim (Arial, sans-serif), caso a primeira não exista no computador.',
+    'font-size': 'Tamanho da letra. 16px é o normal; 40px é um título grandão.',
+    'font-weight': 'Grossura da letra. 400 = normal, 700 = negrito.',
+    'text-align': 'Alinha o texto dentro da caixa: left, center ou right.',
+    'width': 'Largura do CONTEÚDO (só o miolo, sem contar padding nem borda).',
+    'padding': 'Espaço DENTRO da caixa, entre o conteúdo e a borda. O fundo pinta o padding.',
+    'border': 'A borda, em 3 partes: tamanho, tipo e cor. Ex: 2px solid navy.',
+    'border-radius': 'Arredonda os cantos. 50% numa caixa quadrada vira um círculo!',
+    'margin': 'Espaço FORA da caixa, empurrando os vizinhos. O fundo NÃO pinta a margin.',
+    'content': 'O conteúdo: texto, imagem... O tamanho dele é o width (e o height).',
+    'position': 'Como o elemento é posicionado: static (normal), relative (ajustável) ou absolute (livre, em cima de tudo).',
+    'top': 'Distância a partir de cima (e left, right e bottom: lados). Só funciona depois de definir position.'
+  };
+  var NAMES = { chaves:'chaves { }', pontovirgula:'ponto e vírgula', content:'conteúdo' };
+  function P(n){ return '<span class="prop" data-p="'+n+'">'+n+'</span>'; }
+  function L(h, extra){ return '<span class="ln'+(extra?' '+extra:'')+'">'+h+'</span>'; }
+  function outs(){ $$('input[type=range]').forEach(function(r){ var o = r.parentNode.querySelector('output'); if (o) o.textContent = r.value + 'px'; }); }
+
+  var tip = $('#tip');
+  function hideTip(){
+    tip.classList.remove('show');
+    document.body.removeAttribute('data-hover');
+    $$('.glow').forEach(function(g){ g.classList.remove('glow'); });
+  }
+  function showTip(el){
+    var key = el.getAttribute('data-p');
+    var txt = el.getAttribute('data-tip') || TIPS[key];
+    if (!txt) return;
+    var name = el.getAttribute('data-name') || NAMES[key] || key || el.textContent.trim();
+    tip.innerHTML = '<b></b><span></span>';
+    tip.firstChild.textContent = name;
+    tip.lastChild.textContent = txt;
+    tip.classList.add('show');
+    var r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+    var x = Math.min(Math.max(8, r.left + r.width/2 - tw/2), window.innerWidth - tw - 8);
+    var y = r.top - th - 10; if (y < 8) y = r.bottom + 10;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function onOver(e){
+    var el = e.target.closest && e.target.closest('[data-p]');
+    if (!el){ hideTip(); return; }
+    document.body.setAttribute('data-hover', el.getAttribute('data-prop') || el.getAttribute('data-p'));
+    var slide = el.closest('.slide');
+    $$('.glow').forEach(function(g){ g.classList.remove('glow'); });
+    if (slide && el.closest('pre.code, .tagtable')) $$('.glow-target', slide).forEach(function(g){ g.classList.add('glow'); });
+    showTip(el);
+  }
+  document.addEventListener('mouseover', onOver);
+  document.addEventListener('click', function(e){ if (e.target.closest && e.target.closest('[data-p]')) onOver(e); });
+  document.addEventListener('mouseout', function(e){ if (!e.relatedTarget) hideTip(); });
+  document.addEventListener('focusin', function(e){ if (e.target.matches && e.target.matches('[data-p]')) onOver(e); });
+
+  /* ---------- 3: css liga/desliga ---------- */
+  (function(){
+    var mini = $('#mini'), btn = $('#cssToggle'), code = $('#miniCode'), msg = $('#miniMsg');
+    btn.addEventListener('click', function(){
+      var on = mini.classList.toggle('on');
+      btn.textContent = on ? 'Desligar o CSS' : 'Ligar o CSS';
+      btn.classList.toggle('on', on);
+      code.hidden = !on;
+      msg.textContent = on ? 'O HTML é o mesmo. Só apareceram essas linhas de CSS.' : 'Sem CSS, o navegador usa o visual padrão dele: feio, mas funciona.';
+    });
+  })();
+
+  /* ---------- 4: abas ---------- */
+  (function(){
+    var btns = $$('#tabs button'), panes = $$('.tp');
+    btns.forEach(function(b, i){
+      b.addEventListener('click', function(){
+        btns.forEach(function(x, j){ x.classList.toggle('on', i === j); });
+        panes.forEach(function(p, j){ p.classList.toggle('on', i === j); });
+      });
+    });
+  })();
+
+  /* ---------- 5: anatomia ---------- */
+  (function(){
+    var semi = $('#semi'), btn = $('#brk'), h1 = $('#sh1'), msg = $('#brkMsg'), broken = false;
+    btn.addEventListener('click', function(){
+      broken = !broken;
+      semi.textContent = broken ? '' : ';';
+      semi.classList.toggle('miss', broken);
+      h1.classList.toggle('broken', broken);
+      btn.textContent = broken ? 'Colocar o ; de volta' : 'Esquecer o ;';
+      msg.textContent = broken ? 'Faltou um ; e o navegador ignorou as DUAS linhas. Sem aviso de erro!' : 'Passe o mouse em cada pedaço do código.';
+    });
+  })();
+
+  /* ---------- 6: cores ---------- */
+  (function(){
+    var prev = $('#colPrev'), code = $('#colCode'), tgt = 'color';
+    var st = { 'color':'#ffffff', 'background-color':'#123f63' };
+    function draw(){
+      prev.style.color = st['color']; prev.style.backgroundColor = st['background-color'];
+      code.innerHTML = L('p {') + L('  '+P('color')+': '+st['color']+';') + L('  '+P('background-color')+': '+st['background-color']+';') + L('}');
+    }
+    $$('#colTarget button').forEach(function(b){
+      b.addEventListener('click', function(){
+        tgt = b.getAttribute('data-t');
+        $$('#colTarget button').forEach(function(x){ x.classList.toggle('on', x === b); });
+      });
+    });
+    $$('#swatches .sw').forEach(function(s){ s.addEventListener('click', function(){ st[tgt] = s.getAttribute('data-c'); draw(); }); });
+    $('#colPick').addEventListener('input', function(){ st[tgt] = this.value; draw(); });
+    draw();
+  })();
+
+  /* ---------- 7: texto ---------- */
+  (function(){
+    var prev = $('#txPrev'), code = $('#txCode');
+    var fam = $('#txFam'), size = $('#txSize'), w = $('#txW'), al = 'left';
+    function draw(){
+      prev.style.fontFamily = fam.value; prev.style.fontSize = size.value + 'px';
+      prev.style.fontWeight = w.value; prev.style.textAlign = al;
+      code.innerHTML = L('p {') + L('  '+P('font-family')+': '+fam.value+';') + L('  '+P('font-size')+': '+size.value+'px;')
+        + L('  '+P('font-weight')+': '+w.value+';') + L('  '+P('text-align')+': '+al+';') + L('}');
+      outs();
+    }
+    [fam, size, w].forEach(function(e){ e.addEventListener('input', draw); });
+    $$('#txAlign button').forEach(function(b){
+      b.addEventListener('click', function(){
+        al = b.getAttribute('data-a');
+        $$('#txAlign button').forEach(function(x){ x.classList.toggle('on', x === b); });
+        draw();
+      });
+    });
+    draw();
+  })();
+
+  /* ---------- 9: laboratório da caixa ---------- */
+  (function(){
+    var w = $('#bxW'), p = $('#bxP'), b = $('#bxB'), m = $('#bxM');
+    var wrap = $('#bxWrap'), box = $('#bxBox'), cont = $('#bxCont'), code = $('#bxCode');
+    function draw(){
+      cont.style.width = w.value + 'px'; box.style.padding = p.value + 'px';
+      box.style.borderWidth = b.value + 'px'; wrap.style.padding = m.value + 'px';
+      code.innerHTML = L('.caixa {') + L('  '+P('width')+': '+w.value+'px;') + L('  '+P('padding')+': '+p.value+'px;')
+        + L('  '+P('border')+': '+b.value+'px solid;') + L('  '+P('margin')+': '+m.value+'px;') + L('}');
+      outs();
+    }
+    [w, p, b, m].forEach(function(e){ e.addEventListener('input', draw); });
+    draw();
+  })();
+
+  /* ---------- 10: padding com 1, 2, 3 ou 4 valores ---------- */
+  (function(){
+    var inp = $('#shIn'), box = $('#shBox'), msg = $('#shMsg');
+    var T = $('#shT'), R = $('#shR'), B = $('#shB'), Lf = $('#shL');
+    var texts = {
+      1: 'Um valor: os 4 lados iguais.',
+      2: 'Dois valores: cima e baixo = 1º, esquerda e direita = 2º.',
+      3: 'Três valores: cima = 1º, lados = 2º, baixo = 3º.',
+      4: 'Quatro valores: cima, direita, baixo, esquerda (sentido do relógio).'
+    };
+    function parse(v){
+      var t = v.trim().split(/\s+/).filter(Boolean);
+      if (!t.length || t.length > 4) return null;
+      var n = t.map(function(x){ return parseFloat(x); });
+      if (n.some(isNaN)) return null;
+      n = n.map(function(x){ return Math.min(80, Math.max(0, x)); });
+      var a = n.length === 1 ? [n[0],n[0],n[0],n[0]] : n.length === 2 ? [n[0],n[1],n[0],n[1]] : n.length === 3 ? [n[0],n[1],n[2],n[1]] : n;
+      return { a:a, k:n.length };
+    }
+    function draw(){
+      var r = parse(inp.value);
+      if (!r){ msg.textContent = 'Use de 1 a 4 números, por exemplo 10px 20px.'; return; }
+      box.style.padding = r.a.map(function(x){ return x + 'px'; }).join(' ');
+      var o = r.k === 4 ? ['1º ','2º ','3º ','4º '] : ['','','',''];
+      T.textContent = o[0] + r.a[0] + 'px'; R.textContent = o[1] + r.a[1] + 'px';
+      B.textContent = o[2] + r.a[2] + 'px'; Lf.textContent = o[3] + r.a[3] + 'px';
+      msg.textContent = texts[r.k];
+    }
+    inp.addEventListener('input', draw);
+    $$('#shBtns button').forEach(function(b){ b.addEventListener('click', function(){ inp.value = b.getAttribute('data-v'); draw(); }); });
+    draw();
+  })();
+
+  /* ---------- 11: borda ---------- */
+  (function(){
+    var w = $('#bdW'), s = $('#bdS'), c = $('#bdC'), r = $('#bdR'), box = $('#bdBox'), code = $('#bdCode'), circ = false;
+    function draw(){
+      var rad = circ ? '50%' : r.value + 'px';
+      box.style.border = w.value + 'px ' + s.value + ' ' + c.value; box.style.borderRadius = rad;
+      code.innerHTML = L('.caixa {') + L('  '+P('border')+': '+w.value+'px '+s.value+' '+c.value+';') + L('  '+P('border-radius')+': '+rad+';') + L('}');
+      outs();
+    }
+    [w, s, c].forEach(function(e){ e.addEventListener('input', draw); });
+    r.addEventListener('input', function(){ circ = false; draw(); });
+    $('#bdCircle').addEventListener('click', function(){ circ = true; draw(); });
+    draw();
+  })();
+
+  /* ---------- 12: adivinhe ---------- */
+  (function(){
+    var opts = $$('#gOpts button'), fb = $('#gFb'), wrap = $('#gWrap'), hint = $('#gHint');
+    opts.forEach(function(o){
+      o.addEventListener('click', function(){
+        var a = o.getAttribute('data-a');
+        opts.forEach(function(x){ x.classList.remove('wrong', 'right'); });
+        if (a === '2'){
+          o.classList.add('right');
+          fb.textContent = 'Isso! O fundo pinta o conteúdo e o padding. A margin fica transparente.';
+          hint.textContent = 'A área tracejada é a margin: sem cor nenhuma.';
+          wrap.style.outlineColor = 'var(--accent)';
+        } else {
+          o.classList.add('wrong');
+          fb.textContent = a === '1' ? 'Quase: o padding também ganha a cor. Tente de novo.' : 'A margin é espaço vazio, nunca pinta. Tente de novo.';
+        }
+      });
+    });
+  })();
+
+  /* ---------- 13: position relative ---------- */
+  (function(){
+    var B = $('#rlB'), t = $('#rlT'), l = $('#rlL'), code = $('#rlCode'), pos = 'static';
+    function draw(){
+      B.style.position = pos; B.style.top = t.value + 'px'; B.style.left = l.value + 'px';
+      B.classList.toggle('moved', true);
+      var ign = pos === 'static' ? 'ign' : '';
+      code.innerHTML = L('.b {') + L('  '+P('position')+': '+pos+';') + L('  '+P('top')+': '+t.value+'px;', ign) + L('  <span class="prop" data-p="top" data-name="left">left</span>: '+l.value+'px;', ign)
+        + (pos === 'static' ? L('  <span class="hint">/* static ignora top e left! */</span>') : '') + L('}');
+      outs();
+    }
+    $$('#rlPos button').forEach(function(b){
+      b.addEventListener('click', function(){
+        pos = b.getAttribute('data-p');
+        $$('#rlPos button').forEach(function(x){ x.classList.toggle('on', x === b); });
+        draw();
+      });
+    });
+    [t, l].forEach(function(e){ e.addEventListener('input', draw); });
+    draw();
+  })();
+
+  /* ---------- 14: position absolute ---------- */
+  (function(){
+    var pr = $('#abPr'), ch = $('#abCh'), code = $('#abCode'), msg = $('#abMsg'), rel = true, corner = 'tl';
+    var map = { tl:['top','left'], tr:['top','right'], bl:['bottom','left'], br:['bottom','right'] };
+    function draw(){
+      pr.classList.toggle('rel', rel);
+      ['top','right','bottom','left'].forEach(function(k){ ch.style[k] = 'auto'; });
+      map[corner].forEach(function(k){ ch.style[k] = '0'; });
+      ch.classList.remove('pop'); void ch.offsetWidth; ch.classList.add('pop');
+      var k = map[corner][0], k2 = map[corner][1];
+      function PK(x){ return '<span class="prop" data-p="top" data-name="'+x+'">'+x+'</span>'; }
+      code.innerHTML = L('.pai {') + L(rel ? '  '+P('position')+': relative;' : '  <span class="hint">/* sem position */</span>')
+        + L('}') + L('.filho {') + L('  '+P('position')+': absolute;')
+        + L('  '+PK(k)+': 0;') + L('  '+PK(k2)+': 0;') + L('}');
+      msg.textContent = rel ? 'O filho mede a distância a partir do PAI.' : 'Sem position no pai, o filho foge e mede a partir da PÁGINA.';
+    }
+    $$('#abPar button').forEach(function(b){
+      b.addEventListener('click', function(){
+        rel = b.getAttribute('data-r') === '1';
+        $$('#abPar button').forEach(function(x){ x.classList.toggle('on', x === b); });
+        draw();
+      });
+    });
+    $$('#abCorner button').forEach(function(b){
+      b.addEventListener('click', function(){
+        corner = b.getAttribute('data-c');
+        $$('#abCorner button').forEach(function(x){ x.classList.toggle('on', x === b); });
+        draw();
+      });
+    });
+    draw();
+  })();
+
+  /* ---------- 15: card de personagem ---------- */
+  (function(){
+    var steps = [
+      ['background-color', '#123f63'], ['color', 'white'], ['font-family', 'Arial, sans-serif'],
+      ['padding', '20px'], ['border', '4px solid #16a89c'], ['border-radius', '16px']
+    ];
+    var card = $('#card'), code = $('#cdCode'), next = $('#cdNext'), n = 0;
+    function draw(){
+      steps.forEach(function(s, i){ card.style.setProperty(s[0], i < n ? s[1] : ''); });
+      var h = L('.card {');
+      steps.forEach(function(s, i){ if (i < n) h += L('  '+P(s[0])+': '+s[1]+';', i === n-1 ? 'new' : ''); });
+      if (!n) h += L('  <span class="hint">/* ainda sem estilo */</span>');
+      code.innerHTML = h + L('}');
+      next.disabled = n >= steps.length;
+      next.textContent = n >= steps.length ? 'Pronto!' : 'Próxima propriedade →';
+    }
+    next.addEventListener('click', function(){ if (n < steps.length){ n++; draw(); } });
+    $('#cdReset').addEventListener('click', function(){ n = 0; draw(); });
+    draw();
+  })();
+
+  /* ---------- cores de sintaxe (VS Code) nos blocos gerados ---------- */
+  (function(){
+    var busy = false;
+    function tok(v){
+      return v.replace(/(\S+)/g, function(t){ return '<span class="' + (/^[#\d.-]/.test(t) ? 'n' : 'v') + '">' + t + '</span>'; });
+    }
+    function hl(pre){
+      if (busy) return; busy = true;
+      var w = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT), list = [], n;
+      while ((n = w.nextNode())) list.push(n);
+      list.forEach(function(t){
+        var p = t.parentNode; if (p.matches('.v,.n,.sel,.hint,.t,.at,.c')) return;
+        var x = t.nodeValue, m, h = null;
+        if ((m = x.match(/^:\s(.*?)(;?)\s*$/)) && m[1]) h = ': ' + tok(m[1]) + m[2];
+        else if ((m = x.match(/^(\s*)([.#]?[\w-]+)(\s*\{)$/))) h = m[1] + '<span class="sel">' + m[2] + '</span>' + m[3];
+        if (h !== null){ var sp = document.createElement('span'); sp.innerHTML = h; while (sp.firstChild) p.insertBefore(sp.firstChild, t); p.removeChild(t); }
+      });
+      busy = false;
+    }
+    $$('pre.code').forEach(function(pre){
+      new MutationObserver(function(){ hl(pre); }).observe(pre, { childList:true });
+      hl(pre);
+    });
+  })();
+
+  /* ---------- navegação + anotações ---------- */
+  var slides = $$('.slide'), total = slides.length;
+  var pfill = $('#pfill'), count = $('#count'), partLabel = $('#partLabel'), panel = $('#notesPanel');
+  var i = 0, pop = null;
+  function pad(n){ return (n<10?'0':'') + n; }
+
+  function notesHTML(){
+    var n = slides[i].querySelector('aside.notes');
+    return n ? n.innerHTML : '<h4>Sem anotações</h4>';
+  }
+  function updateNotes(){
+    panel.innerHTML = '<div class="np-h">Só você vê &middot; slide ' + (i+1) + ' &middot; N fecha &middot; P abre janela</div>' + notesHTML();
+    if (pop && !pop.closed){ pop.document.body.innerHTML = '<div class="np-h">Slide ' + (i+1) + ' / ' + total + '</div>' + notesHTML(); }
+  }
+  function openPop(){
+    pop = window.open('', 'css01notas', 'width=520,height=720');
+    if (!pop){ panel.hidden = false; return; }
+    var d = pop.document; d.title = 'Notas do professor';
+    d.head.innerHTML = '<meta charset="utf-8"><style>body{font:16px/1.5 system-ui,sans-serif;background:#0c1f2e;color:#e4ecf3;padding:1rem 1.3rem}h4{font:500 12px monospace;letter-spacing:.1em;text-transform:uppercase;color:#f4ac4a;margin:1.1rem 0 .2rem}ul{margin:0;padding-left:1.2rem}li{margin:.25rem 0}code{background:#123047;padding:.05em .35em;border-radius:4px}.np-h{font:12px monospace;color:#93a6b5}</style>';
+    panel.hidden = true; updateNotes();
+  }
+
+  function render(){
+    slides.forEach(function(s, x){ s.classList.toggle('active', x === i); s.setAttribute('aria-hidden', x === i ? 'false' : 'true'); });
+    pfill.style.width = ((i+1)/total*100) + '%';
+    count.textContent = pad(i+1) + ' / ' + pad(total);
+    var eb = slides[i].querySelector('.eyebrow');
+    partLabel.textContent = eb ? eb.textContent.replace(/\s+/g,' ').trim() : 'CSS 1';
+    if (history.replaceState) history.replaceState(null, '', '#' + (i+1));
+    hideTip(); updateNotes();
+  }
+  function go(n){
+    var nx = Math.max(0, Math.min(total-1, n));
+    if (nx === i) return;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    i = nx; render();
+  }
+  function next(){ go(i+1); } function prev(){ go(i-1); }
+
+  document.addEventListener('keydown', function(e){
+    var t = e.target, tag = t && t.tagName;
+    if (e.key === 'Escape'){ if (document.activeElement) document.activeElement.blur(); panel.hidden = true; return; }
+    if (tag === 'TEXTAREA' || tag === 'SELECT' || (tag === 'INPUT' && t.type !== 'range' && t.type !== 'color')) return;
+    if (tag === 'INPUT' && t.type === 'range' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+    if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+    if (e.key === 'n' || e.key === 'N'){ panel.hidden = !panel.hidden; return; }
+    if (e.key === 'p' || e.key === 'P'){ openPop(); return; }
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ' || e.key === 'ArrowDown'){ e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){ e.preventDefault(); prev(); }
+    else if (e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if (e.key === 'End'){ e.preventDefault(); go(total-1); }
+  });
+  $('#btnNext').addEventListener('click', next);
+  $('#btnPrev').addEventListener('click', prev);
+  $('#znext').addEventListener('click', function(){ this.blur(); next(); });
+  $('#zprev').addEventListener('click', function(){ this.blur(); prev(); });
+
+  var root = document.documentElement;
+  $('#btnTheme').addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme');
+    var isDark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  if (!isNaN(start) && start >= 1 && start <= total) i = start - 1;
+  outs(); render();
+})();
+</script>
+
+</body>
+</html>

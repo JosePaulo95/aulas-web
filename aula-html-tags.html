@@ -1,0 +1,754 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>HTML na Prática</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    color-scheme: dark;
+    /* +ROBOTIC brand: navy #123f63 / slate #8fa3c4 / teal #16a89c / lime #bcd230 / orange #f2a63b */
+    --navy:#123f63;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+    --logo:url("data:image/png;base64,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");
+    --font-display:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body:"Barlow", system-ui, -apple-system, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      color-scheme: light;
+      --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+      --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+      --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+    --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+    --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:clamp(15px,1.1vw,18px); line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  .deck{ position:fixed; inset:0; display:grid; grid-template-rows:1fr auto; }
+
+  .stage{ position:relative; overflow:hidden; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+    padding:clamp(2rem,6vw,5.5rem) clamp(1.6rem,7vw,7rem) clamp(3.2rem,8vh,5rem);
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .34s ease, transform .34s ease, visibility 0s linear .34s;
+  }
+  .slide.active{
+    opacity:1; visibility:visible; transform:none;
+    transition:opacity .38s ease, transform .38s ease;
+  }
+  .slide > *{ max-width:60ch; }
+  .slide .wide{ max-width:min(1080px,92vw); }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0; display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before{ content:""; width:1.8rem; height:2px; background:var(--accent); display:inline-block; }
+
+  h1,h2{ font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.02; text-transform:uppercase; letter-spacing:.005em; }
+  h1{ font-size:clamp(2.9rem,9vw,6.2rem); }
+  h2{ font-size:clamp(2rem,5vw,3.6rem); }
+  h2 em, h1 em{ font-style:normal; color:var(--accent); }
+  h1 code, h2 code, h1 kbd, h2 kbd{ text-transform:none; font-size:.82em; vertical-align:.04em; }
+
+  .lead{ font-size:clamp(1.15rem,2.1vw,1.7rem); color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+  .slide p{ margin:0; }
+  strong{ font-weight:600; color:var(--ink); }
+  .hl{ color:var(--accent); font-weight:600; }
+  .hl-amber{ color:var(--amber); font-weight:600; }
+  .hl-violet{ color:var(--slate); font-weight:600; }
+
+  code, kbd{
+    font-family:var(--font-mono); font-size:.92em;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:5px;
+    padding:.1em .45em;
+  }
+  kbd{ box-shadow:0 2px 0 var(--line); }
+
+  .subtitle{ font-family:var(--font-mono); color:var(--ink-dim); font-size:clamp(.95rem,1.6vw,1.15rem); letter-spacing:.02em; }
+
+  /* analogy / list cards */
+  .cards{ list-style:none; margin:0; padding:0; display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .cards li{
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.35rem;
+  }
+  .cards .term{ font-family:var(--font-mono); font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); }
+  .cards .def{ font-size:1.05rem; }
+  .cards.lift li:first-child{ border-color:var(--accent); }
+
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.35rem); }
+  ul.bullets li{ display:flex; gap:.7rem; align-items:baseline; }
+  ul.bullets li::before{ content:"▸"; color:var(--accent); flex:none; }
+
+  /* DNS flow */
+  .flow{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; align-items:stretch; gap:.6rem; }
+  .flow li:not(.arrow){
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:11px;
+    padding:.85rem 1rem; min-width:150px; flex:1 1 150px;
+    display:flex; flex-direction:column; gap:.35rem;
+  }
+  .flow .tag{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .flow .arrow{ display:flex; align-items:center; color:var(--ink-dim); font-size:1.4rem; flex:none; }
+  @media (max-width:760px){
+    .flow{ flex-direction:column; }
+    .flow .arrow{ transform:rotate(90deg); align-self:center; }
+  }
+
+  /* network waterfall */
+  .waterfall{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.55rem; }
+  .waterfall li{ display:grid; grid-template-columns:minmax(120px,10rem) 1fr; align-items:center; gap:1rem; }
+  .waterfall code{ background:none; border:none; padding:0; color:var(--ink-dim); }
+  .track{ position:relative; height:15px; background:var(--bg-elev); border:1px solid var(--line); border-radius:4px; overflow:hidden; }
+  .track::after{
+    content:""; position:absolute; top:0; bottom:0;
+    left:var(--d,0); width:var(--w,30%); background:var(--c,var(--accent)); border-radius:3px;
+  }
+  .bar-html{ --c:var(--slate); } .bar-code{ --c:var(--accent); } .bar-img{ --c:var(--amber); } .bar-font{ --c:var(--lime); }
+  .legend{ display:flex; flex-wrap:wrap; gap:1.1rem; font-family:var(--font-mono); font-size:.82rem; color:var(--ink-dim); }
+  .legend span{ display:flex; align-items:center; gap:.4rem; }
+  .legend i{ width:.8rem; height:.8rem; border-radius:3px; display:inline-block; }
+
+  /* callout */
+  .callout{
+    border-left:3px solid var(--amber); background:var(--bg-elev);
+    padding:1rem 1.2rem; border-radius:0 10px 10px 0; font-size:clamp(1.02rem,1.8vw,1.3rem);
+  }
+  .callout.good{ border-color:var(--accent); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:.55rem; }
+  .chips span{
+    font-family:var(--font-mono); font-size:.92rem;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.4em .9em;
+  }
+
+  .kv{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.9rem; }
+  .kv > div{ display:flex; flex-direction:column; gap:.3rem; }
+  .kv .k{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .kv .v{ font-size:1.05rem; }
+
+  pre.term-out{
+    font-family:var(--font-mono); font-size:clamp(.82rem,1.5vw,1rem); line-height:1.7;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1.1rem 1.3rem; margin:0; overflow-x:auto; color:var(--ink-dim);
+  }
+  pre.term-out b{ color:var(--accent); font-weight:500; }
+
+  .title-slide h1 .arrow-key{ color:var(--accent); }
+
+  /* footer chrome */
+  .chrome{
+    display:flex; align-items:center; gap:1rem;
+    padding:.55rem clamp(1rem,4vw,2.4rem); border-top:1px solid var(--line);
+    background:var(--bg); font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+    z-index:10;
+  }
+  .chrome .label{ letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progress{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; min-width:60px; }
+  .progress__fill{ height:100%; background:var(--accent); width:0; transition:width .35s ease; }
+  .chrome .count{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .chrome button{
+    font:inherit; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line);
+    border-radius:7px; padding:.3em .7em; cursor:pointer;
+  }
+  .chrome button:hover{ color:var(--ink); border-color:var(--accent); }
+  .chrome button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .zones{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+  .zone{ pointer-events:auto; border:none; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; }
+  .zone:focus, .zone:focus-visible{ outline:none; }
+  .zone.prev{ width:28%; }
+  .zone.spacer{ flex:1; cursor:default; pointer-events:none; }
+  .zone.next{ width:40%; }
+
+  /* brand motif: the tricolour underline from the +ROBOTIC logo */
+  .brandbar{ position:absolute; left:0; right:0; top:0; height:5px; display:flex; z-index:8; }
+  .brandbar i{ flex:1; }
+  .brandbar i:nth-child(1){ background:var(--accent); }
+  .brandbar i:nth-child(2){ background:var(--lime); }
+  .brandbar i:nth-child(3){ background:var(--amber); }
+
+  .logo-plaque{
+    background:#fff; border-radius:14px; padding:.9rem 1.15rem;
+    box-shadow:var(--shadow); display:inline-flex; align-self:flex-start;
+  }
+  .logo-plaque .logo{
+    display:block; height:clamp(48px,7.5vw,80px); aspect-ratio:1098/633;
+    background:var(--logo) center/contain no-repeat;
+  }
+  .chrome .brandmark{
+    background:#fff; border-radius:6px; padding:.3rem .45rem; display:flex; align-items:center; flex:none;
+  }
+  .chrome .brandmark .logo{
+    display:block; height:20px; aspect-ratio:1098/633;
+    background:var(--logo) center/contain no-repeat;
+  }
+
+  /* rounded-square tech badges (HTML / CSS / JS) */
+  .badges{ display:flex; flex-wrap:wrap; gap:clamp(.7rem,2vw,1.4rem); }
+  .badge{
+    width:clamp(116px,15vw,168px); aspect-ratio:1/1; border-radius:22px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.35rem;
+    color:#fff; box-shadow:var(--shadow); padding:1rem;
+  }
+  .badge svg{ width:38%; height:auto; }
+  .badge .tag{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; letter-spacing:.03em; font-size:clamp(1.1rem,2.4vw,1.7rem); line-height:1; }
+  .badge .sub{ font-family:var(--font-mono); font-size:.66rem; letter-spacing:.06em; opacity:.85; text-align:center; }
+  .badge.b-html{ background:var(--navy); }
+  .badge.b-css{ background:var(--accent); color:var(--accent-ink); }
+  .badge.b-js{ background:var(--amber); color:#3a2708; }
+  .badge.sm{ width:clamp(78px,10vw,104px); border-radius:16px; }
+  .badge.sm .sub{ display:none; }
+
+  .filebadges{ display:flex; flex-wrap:wrap; gap:.7rem; }
+  .filebadge{
+    font-family:var(--font-mono); font-size:.9rem; border-radius:12px; padding:.7rem 1rem;
+    background:var(--bg-elev); border:1px solid var(--line); display:flex; align-items:center; gap:.55rem;
+  }
+  .filebadge::before{ content:""; width:.85rem; height:.85rem; border-radius:4px; background:var(--amber); flex:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide, .slide.active, .progress__fill{ transition:none; }
+  }
+</style>
+<style>
+  /* --- extras do deck de HTML: código e demonstração lado a lado --- */
+  pre.code{
+    font-family:var(--font-mono); font-size:clamp(.8rem,1.35vw,1rem); line-height:1.65;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; margin:0; overflow-x:auto; color:var(--ink);
+    white-space:pre; tab-size:2;
+  }
+  pre.code .t{ color:var(--accent); }        /* tag */
+  pre.code .at{ color:var(--amber); }        /* atributo */
+  pre.code .v{ color:var(--slate); }         /* valor */
+  pre.code .c{ color:var(--ink-dim); font-style:italic; }
+
+  .demo{ display:grid; gap:.9rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .demo{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .demo .pane{ display:flex; flex-direction:column; gap:.45rem; min-width:0; }
+  .demo .pane-label{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-dim);
+  }
+  .render{
+    background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .render :is(h1,h2,h3){ font-family:inherit; text-transform:none; letter-spacing:0; color:inherit; margin:.35em 0; line-height:1.2; }
+  .render h1{ font-size:2em; font-weight:700; }
+  .render h2{ font-size:1.5em; font-weight:700; }
+  .render h3{ font-size:1.17em; font-weight:700; }
+  .render p{ margin:.7em 0; font-size:1em; }
+  .render a{ color:#00e; text-decoration:underline; }
+  .render ul{ margin:.7em 0; padding-left:2.2em; }
+  .render ul li{ list-style:disc; }
+  .render ol{ margin:.7em 0; padding-left:2.4em; }
+  .render > :first-child{ margin-top:0; }
+  .render > :last-child{ margin-bottom:0; }
+
+  .tagtable{ display:grid; grid-template-columns:auto 1fr; gap:.55rem 1.1rem; align-items:baseline; }
+  .tagtable code{ white-space:nowrap; }
+</style>
+
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="brandbar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="zones" aria-hidden="true">
+      <button class="zone prev" id="zprev" tabindex="-1" aria-label="Slide anterior"></button>
+      <span class="zone spacer"></span>
+      <button class="zone next" id="znext" tabindex="-1" aria-label="Próximo slide"></button>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide title-slide" aria-label="Slide 1">
+      <span class="logo-plaque"><span class="logo" role="img" aria-label="+ROBOTIC"></span></span>
+      <p class="eyebrow">Aula &middot; Fundamentos</p>
+      <h1>HTML</h1>
+      <p class="subtitle">o esqueleto de toda página da web &mdash; e as primeiras tags que você vai escrever</p>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" aria-label="Slide 2">
+      <p class="eyebrow">De onde a gente parou</p>
+      <h2>O servidor manda um <em>arquivo de texto</em></h2>
+      <p class="lead">Lembra? Você digita o endereço, o DNS traduz, o navegador pede &mdash; e a primeira coisa que volta é o <span class="hl">HTML</span>.</p>
+      <p class="lead dim">É nele que o navegador descobre o que escrever na tela e quais outros arquivos ainda precisa baixar. Hoje a gente aprende a escrever esse arquivo.</p>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" aria-label="Slide 3">
+      <p class="eyebrow">Parte 1 &middot; A ideia</p>
+      <h2>HTML não é programação</h2>
+      <p class="lead">HTML = <strong>HyperText Markup Language</strong> &mdash; linguagem de <span class="hl">marcação</span>.</p>
+      <p class="lead">Você não manda o computador &ldquo;fazer&rdquo; nada. Você pega um texto e vai <strong>etiquetando</strong> cada pedaço: isto aqui é um título, isto é um parágrafo, isto é um link.</p>
+      <div class="callout good wide">Igual passar marca-texto numa apostila: o conteúdo já existe, você só diz o que cada parte <em>é</em>.</div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" aria-label="Slide 4">
+      <p class="eyebrow">Parte 1 &middot; A ideia</p>
+      <h2>Anatomia de uma tag</h2>
+      <pre class="code wide"><span class="t">&lt;p&gt;</span>Oi, eu sou um parágrafo.<span class="t">&lt;/p&gt;</span>
+<span class="c">  ↑                              ↑</span>
+<span class="c">  abre                           fecha (tem a barra /)</span></pre>
+      <ul class="bullets wide">
+        <li>A tag de <span class="hl">abertura</span> diz onde começa</li>
+        <li>A de <span class="hl">fechamento</span> tem uma <code>/</code> e diz onde termina</li>
+        <li>O que está no meio é o <strong>conteúdo</strong></li>
+      </ul>
+      <p class="dim">Abriu, fecha. Esqueceu de fechar &rarr; o navegador chuta &mdash; e geralmente chuta errado.</p>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" aria-label="Slide 5">
+      <p class="eyebrow">Parte 1 &middot; A ideia</p>
+      <h2>O esqueleto de um arquivo</h2>
+      <pre class="code wide"><span class="t">&lt;!DOCTYPE html&gt;</span>
+<span class="t">&lt;html&gt;</span>
+  <span class="t">&lt;head&gt;</span>
+    <span class="t">&lt;title&gt;</span>Minha página<span class="t">&lt;/title&gt;</span>   <span class="c">&lt;!-- o nome da aba --&gt;</span>
+  <span class="t">&lt;/head&gt;</span>
+  <span class="t">&lt;body&gt;</span>
+    <span class="c">&lt;!-- tudo que aparece na tela vem aqui --&gt;</span>
+  <span class="t">&lt;/body&gt;</span>
+<span class="t">&lt;/html&gt;</span></pre>
+      <div class="kv wide">
+        <div><span class="k">head</span><span class="v">informações sobre a página (ninguém vê)</span></div>
+        <div><span class="k">body</span><span class="v">o conteúdo de verdade (todo mundo vê)</span></div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" aria-label="Slide 6">
+      <p class="eyebrow">Parte 2 &middot; As tags</p>
+      <h2>As tags de hoje</h2>
+      <div class="chips wide">
+        <span>&lt;p&gt;</span><span>&lt;br&gt;</span><span>&lt;h1&gt; &lt;h2&gt; &lt;h3&gt;</span><span>&lt;a href&gt;</span><span>&lt;ul&gt; &lt;li&gt;</span>
+      </div>
+      <p class="lead">Cinco tags. Com elas você já monta uma página inteira de verdade &mdash; texto, títulos, links e listas.</p>
+      <p class="lead dim">Existem mais de 100 tags. Ninguém decora todas: a gente aprende as que usa todo dia e consulta o resto.</p>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" aria-label="Slide 7">
+      <p class="eyebrow">Parte 2 &middot; Texto</p>
+      <h2><code>&lt;p&gt;</code> &mdash; parágrafo</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;p&gt;</span>Robótica é construir máquinas
+que fazem tarefas sozinhas.<span class="t">&lt;/p&gt;</span>
+
+<span class="t">&lt;p&gt;</span>Na +ROBOTIC a gente
+programa elas.<span class="t">&lt;/p&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <p>Robótica é construir máquinas que fazem tarefas sozinhas.</p>
+            <p>Na +ROBOTIC a gente programa elas.</p>
+          </div>
+        </div>
+      </div>
+      <p class="dim">Repare: o navegador <strong>ignora</strong> onde você apertou Enter. Quem separa os blocos é a tag, não a tecla.</p>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" aria-label="Slide 8">
+      <p class="eyebrow">Parte 2 &middot; Texto</p>
+      <h2><code>&lt;br&gt;</code> &mdash; quebra de linha</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;p&gt;</span>Rua das Flores, 120<span class="t">&lt;br&gt;</span>
+Centro &mdash; Guaratinguetá<span class="t">&lt;br&gt;</span>
+CEP 12500-000<span class="t">&lt;/p&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <p>Rua das Flores, 120<br>Centro — Guaratinguetá<br>CEP 12500-000</p>
+          </div>
+        </div>
+      </div>
+      <ul class="bullets wide">
+        <li><code>&lt;br&gt;</code> <strong>não fecha</strong> &mdash; não existe <code>&lt;/br&gt;</code>. Ela não embrulha nada, só faz uma coisa acontecer ali.</li>
+        <li>Use para endereço, verso de poema, letra de música. <span class="hl-amber">Não use</span> para dar espaço entre parágrafos &mdash; isso é trabalho do <code>&lt;p&gt;</code>.</li>
+      </ul>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" aria-label="Slide 9">
+      <p class="eyebrow">Parte 2 &middot; Títulos</p>
+      <h2><code>&lt;h1&gt;</code> a <code>&lt;h3&gt;</code> &mdash; títulos</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;h1&gt;</span>Curso de Robótica<span class="t">&lt;/h1&gt;</span>
+<span class="t">&lt;h2&gt;</span>Módulo 1<span class="t">&lt;/h2&gt;</span>
+<span class="t">&lt;h3&gt;</span>Aula de hoje<span class="t">&lt;/h3&gt;</span>
+<span class="t">&lt;p&gt;</span>Vamos falar de HTML.<span class="t">&lt;/p&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <h1>Curso de Robótica</h1>
+            <h2>Módulo 1</h2>
+            <h3>Aula de hoje</h3>
+            <p>Vamos falar de HTML.</p>
+          </div>
+        </div>
+      </div>
+      <p class="dim">Vai de <code>h1</code> até <code>h6</code>. Você não precisou escolher tamanho de fonte: o navegador já tem um padrão pra cada nível.</p>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" aria-label="Slide 10">
+      <p class="eyebrow">Parte 2 &middot; Títulos</p>
+      <h2>Título é <em>hierarquia</em>, não tamanho</h2>
+      <ul class="bullets wide">
+        <li><code>h1</code> = o assunto da página inteira &mdash; normalmente <strong>um só</strong></li>
+        <li><code>h2</code> = as seções &middot; <code>h3</code> = as subseções dentro delas</li>
+        <li>É o índice de um livro: capítulo &rarr; seção &rarr; tópico</li>
+      </ul>
+      <div class="callout wide">Quer só deixar um texto maior? Isso é trabalho do <strong>CSS</strong>, na próxima aula. Usar <code>h1</code> pra isso confunde o Google e os leitores de tela.</div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" aria-label="Slide 11">
+      <p class="eyebrow">Parte 3 &middot; Atributos</p>
+      <h2>Atributos: informação extra na tag</h2>
+      <pre class="code wide"><span class="t">&lt;img</span> <span class="at">src</span>=<span class="v">"robo.jpg"</span><span class="t">&gt;</span>
+<span class="c">  ↑    ↑        ↑</span>
+<span class="c">  tag  atributo valor (entre aspas)</span></pre>
+      <p class="lead">Algumas tags precisam de <strong>dados</strong> pra funcionar. Só <code>&lt;img&gt;</code> não diz nada &mdash; qual imagem? O atributo <span class="hl-amber">src</span> responde isso.</p>
+      <p class="lead dim">Uma tag pode ter vários atributos, sempre no formato <code>nome="valor"</code>, dentro da tag de abertura.</p>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" aria-label="Slide 12">
+      <p class="eyebrow">Parte 3 &middot; Imagens</p>
+      <h2><code>&lt;img&gt;</code> &mdash; a imagem</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;p&gt;</span>Meu robô ficou assim:<span class="t">&lt;/p&gt;</span>
+
+<span class="t">&lt;img</span> <span class="at">src</span>=<span class="v">"robo.jpg"</span>
+     <span class="at">alt</span>=<span class="v">"Foto do robô montado"</span><span class="t">&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <p>Meu robô ficou assim:</p>
+            <svg viewBox="0 0 120 100" width="150" role="img" aria-label="Ilustração de um robô" style="display:block">
+              <g fill="none" stroke="#123f63" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M60 14V26"/><circle cx="60" cy="10" r="4" fill="#16a89c" stroke="none"/>
+                <rect x="28" y="26" width="64" height="44" rx="10"/>
+                <circle cx="47" cy="46" r="5" fill="#16a89c" stroke="none"/>
+                <circle cx="73" cy="46" r="5" fill="#16a89c" stroke="none"/>
+                <path d="M48 60h24"/>
+                <path d="M28 44H16v18M92 44h12v18"/>
+                <path d="M42 70v16M78 70v16"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <ul class="bullets wide">
+        <li>Como o <code>&lt;br&gt;</code>, o <code>&lt;img&gt;</code> <strong>não fecha</strong> &mdash; não existe <code>&lt;/img&gt;</code></li>
+        <li><span class="hl-amber">alt</span> = descrição da imagem: aparece se ela não carregar e é o que um leitor de tela fala pra quem não enxerga</li>
+      </ul>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" aria-label="Slide 13">
+      <p class="eyebrow">Parte 3 &middot; Imagens</p>
+      <h2>A imagem não está <em>dentro</em> do HTML</h2>
+      <p class="lead">Lembra da aula passada? O <code>src</code> é só um <strong>endereço</strong>. O arquivo <code>robo.jpg</code> continua lá fora, sozinho.</p>
+      <ul class="bullets wide">
+        <li>Ao ler essa linha, o navegador faz <span class="hl">outro pedido</span> ao servidor só pra baixar a imagem</li>
+        <li><code>src="robo.jpg"</code> &rarr; arquivo na mesma pasta da sua página</li>
+        <li><code>src="imagens/robo.jpg"</code> &rarr; dentro da pasta <code>imagens</code></li>
+        <li><code>src="https://site.com/foto.jpg"</code> &rarr; imagem que mora em outro site</li>
+      </ul>
+      <div class="callout wide">Errou o caminho ou renomeou o arquivo? A imagem some e sobra o <code>alt</code>. É o erro mais comum da primeira página de todo mundo.</div>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide" aria-label="Slide 14">
+      <p class="eyebrow">Parte 3 &middot; Links</p>
+      <h2><code>&lt;a href&gt;</code> &mdash; o link</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;p&gt;</span>Pesquise no
+<span class="t">&lt;a</span> <span class="at">href</span>=<span class="v">"https://google.com"</span><span class="t">&gt;</span>Google<span class="t">&lt;/a&gt;</span>
+ou veja a
+<span class="t">&lt;a</span> <span class="at">href</span>=<span class="v">"contato.html"</span><span class="t">&gt;</span>página
+de contato<span class="t">&lt;/a&gt;</span>.<span class="t">&lt;/p&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <p>Pesquise no <a href="#" onclick="return false">Google</a> ou veja a <a href="#" onclick="return false">página de contato</a>.</p>
+          </div>
+        </div>
+      </div>
+      <ul class="bullets wide">
+        <li>Endereço <strong>completo</strong> (<code>https://...</code>) &rarr; vai pra outro site</li>
+        <li>Só o <strong>nome do arquivo</strong> (<code>contato.html</code>) &rarr; vai pra outra página sua, na mesma pasta</li>
+      </ul>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide" aria-label="Slide 15">
+      <p class="eyebrow">Parte 3 &middot; Links</p>
+      <h2>O <em>hyper</em> do HyperText</h2>
+      <p class="lead">O link é a invenção que criou a web: páginas soltas em servidores do mundo inteiro, costuradas umas nas outras.</p>
+      <div class="chips wide">
+        <span>href="https://..." &rarr; outro site</span>
+        <span>href="sobre.html" &rarr; sua outra página</span>
+        <span>href="#final" &rarr; um ponto desta página</span>
+      </div>
+      <p class="lead dim">Sem o <code>&lt;a&gt;</code>, a internet seria só um monte de documentos que não se conhecem.</p>
+    </section>
+
+    <!-- 16 -->
+    <section class="slide" aria-label="Slide 16">
+      <p class="eyebrow">Parte 4 &middot; Listas</p>
+      <h2><code>&lt;ul&gt;</code> + <code>&lt;li&gt;</code> &mdash; lista</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;ul&gt;</span>
+  <span class="t">&lt;li&gt;</span>Arduino<span class="t">&lt;/li&gt;</span>
+  <span class="t">&lt;li&gt;</span>Sensor de distância<span class="t">&lt;/li&gt;</span>
+  <span class="t">&lt;li&gt;</span>Dois motores<span class="t">&lt;/li&gt;</span>
+<span class="t">&lt;/ul&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <ul>
+              <li>Arduino</li>
+              <li>Sensor de distância</li>
+              <li>Dois motores</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <ul class="bullets wide">
+        <li><code>ul</code> = <em>unordered list</em>, a lista inteira &mdash; a &ldquo;caixa&rdquo;</li>
+        <li><code>li</code> = <em>list item</em>, cada item dentro dela</li>
+      </ul>
+    </section>
+
+    <!-- 17 -->
+    <section class="slide" aria-label="Slide 17">
+      <p class="eyebrow">Parte 4 &middot; Listas</p>
+      <h2>Tags dentro de tags</h2>
+      <p class="lead">Repare no que aconteceu: o <code>&lt;li&gt;</code> mora <strong>dentro</strong> do <code>&lt;ul&gt;</code>. HTML é feito de caixas dentro de caixas.</p>
+      <pre class="code wide"><span class="t">&lt;ul&gt;</span>
+  <span class="t">&lt;li&gt;</span>Veja o <span class="t">&lt;a</span> <span class="at">href</span>=<span class="v">"kit.html"</span><span class="t">&gt;</span>kit completo<span class="t">&lt;/a&gt;</span><span class="t">&lt;/li&gt;</span>
+<span class="t">&lt;/ul&gt;</span></pre>
+      <p class="lead">A regra é só uma: <span class="hl">a última que abriu é a primeira que fecha.</span> Nunca cruze as tags.</p>
+      <div class="callout wide">Dica: um nível de <strong>indentação</strong> (Tab) pra cada caixa. Não muda nada na tela, muda tudo na sua cabeça.</div>
+    </section>
+
+    <!-- 18 -->
+    <section class="slide" aria-label="Slide 18">
+      <p class="eyebrow">Parte 4 &middot; Bônus</p>
+      <h2>Trocando uma letra: <code>&lt;ol&gt;</code></h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;ol&gt;</span>
+  <span class="t">&lt;li&gt;</span>Monte o chassi<span class="t">&lt;/li&gt;</span>
+  <span class="t">&lt;li&gt;</span>Ligue os motores<span class="t">&lt;/li&gt;</span>
+  <span class="t">&lt;li&gt;</span>Envie o código<span class="t">&lt;/li&gt;</span>
+<span class="t">&lt;/ol&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <ol>
+              <li>Monte o chassi</li>
+              <li>Ligue os motores</li>
+              <li>Envie o código</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <p class="dim"><em>ordered list</em>: quando a ordem importa, o navegador numera sozinho. Se você inserir um passo no meio, ele renumera tudo.</p>
+    </section>
+
+    <!-- 19 -->
+    <section class="slide" aria-label="Slide 19">
+      <p class="eyebrow">Juntando tudo</p>
+      <h2>Uma página inteira, de verdade</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">pagina.html</span>
+          <pre class="code"><span class="t">&lt;body&gt;</span>
+  <span class="t">&lt;h1&gt;</span>Meu robô<span class="t">&lt;/h1&gt;</span>
+  <span class="t">&lt;p&gt;</span>Ele desvia de obstáculos.<span class="t">&lt;/p&gt;</span>
+
+  <span class="t">&lt;h2&gt;</span>Peças<span class="t">&lt;/h2&gt;</span>
+  <span class="t">&lt;ul&gt;</span>
+    <span class="t">&lt;li&gt;</span>Arduino<span class="t">&lt;/li&gt;</span>
+    <span class="t">&lt;li&gt;</span>Sensor<span class="t">&lt;/li&gt;</span>
+  <span class="t">&lt;/ul&gt;</span>
+
+  <span class="t">&lt;p&gt;</span>Feito na
+  <span class="t">&lt;a</span> <span class="at">href</span>=<span class="v">"https://mais-robotic.com.br"</span><span class="t">&gt;</span>+ROBOTIC<span class="t">&lt;/a&gt;</span>.<span class="t">&lt;/p&gt;</span>
+<span class="t">&lt;/body&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <h1>Meu robô</h1>
+            <p>Ele desvia de obstáculos.</p>
+            <h2>Peças</h2>
+            <ul><li>Arduino</li><li>Sensor</li></ul>
+            <p>Feito na <a href="#" onclick="return false">+ROBOTIC</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 20 -->
+    <section class="slide" aria-label="Slide 20">
+      <p class="eyebrow">Fecho &middot; Cola</p>
+      <h2>O que levar pra casa</h2>
+      <div class="tagtable wide">
+        <code>&lt;p&gt;&lt;/p&gt;</code><span>parágrafo de texto</span>
+        <code>&lt;br&gt;</code><span>quebra de linha (não fecha)</span>
+        <code>&lt;h1&gt; &lt;h2&gt; &lt;h3&gt;</code><span>títulos, do mais importante ao menos</span>
+        <code>&lt;img src="..." alt="..."&gt;</code><span>imagem (não fecha)</span>
+        <code>&lt;a href="..."&gt;&lt;/a&gt;</code><span>link para outra página</span>
+        <code>&lt;ul&gt; &lt;li&gt;</code><span>lista com marcadores</span>
+        <code>&lt;ol&gt; &lt;li&gt;</code><span>lista numerada</span>
+      </div>
+      <p class="lead dim">Abriu, fecha. Tag dentro de tag, sempre na ordem. O resto é vocabulário.</p>
+    </section>
+
+    <!-- 21 -->
+    <section class="slide" aria-label="Slide 21">
+      <p class="eyebrow">Mão na massa</p>
+      <h2>Sua página sobre você</h2>
+      <ul class="bullets wide">
+        <li>Crie <code>index.html</code> com o esqueleto (<code>html</code>, <code>head</code>, <code>body</code>)</li>
+        <li>Um <code>&lt;h1&gt;</code> com seu nome e um <code>&lt;p&gt;</code> se apresentando</li>
+        <li>Um <code>&lt;h2&gt;</code> &ldquo;Do que eu gosto&rdquo; + uma <code>&lt;ul&gt;</code> com 3 itens</li>
+        <li>Uma <code>&lt;img&gt;</code> de uma foto salva na mesma pasta (com <code>alt</code>!)</li>
+        <li>Um <code>&lt;a&gt;</code> pro seu site ou jogo favorito</li>
+      </ul>
+      <p class="lead">Salve, abra no navegador, mude alguma coisa, salve de novo e aperte <kbd>F5</kbd>.</p>
+      <p class="lead dim">Agora o arquivo é seu &mdash; a mudança <strong>não</strong> some no F5.</p>
+    </section>
+
+  </div>
+
+  <div class="chrome">
+    <span class="brandmark"><span class="logo" role="img" aria-label="+ROBOTIC"></span></span>
+    <span class="label" id="partLabel">HTML na prática</span>
+    <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
+    <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+    <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
+    <span class="count" id="count">01 / 21</span>
+    <button id="btnTheme" aria-label="Alternar tema">tema</button>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var total = slides.length;
+    var pfill = document.getElementById('pfill');
+    var count = document.getElementById('count');
+    var partLabel = document.getElementById('partLabel');
+    var i = 0;
+
+    function pad(n){ return (n<10?'0':'') + n; }
+
+    function render(){
+      slides.forEach(function(s, x){
+        s.classList.toggle('active', x === i);
+        s.setAttribute('aria-hidden', x === i ? 'false' : 'true');
+      });
+      pfill.style.width = ((i+1)/total*100) + '%';
+      count.textContent = pad(i+1) + ' / ' + pad(total);
+      var eb = slides[i].querySelector('.eyebrow');
+      partLabel.textContent = eb ? eb.textContent.replace(/\s+/g,' ').trim() : 'HTML na prática';
+      if (history.replaceState) history.replaceState(null, '', '#' + (i+1));
+    }
+
+    function go(n){
+      var next = Math.max(0, Math.min(total-1, n));
+      if (next === i) return;
+      i = next; render();
+    }
+    function next(){ go(i+1); }
+    function prev(){ go(i-1); }
+
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ' || e.key === 'ArrowDown'){ e.preventDefault(); next(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){ e.preventDefault(); prev(); }
+      else if (e.key === 'Home'){ e.preventDefault(); go(0); }
+      else if (e.key === 'End'){ e.preventDefault(); go(total-1); }
+    });
+
+    document.getElementById('btnNext').addEventListener('click', next);
+    document.getElementById('btnPrev').addEventListener('click', prev);
+    document.getElementById('znext').addEventListener('click', function(){ this.blur(); next(); });
+    document.getElementById('zprev').addEventListener('click', function(){ this.blur(); prev(); });
+
+    // theme toggle
+    var root = document.documentElement;
+    var btnTheme = document.getElementById('btnTheme');
+    btnTheme.addEventListener('click', function(){
+      var cur = root.getAttribute('data-theme');
+      var isDark = cur ? cur === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    });
+
+    // deep link
+    var start = parseInt((location.hash || '').replace('#',''), 10);
+    if (!isNaN(start) && start >= 1 && start <= total) i = start - 1;
+
+    render();
+  })();
+</script>
+
+</body></html>

@@ -1,0 +1,77 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Instalação do Git no Windows</title>
+<style>
+@page{size:A4 portrait;margin:16mm 16mm 16mm}
+*{box-sizing:border-box}
+body{font-family:"Segoe UI",Arial,sans-serif;color:#1f2933;font-size:11pt;line-height:1.45;margin:0}
+h1{font-size:24pt;margin:0 0 2mm;color:#111}
+.sub{color:#5b6672;margin:0 0 6mm}
+h2{font-size:14pt;margin:0 0 2mm;display:flex;align-items:center;gap:3mm}
+.n{background:#111;color:#fff;border-radius:50%;width:8mm;height:8mm;display:inline-flex;align-items:center;justify-content:center;font-size:11pt;flex:none}
+.step{break-inside:avoid;margin-bottom:6mm}
+p{margin:0 0 2mm}
+img{display:block;border:1px solid #cfd6dd;border-radius:2mm;margin:2mm 0}
+.tip,.warn{border-left:3px solid #2f7de1;background:#eef5fd;padding:2.5mm 3.5mm;margin:2mm 0;border-radius:0 2mm 2mm 0;font-size:10pt}
+.warn{border-color:#e08a1e;background:#fdf4e7}
+code,b.f{font-family:Consolas,monospace;background:#f0f2f4;padding:0 1.2mm;border-radius:1mm;font-size:10pt}
+table{border-collapse:collapse;width:100%;font-size:10pt;margin:2mm 0}
+td,th{border:1px solid #d5dbe1;padding:1.8mm 2.5mm;text-align:left;vertical-align:top}
+th{background:#f0f2f4}
+.row{display:flex;gap:5mm;align-items:flex-start}
+.row>div{flex:1}
+.pb{break-before:page}
+ul{margin:0 0 2mm;padding-left:5mm}
+.check li{list-style:none;margin-left:-5mm}.check li:before{content:"☐  "}
+</style></head><body>
+<h1>Instalando o Git no Windows</h1>
+<p class="sub">Git e GitHub · Tempo estimado: 10 minutos</p>
+
+<p>O <b>Git</b> é um programa que guarda o histórico do seu projeto: cada vez que você salva uma versão, ele registra. Assim, se algo der errado, dá para voltar a uma versão anterior. Vamos instalá-lo no seu computador. Ele é gratuito.</p>
+<div class="warn"><b>Este tutorial é para Windows.</b> Se você usa Mac ou Linux, os passos são parecidos, mas podem ser ligeiramente diferentes (nas telas e nos nomes dos botões).</div>
+
+<div class="step"><h2><span class="n">1</span>Baixar o instalador</h2>
+<p>Abra o navegador e pesquise <code>git download</code> no Google (o site certo é o <b>git-scm.com</b>). Se preferir, entre direto neste link: <a href="https://git-scm.com/downloads">git-scm.com/downloads</a>.</p>
+<p>Com a aba <b>Windows</b> selecionada, clique em <b>Click here to download</b> (onde está a seta vermelha). O download começa sozinho.</p>
+<img src="img/git-download.jpg" style="width:78%">
+<div class="tip"><b>Como saber se é o arquivo certo:</b> o nome vai ser mais ou menos assim: <code>Git-2.55.0-64-bit.exe</code>. O número da <b>versão pode estar diferente</b> (o Git é atualizado com frequência). Isso não é problema. O importante é que seja um <b>executável</b>, ou seja, termine em <code>.exe</code>.</div>
+</div>
+
+<div class="step"><h2><span class="n">2</span>Instalar</h2>
+<p>Abra a pasta <b>Downloads</b> e dê <b>dois cliques</b> no arquivo <code>.exe</code>. Se o Windows perguntar se você quer permitir alterações no computador, clique em <b>Sim</b>.</p>
+<p>Vão aparecer várias telas com opções técnicas. Você não precisa entender todas: basta ir clicando em <b>Next</b>, <b>Next</b>, <b>Next</b>... até aparecer o botão <b>Install</b>. Clique nele, espere terminar e clique em <b>Finish</b>.</p>
+<div class="warn"><b>Uma exceção:</b> na tela do <i>editor padrão</i>, o Git vem com o <b>Vim</b>, um editor difícil de usar para quem está começando. Troque por <b>Notepad</b> ou <b>Visual Studio Code</b>. Todo o resto pode ficar como está.</div>
+</div>
+
+<div class="step"><h2><span class="n">3</span>Abrir o CMD</h2>
+<p>O <b>CMD</b> (Prompt de Comando) é uma janela preta onde o computador recebe comandos digitados por nós. Para abrir:</p>
+<ul>
+<li>Clique no <b>símbolo do Windows</b> (a janelinha no canto inferior esquerdo da tela) para abrir o menu;</li>
+<li>Digite <code>cmd</code>. Não é preciso clicar em nenhum campo, basta começar a digitar;</li>
+<li>Clique em <b>Prompt de Comando</b> (ou aperte <b>Enter</b>).</li>
+</ul>
+<div class="tip"><b>Outra forma:</b> aperte as teclas <b>Windows + R</b>, digite <code>cmd</code> e aperte Enter.</div>
+</div>
+
+<div class="step"><h2><span class="n">4</span>Testar se instalou direito</h2>
+<p>Na janela preta, digite o comando abaixo e aperte <b>Enter</b>:</p>
+<p><code>git --version</code></p>
+<p>Se aparecer algo como <code>git version 2.55.0.windows.1</code>, <b>o Git foi instalado com sucesso!</b> Os números podem ser diferentes.</p>
+<div class="warn"><b>Apareceu um erro dizendo que o comando "não é reconhecido"?</b> Isso costuma acontecer quando o CMD já estava aberto antes da instalação. Feche a janela preta, abra outra (passo 3) e tente de novo.</div>
+</div>
+
+<div class="step"><h2><span class="n">5</span>Configurar seu nome e e-mail</h2>
+<p>O Git precisa saber quem está registrando as versões. Faça isso <b>uma única vez</b>, no CMD, trocando pelos seus dados (mantenha as aspas). Use o <b>mesmo e-mail</b> da sua conta do GitHub:</p>
+<p><code>git config --global user.name "Seu Nome"</code><br>
+<code>git config --global user.email "seu-email@exemplo.com"</code></p>
+<p>Aperte Enter depois de cada linha. Se não aparecer nenhuma mensagem, é porque deu certo.</p>
+</div>
+
+<div class="step"><h2><span class="n">✓</span>Checklist final</h2>
+<ul class="check">
+<li>Baixei o instalador <code>.exe</code> do site git-scm.com</li>
+<li>Instalei clicando em <b>Next</b> até o final</li>
+<li>Abri o <b>CMD</b> pelo menu do Windows</li>
+<li>Rodei <code>git --version</code> e apareceu a versão</li>
+<li>Configurei meu nome e meu e-mail no Git</li>
+</ul></div>
+
+</body></html>

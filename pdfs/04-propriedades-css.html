@@ -1,0 +1,114 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Guia de referências: propriedades CSS</title><style>
+@page{size:A4 portrait;margin:0}
+*{box-sizing:border-box}
+body{font-family:"Segoe UI",Arial,sans-serif;color:#1f2933;margin:0;background:#f4f6fb;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bar{height:4mm;background:linear-gradient(90deg,#16a89c 0 33.3%,#bcd230 33.3% 66.6%,#f2a63b 66.6%)}
+.pg{padding:8mm 13mm 6mm;page-break-after:always;min-height:289mm}
+.pg:last-child{page-break-after:auto}
+h1{font-size:23pt;margin:0 0 1mm;color:#123f63}
+.sub{color:#5b6672;margin:0 0 4mm;font-size:10pt}
+.g{margin-bottom:4.2mm;break-inside:avoid}
+.gh{display:flex;align-items:center;gap:3mm;margin-bottom:1.8mm}
+h2{font-size:12.5pt;margin:0;color:#123f63}
+.chip{width:6.5mm;height:6.5mm;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#123f63;font-weight:700;font-size:10pt}
+.r{display:flex;align-items:center;gap:4mm;margin-bottom:1.4mm}
+.c{flex:0 0 66mm;background:#0c1f31;border-left:2mm solid #16a89c;border-radius:2.2mm;padding:1.9mm 3mm;font-family:Consolas,monospace;font-size:9.4pt;color:#d4d4d4;white-space:nowrap;overflow:hidden}
+.c b{color:#9cdcfe;font-weight:400}.c i{color:#ce9178;font-style:normal}.c s{color:#d7ba7d;text-decoration:none}.c u{color:#b5cea8;text-decoration:none}
+.d{font-size:9.4pt;color:#1f2933;line-height:1.3}
+.tip{border-left:3px solid #2f7de1;background:#eaf1fb;padding:2.2mm 3.2mm;border-radius:0 2mm 2mm 0;font-size:9.4pt;margin-top:1.8mm}
+code{font-family:Consolas,monospace;background:#e3e8f0;padding:0 1.2mm;border-radius:1mm}
+.foot{margin-top:3mm;font-size:8.5pt;color:#7a8794;text-align:right}
+</style></head><body>
+
+<!-- PÁGINA 1 -->
+<div class="pg"><div class="bar" style="margin:-8mm -13mm 6mm"></div>
+<h1>Propriedades CSS</h1>
+<p class="sub">CSS · Guia rápido para consultar durante as aulas e os projetos</p>
+
+<div class="g"><div class="gh"><span class="chip" style="background:#16a89c">1</span><h2>Cor e texto</h2></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><b>color</b>: <i>teal</i>;</div><div class="d">Cor da letra. Aceita nome (<code>red</code>) ou hex (<code>#16a89c</code>)</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><b>background-color</b>: <i>#123f63</i>;</div><div class="d">Cor de fundo (pinta conteúdo e padding, não a margin)</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><b>font-family</b>: <i>Arial, sans-serif</i>;</div><div class="d">Fonte. Sempre ponha uma reserva no final</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><b>font-size</b>: <u>18px</u>;</div><div class="d">Tamanho da letra (16px é o normal)</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><b>font-weight</b>: <u>700</u>;</div><div class="d">Grossura: 400 normal, 700 negrito</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><b>text-align</b>: <i>center</i>;</div><div class="d">Alinha o texto na caixa: left, center, right</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><b>line-height</b>: <u>1.6</u>;</div><div class="d">Altura da linha, sem unidade. Dá respiro ao texto</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><b>text-decoration</b>: <i>none</i>;</div><div class="d">Tira (<code>none</code>) ou põe (<code>underline</code>) o sublinhado</div></div></div>
+
+<div class="g"><div class="gh"><span class="chip" style="background:#bcd230">2</span><h2>A caixa</h2></div>
+<div class="r"><div class="c" style="border-left-color:#bcd230"><b>width</b>: <u>200px</u>;</div><div class="d">Largura do conteúdo (ou da caixa toda com <code>border-box</code>)</div></div>
+<div class="r"><div class="c" style="border-left-color:#bcd230"><b>max-width</b>: <u>420px</u>;</div><div class="d">Largura máxima: encolhe em telas pequenas, nunca passa disso</div></div>
+<div class="r"><div class="c" style="border-left-color:#bcd230"><b>padding</b>: <u>10px 20px</u>;</div><div class="d">Espaço por dentro. 1, 2 ou 4 valores</div></div>
+<div class="r"><div class="c" style="border-left-color:#bcd230"><b>border</b>: <u>2px</u> <i>solid navy</i>;</div><div class="d">Borda: tamanho, tipo e cor, nesta ordem</div></div>
+<div class="r"><div class="c" style="border-left-color:#bcd230"><b>border-radius</b>: <u>12px</u>;</div><div class="d">Cantos arredondados. <code>50%</code> numa caixa quadrada vira círculo</div></div>
+<div class="r"><div class="c" style="border-left-color:#bcd230"><b>margin</b>: <u>0</u> <i>auto</i>;</div><div class="d">Espaço por fora. <code>0 auto</code> centraliza um bloco com largura</div></div>
+<div class="r"><div class="c" style="border-left-color:#bcd230"><b>box-sizing</b>: <i>border-box</i>;</div><div class="d">O <code>width</code> passa a valer a caixa inteira. Use em <code>* { }</code></div></div>
+<div class="tip"><b>1, 2 ou 4 valores</b> (padding e margin): <code>10px</code> = 4 lados · <code>10px 20px</code> = cima/baixo e esquerda/direita · <code>10px 20px 30px 40px</code> = cima, direita, baixo, esquerda (sentido do relógio).</div></div>
+<div class="foot">Página 1 de 3</div>
+</div>
+
+<!-- PÁGINA 2 -->
+<div class="pg"><div class="bar" style="margin:-8mm -13mm 6mm"></div>
+<h1>Propriedades CSS</h1>
+<p class="sub">Aparência, posição e seletores</p>
+
+<div class="g"><div class="gh"><span class="chip" style="background:#f2a63b">3</span><h2>Aparência e efeitos</h2></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>box-shadow</b>: <u>0 6px 16px</u> <i>rgba(0,0,0,.2)</i>;</div><div class="d">Sombra: X, Y, desfoque e cor. Use um gerador de sombras</div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>background-image</b>: <i>url("img.png")</i>;</div><div class="d">Imagem de fundo (o caminho vale a partir do arquivo .css)</div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>background-size</b>: <i>cover</i>;</div><div class="d"><code>cover</code> cobre tudo · <code>contain</code> mostra inteira</div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>background-repeat</b>: <i>no-repeat</i>;</div><div class="d">Impede a imagem de se repetir em ladrilho</div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>cursor</b>: <i>pointer</i>;</div><div class="d">Muda o mouse (<code>pointer</code> = mãozinha)</div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>transition</b>: <u>0.3s</u>;</div><div class="d">Mudança suave. Vai na regra normal, não no <code>:hover</code></div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>transform</b>: <i>scale(1.1)</i>;</div><div class="d">Move (<code>translate</code>), gira (<code>rotate</code>) ou aumenta (<code>scale</code>)</div></div></div>
+
+<div class="g"><div class="gh"><span class="chip" style="background:#2f7de1;color:#fff">4</span><h2>Posição</h2></div>
+<div class="r"><div class="c" style="border-left-color:#2f7de1"><b>position</b>: <i>relative</i>;</div><div class="d">O elemento se move a partir do seu lugar. Sem afetar os vizinhos</div></div>
+<div class="r"><div class="c" style="border-left-color:#2f7de1"><b>position</b>: <i>absolute</i>;</div><div class="d">Sai do fluxo e vai para qualquer lugar do pai com <code>relative</code></div></div>
+<div class="r"><div class="c" style="border-left-color:#2f7de1"><b>top</b> / <b>left</b> / <b>right</b> / <b>bottom</b></div><div class="d">Distância a partir de cada lado. Só funcionam com <code>position</code></div></div>
+<div class="tip"><b>Receita:</b> <code>position: relative</code> no pai e <code>position: absolute</code> no filho. Sem <code>position</code> no pai, o filho usa a página inteira como referência.</div></div>
+
+<div class="g"><div class="gh"><span class="chip" style="background:#16a89c">5</span><h2>Seletores</h2></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><s>p</s> { }</div><div class="d">Tag: todos os elementos daquele tipo</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><s>.aviso</s> { }</div><div class="d">Classe: quem tem <code>class="aviso"</code> (HTML sem ponto)</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><s>#vip</s> { }</div><div class="d">Id: o único com <code>id="vip"</code></div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><s>h1, h2</s> { }</div><div class="d">Vírgula = este <b>e</b> aquele</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><s>nav a</s> { }</div><div class="d">Espaço = "dentro de", em qualquer nível</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><s>.menu &gt; li</s> { }</div><div class="d">Filho direto: só um nível abaixo</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><s>.botao:hover</s> { }</div><div class="d">Pseudo-classe: enquanto o mouse está em cima</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c"><s>li:first-child</s> { }</div><div class="d">Pelo lugar na lista: <code>:first-child</code>, <code>:last-child</code></div></div>
+<div class="tip"><b>Quando duas regras brigam:</b> vence a de maior <b>força</b> (id 100 · classe 10 · tag 1). Com a mesma força, vence a <b>última</b> do arquivo. Prefira seletores simples, como uma classe só.</div></div>
+<div class="foot">Página 2 de 3</div>
+</div>
+
+<!-- PÁGINA 3 -->
+<div class="pg"><div class="bar" style="margin:-8mm -13mm 6mm"></div>
+<h1>Propriedades CSS</h1>
+<p class="sub">Display e Flexbox</p>
+
+<div class="g"><div class="gh"><span class="chip" style="background:#bcd230">6</span><h2>Display</h2></div>
+<div class="r"><div class="c" style="border-left-color:#bcd230"><b>display</b>: <i>block</i>;</div><div class="d">Ocupa a linha inteira. Aceita largura e altura (<code>div</code>, <code>p</code>)</div></div>
+<div class="r"><div class="c" style="border-left-color:#bcd230"><b>display</b>: <i>inline</i>;</div><div class="d">Fica na linha do texto. Ignora largura e altura (<code>span</code>, <code>a</code>)</div></div>
+<div class="r"><div class="c" style="border-left-color:#bcd230"><b>display</b>: <i>inline-block</i>;</div><div class="d">Fica na linha, mas aceita largura e altura</div></div></div>
+
+<div class="g"><div class="gh"><span class="chip" style="background:#f2a63b">7</span><h2>Flexbox · no container (o pai)</h2></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>display</b>: <i>flex</i>;</div><div class="d">Liga o flexbox: os filhos viram itens</div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>flex-direction</b>: <i>column</i>;</div><div class="d"><code>row</code> (padrão, em linha) ou <code>column</code> (em coluna)</div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>justify-content</b>: <i>space-between</i>;</div><div class="d">Distribui no <b>eixo principal</b>: flex-start, center, flex-end, space-between, space-around, space-evenly</div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>align-items</b>: <i>center</i>;</div><div class="d">Alinha no <b>eixo transversal</b>: stretch, flex-start, center, flex-end</div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>gap</b>: <u>10px</u>;</div><div class="d">Espaço fixo entre os itens</div></div>
+<div class="r"><div class="c" style="border-left-color:#f2a63b"><b>flex-wrap</b>: <i>wrap</i>;</div><div class="d">Quebra de linha quando os itens não cabem</div></div>
+<div class="tip"><b>Macete:</b> <code>justify</code> = eixo principal · <code>align</code> = o outro eixo. Em <code>flex-direction: column</code> os eixos trocam: o principal vira vertical.</div></div>
+
+<div class="g"><div class="gh"><span class="chip" style="background:#2f7de1;color:#fff">8</span><h2>Flexbox · nos itens (os filhos)</h2></div>
+<div class="r"><div class="c" style="border-left-color:#2f7de1"><b>flex</b>: <u>1</u>;</div><div class="d">O item cresce e divide o espaço livre com os irmãos</div></div>
+<div class="r"><div class="c" style="border-left-color:#2f7de1"><b>flex-grow</b>: <u>2</u>;</div><div class="d">Quanto cresce: 2 ocupa o dobro de 1</div></div>
+<div class="r"><div class="c" style="border-left-color:#2f7de1"><b>align-self</b>: <i>flex-end</i>;</div><div class="d">Alinhamento só deste item, ignorando o <code>align-items</code> do pai</div></div></div>
+
+<div class="g"><div class="gh"><span class="chip" style="background:#16a89c">9</span><h2>Receitas prontas</h2></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c;flex-basis:84mm"><b>display</b>: <i>flex</i>; <b>justify-content</b>: <i>center</i>; <b>align-items</b>: <i>center</i>;</div><div class="d">Centralizar no meio da caixa</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c;flex-basis:84mm"><b>display</b>: <i>flex</i>; <b>justify-content</b>: <i>space-between</i>;</div><div class="d">Menu: logo de um lado, links do outro</div></div>
+<div class="r"><div class="c" style="border-left-color:#16a89c;flex-basis:84mm"><b>display</b>: <i>flex</i>; <b>flex-wrap</b>: <i>wrap</i>; <b>gap</b>: <u>16px</u>;</div><div class="d">Galeria de cards que quebra de linha</div></div></div>
+<div class="foot">Página 3 de 3</div>
+</div>
+
+</body></html>

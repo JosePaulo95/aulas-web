@@ -1,0 +1,74 @@
+/* ===== Organizando Cubos ===== */
+
+/* ----- Já vem pronto (não precisa mexer) ----- */
+* { box-sizing: border-box; }
+body { font-family: Arial, sans-serif; background-color: #0c1f2e; color: #e4ecf3; padding: 24px; }
+h1 { margin-bottom: 8px; }
+.intro { color: #93a6b5; margin-bottom: 28px; }
+.fase { margin-bottom: 32px; }
+.fase h2 { font-size: 1.1rem; color: #2ec9bd; margin-bottom: 4px; }
+.alvo { color: #93a6b5; margin-bottom: 10px; font-size: 0.95rem; }
+.caixa { height: 200px; padding: 10px; border: 2px dashed #8fa3c4; border-radius: 10px; background-color: #123047; }
+.cubo { width: 48px; height: 48px; border-radius: 8px; display: grid; place-items: center; font-weight: bold; color: #0c1f2e; background-color: #2ec9bd; }
+.cubo:nth-child(2) { background-color: #f4ac4a; }
+.cubo:nth-child(3) { background-color: #c4da3c; }
+.cubo:nth-child(4) { background-color: #a9bce0; }
+.cubo:nth-child(5) { background-color: #ff8f84; }
+.cubo:nth-child(6) { background-color: #8fd3ff; }
+.cubo:nth-child(7) { background-color: #d6a8ff; }
+.cubo:nth-child(8) { background-color: #ffd27a; }
+
+/* ----- Gabarito ----- */
+
+/* Fase 1: lado a lado */
+#fase1 .caixa {
+  display: flex;
+  gap: 10px;
+}
+
+/* Fase 2: no centro */
+#fase2 .caixa {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Fase 3: nas pontas */
+#fase3 .caixa {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Fase 4: coluna à direita */
+#fase4 .caixa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+/* Fase 5: quebra de linha */
+#fase5 .caixa {
+  width: 230px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Fase 6: o dado (face 3) */
+#fase6 .caixa {
+  width: 200px;
+  display: flex;
+  justify-content: space-between;
+}
+#fase6 .cubo:nth-child(1) {
+  align-self: flex-start;
+}
+#fase6 .cubo:nth-child(2) {
+  align-self: center;
+}
+#fase6 .cubo:nth-child(3) {
+  align-self: flex-end;
+}

@@ -1,0 +1,1401 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSS 2 - Seletores e classes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    color-scheme: dark;
+    /* paleta: navy #123f63 / slate #8fa3c4 / teal #16a89c / lime #bcd230 / orange #f2a63b */
+    --navy:#123f63;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+    --font-display:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body:"Barlow", system-ui, -apple-system, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      color-scheme: light;
+      --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+      --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+      --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+    --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+    --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:clamp(15px,1.1vw,18px); line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  .deck{ position:fixed; inset:0; display:grid; grid-template-rows:1fr auto; }
+  .stage{ position:relative; overflow:hidden; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+    padding:clamp(2rem,6vw,5.5rem) clamp(1.6rem,7vw,7rem) clamp(3.2rem,8vh,5rem);
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .34s ease, transform .34s ease, visibility 0s linear .34s;
+    overflow-y:auto;
+  }
+  .slide.active{
+    opacity:1; visibility:visible; transform:none;
+    transition:opacity .38s ease, transform .38s ease;
+  }
+  .slide > *{ max-width:60ch; }
+  .slide .wide{ max-width:min(1080px,92vw); }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0; display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before{ content:""; width:1.8rem; height:2px; background:var(--accent); display:inline-block; }
+
+  h1,h2{ font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.02; text-transform:uppercase; letter-spacing:.005em; }
+  h1{ font-size:clamp(2.9rem,9vw,6.2rem); }
+  h2{ font-size:clamp(2rem,5vw,3.6rem); }
+  h2 em, h1 em{ font-style:normal; color:var(--accent); }
+  h1 code, h2 code{ text-transform:none; font-size:.82em; vertical-align:.04em; }
+
+  .lead{ font-size:clamp(1.15rem,2.1vw,1.7rem); color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+  .slide p{ margin:0; }
+  strong{ font-weight:600; color:var(--ink); }
+  .hl{ color:var(--accent); font-weight:600; }
+  .hl-amber{ color:var(--amber); font-weight:600; }
+
+  code, kbd{
+    font-family:var(--font-mono); font-size:.92em;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:5px;
+    padding:.1em .45em;
+  }
+  kbd{ box-shadow:0 2px 0 var(--line); }
+
+  .subtitle{ font-family:var(--font-mono); color:var(--ink-dim); font-size:clamp(.95rem,1.6vw,1.15rem); letter-spacing:.02em; }
+
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.35rem); }
+  ul.bullets li{ display:flex; gap:.7rem; align-items:baseline; }
+  ul.bullets li::before{ content:"▸"; color:var(--accent); flex:none; }
+
+  .callout{
+    border-left:3px solid var(--amber); background:var(--bg-elev);
+    padding:1rem 1.2rem; border-radius:0 10px 10px 0; font-size:clamp(1.02rem,1.8vw,1.3rem);
+  }
+  .callout.good{ border-color:var(--accent); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:.55rem; }
+  .chips span{
+    font-family:var(--font-mono); font-size:.92rem;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.4em .9em;
+  }
+  .chips.done span{ color:var(--ink-dim); }
+
+  .kv{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.9rem; }
+  .kv > div{ display:flex; flex-direction:column; gap:.3rem; }
+  .kv .k{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .kv .v{ font-size:1.05rem; }
+
+  /* trio de blocos da agenda */
+  .trio{ display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .trio > div{
+    background:var(--bg-elev); border:1px solid var(--line); border-top:4px solid var(--c,var(--accent));
+    border-radius:12px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.5rem;
+  }
+  .trio .k{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:1.6rem; line-height:1; }
+  .trio .tags{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .trio .t1{ --c:var(--accent); } .trio .t2{ --c:var(--amber); } .trio .t3{ --c:var(--lime); }
+
+  /* footer chrome */
+  .chrome{
+    display:flex; align-items:center; gap:1rem;
+    padding:.55rem clamp(1rem,4vw,2.4rem); border-top:1px solid var(--line);
+    background:var(--bg); font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+    z-index:10;
+  }
+  .chrome .label{ letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progress{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; min-width:60px; }
+  .progress__fill{ height:100%; background:var(--accent); width:0; transition:width .35s ease; }
+  .chrome .count{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .chrome button{
+    font:inherit; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line);
+    border-radius:7px; padding:.3em .7em; cursor:pointer;
+  }
+  .chrome button:hover{ color:var(--ink); border-color:var(--accent); }
+  .chrome button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .zones{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+  .zone{ pointer-events:auto; border:none; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; }
+  .zone:focus, .zone:focus-visible{ outline:none; }
+  .zone.prev{ width:28%; }
+  .zone.spacer{ flex:1; cursor:default; pointer-events:none; }
+  .zone.next{ width:40%; }
+
+  /* faixa tricolor no topo */
+  .brandbar{ position:absolute; left:0; right:0; top:0; height:5px; display:flex; z-index:8; }
+  .brandbar i{ flex:1; }
+  .brandbar i:nth-child(1){ background:var(--accent); }
+  .brandbar i:nth-child(2){ background:var(--lime); }
+  .brandbar i:nth-child(3){ background:var(--amber); }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide, .slide.active, .progress__fill{ transition:none; }
+  }
+
+  /* código e demonstração lado a lado */
+  pre.code{
+    font-family:var(--font-mono); font-size:clamp(.78rem,1.3vw,.98rem); line-height:1.6;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; margin:0; overflow-x:auto; color:var(--ink);
+    white-space:pre; tab-size:2;
+  }
+  pre.code .t{ color:var(--accent); }
+  pre.code .at{ color:var(--amber); }
+  pre.code .v{ color:var(--slate); }
+  pre.code .c{ color:var(--ink-dim); font-style:italic; }
+
+  .demo{ display:grid; gap:.9rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .demo{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .demo .pane{ display:flex; flex-direction:column; gap:.45rem; min-width:0; }
+  .demo .pane-label{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-dim);
+  }
+  /* o "navegador": estilos padrão, sem CSS nenhum — e clicável por cima das zonas de navegação */
+  .render{
+    color-scheme:light;
+    position:relative; z-index:6;
+    background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .render :is(h1,h2,h3){ font-family:inherit; text-transform:none; letter-spacing:0; color:inherit; margin:.35em 0; line-height:1.2; }
+  .render h1{ font-size:2em; font-weight:700; }
+  .render h2{ font-size:1.5em; font-weight:700; }
+  .render p{ margin:.7em 0; }
+  .render a{ color:#00e; text-decoration:underline; }
+  .render table{ border-collapse:separate; border-spacing:2px; }
+  .render th, .render td{ padding:1px; text-align:left; }
+  .render th{ font-weight:700; text-align:center; }
+  .render table[border] th, .render table[border] td{ border:1px solid #808080; }
+  .render input, .render button{ font-family:system-ui, sans-serif; font-size:13px; }
+  .render > :first-child{ margin-top:0; }
+  .render > :last-child{ margin-bottom:0; }
+
+  .tagtable{ display:grid; grid-template-columns:auto 1fr; gap:.55rem 1.1rem; align-items:baseline; }
+  .tagtable code{ white-space:nowrap; }
+  .tagtable .grp{
+    grid-column:1/-1; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent); margin-top:.4rem;
+  }
+
+  /* diagrama da página semântica */
+  .layout{ display:grid; gap:.5rem; font-family:var(--font-mono); font-size:.9rem; }
+  .layout > div{
+    border:2px dashed var(--line); border-radius:10px; padding:.8rem 1rem;
+    display:flex; justify-content:space-between; gap:1rem; color:var(--ink-dim);
+  }
+  .layout b{ color:var(--accent); font-weight:500; }
+  .layout .main{ min-height:7rem; align-items:flex-start; }
+  .layout .hd b, .layout .ft b{ color:var(--amber); }
+  .layout .hd, .layout .ft{ border-style:solid; border-color:var(--amber); }
+
+  /* ===== CSS 1: extras ===== */
+  .slide aside.notes{ display:none; }
+  .lab, pre.code, .tabs, .seg, .btns, .swatches{ position:relative; z-index:6; }
+  pre.code .ln{ display:block; }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.5rem); }
+
+  /* dicas ao passar o mouse */
+  .prop{ border-bottom:1px dotted var(--accent); cursor:help; border-radius:2px; transition:background .15s; }
+  .prop:hover, .prop:focus-visible{ background:color-mix(in srgb, var(--accent) 24%, transparent); outline:none; }
+  #tip{
+    position:fixed; z-index:60; max-width:min(330px,86vw); left:0; top:0;
+    background:var(--ink); color:var(--bg); padding:.65rem .85rem; border-radius:10px;
+    font-size:.92rem; line-height:1.4; pointer-events:none; opacity:0; transform:translateY(5px);
+    transition:opacity .15s ease, transform .15s ease; box-shadow:var(--shadow);
+  }
+  #tip.show{ opacity:1; transform:none; }
+  #tip b{ display:block; font-family:var(--font-mono); font-weight:500; font-size:.82rem; letter-spacing:.04em; margin-bottom:.15rem; color:var(--accent-ink); background:var(--accent); width:max-content; padding:.05em .5em; border-radius:4px; }
+
+  @keyframes glow{
+    0%,100%{ box-shadow:0 0 0 0 transparent; }
+    50%{ box-shadow:0 0 0 7px color-mix(in srgb, var(--accent) 55%, transparent); }
+  }
+  @keyframes pop{ 0%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+  .glow{ animation:glow .9s ease-in-out infinite; }
+
+  /* controles */
+  .btn{
+    font-family:var(--font-mono); font-size:.85rem; color:var(--ink); background:var(--bg-elev);
+    border:1px solid var(--line); border-radius:8px; padding:.45em .9em; cursor:pointer;
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .btn:hover{ border-color:var(--accent); }
+  .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn.on{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .btn.big{ font-size:1.05rem; padding:.7em 1.3em; font-weight:500; }
+  .btns, .seg, .tabs{ display:flex; flex-wrap:wrap; gap:.5rem; }
+  .ctl{ display:grid; grid-template-columns:8.5rem 1fr 4rem; align-items:center; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .ctl output{ text-align:right; color:var(--ink); }
+  .ctl select, .ctl input[type=color]{ grid-column:2/4; font:inherit; background:var(--bg-elev); color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.3em .5em; height:2.1rem; }
+  .ctl input[type=text]{ grid-column:2/4; font:inherit; font-size:1rem; background:var(--bg-elev); color:var(--ink); border:1px solid var(--accent); border-radius:7px; padding:.35em .6em; }
+  input[type=range]{ accent-color:var(--accent); width:100%; }
+  .lab{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .hint{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim); }
+  .hint b{ color:var(--amber); font-weight:500; }
+
+  /* a mini-página liga/desliga CSS */
+  .mini{
+    background:#fff; color:#1a1a1a; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem; box-shadow:var(--shadow);
+    transition:background .6s ease, color .6s ease, padding .6s ease, border-radius .6s ease;
+  }
+  .mini h1{ font-family:inherit; text-transform:none; font-size:2em; margin:.3em 0; line-height:1.15; color:inherit; transition:all .6s ease; }
+  .mini p{ margin:.6em 0; transition:all .6s ease; }
+  .mini button{ font-family:inherit; font-size:13px; transition:all .6s ease; }
+  .mini .tag{ display:inline-block; font-family:inherit; font-size:1em; transition:all .6s ease; }
+  .mini.on{ background:#123f63; color:#e4ecf3; font-family:"Barlow", system-ui, sans-serif; padding:1.8rem 1.8rem; border-radius:18px; }
+  .mini.on h1{ font-family:"Barlow Condensed", "Arial Narrow", sans-serif; text-transform:uppercase; color:#2ec9bd; font-size:2.6em; letter-spacing:.01em; }
+  .mini.on p{ color:#c9d6e2; }
+  .mini.on button{ background:#f2a63b; color:#3a2300; border:none; border-radius:999px; padding:.7em 1.4em; font-weight:600; font-size:15px; }
+  .mini.on .tag{ background:#16a89c; color:#fff; border-radius:6px; padding:.1em .6em; font-size:.85em; }
+
+  /* abas de "como o css entra" */
+  .tabs button{ font-family:var(--font-mono); font-size:.9rem; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line); border-radius:8px 8px 0 0; padding:.5em 1em; cursor:pointer; }
+  .tabs button.on{ color:var(--ink); border-color:var(--accent); border-bottom-color:var(--bg-elev); box-shadow:inset 0 3px 0 var(--accent); }
+  .tp{ display:none; }
+  .tp.on{ display:flex; flex-direction:column; gap:.8rem; }
+  .files{ display:grid; gap:.8rem; grid-template-columns:1fr; }
+  @media (min-width:800px){ .files{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .fname{ font-family:var(--font-mono); font-size:.78rem; color:var(--amber); letter-spacing:.06em; margin-bottom:.3rem; display:block; }
+  .verdict{ font-family:var(--font-mono); font-size:.88rem; padding:.45em .9em; border-radius:8px; width:max-content; max-width:100%; }
+  .verdict.bad{ background:color-mix(in srgb, var(--amber) 20%, transparent); color:var(--amber); }
+  .verdict.ok{ background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--accent); }
+
+  /* anatomia de uma regra */
+  .k-seletor{ color:var(--accent); } .k-propriedade{ color:var(--amber); } .k-valor{ color:var(--slate); }
+  .k-seletor, .k-propriedade, .k-valor, .k-fim{ border-radius:4px; }
+  body[data-hover="seletor"] .k-seletor, body[data-hover="propriedade"] .k-propriedade,
+  body[data-hover="valor"] .k-valor, body[data-hover="fim"] .k-fim{ animation:glow .9s ease-in-out infinite; }
+  .legend{ display:flex; flex-wrap:wrap; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; }
+  .legend span{ background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.3em .85em; }
+  .semi.miss::after{ content:"\2190 faltou!"; color:#ff6b5e; font-size:.8em; margin-left:.4rem; }
+  .s-h1{ font-family:"Times New Roman", serif; font-weight:700; margin:0; color:#16a89c; font-size:40px; line-height:1.1; transition:all .35s ease; }
+  .s-h1.broken{ color:#1a1a1a; font-size:32px; }
+
+  /* amostras */
+  .sample{ color-scheme:light; background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px; padding:1.2rem; box-shadow:var(--shadow); font-family:"Times New Roman", serif; min-height:7rem; }
+  .sample p{ margin:0; padding:.6rem .8rem; border-radius:6px; transition:all .25s ease; }
+  .swatches{ display:flex; flex-wrap:wrap; gap:.45rem; }
+  .sw{ font-family:var(--font-mono); font-size:.76rem; border:2px solid var(--line); border-radius:8px; padding:.35em .6em; cursor:pointer; color:#111; }
+  .sw:hover{ border-color:var(--accent); }
+  .sw.dark{ color:#fff; }
+
+  /* caixa: diagrama */
+  .bm{ max-width:560px; }
+  .bm-margin, .bm-border, .bm-padding, .bm-content{ position:relative; border-radius:6px; transition:filter .2s; }
+  .bm-tag{ position:absolute; top:.25rem; left:.55rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#1a1a1a; font-weight:500; pointer-events:none; }
+  .bm-margin{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.38) 8px 16px); padding:2.1rem 1.4rem 1.4rem; border:2px dashed #f2a63b; cursor:help; }
+  .bm-border{ background:#4f7cac; padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-border .bm-tag{ color:#fff; }
+  .bm-padding{ background:rgba(188,210,48,.92); padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-content{ background:#16a89c; color:#fff; padding:1.3rem .6rem; text-align:center; font-family:var(--font-mono); cursor:help; }
+  .bm-content .bm-tag{ display:none; }
+  body[data-hover="margin"] .bm-margin, body[data-hover="border"] .bm-border,
+  body[data-hover="padding"] .bm-padding, body[data-hover="content"] .bm-content{ animation:glow .9s ease-in-out infinite; filter:brightness(1.15); }
+
+  /* caixa: laboratório */
+  .mstage{ min-height:310px; display:grid; place-items:center; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .mwrap{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.35) 8px 16px); outline:1px dashed #f2a63b; transition:padding .12s; }
+  .mbox{ border-style:solid; border-color:#4f7cac; background:rgba(188,210,48,.95); background-clip:padding-box; transition:padding .12s, border-width .12s; }
+  .mcontent{ background:#16a89c; color:#fff; height:70px; display:grid; place-items:center; font-family:var(--font-mono); font-size:.8rem; transition:width .12s; }
+
+  /* padding: 1, 2, 3 ou 4 valores */
+  .sh-grid{ display:grid; grid-template-columns:auto auto auto; grid-template-rows:auto auto auto; gap:.35rem; align-items:center; justify-items:center; justify-content:center; }
+  .sh-b{ font-family:var(--font-mono); font-size:.85rem; color:var(--accent); min-width:4.2rem; text-align:center; }
+  .sh-box{ background:rgba(188,210,48,.95); border:2px solid #4f7cac; transition:padding .2s ease; }
+  .sh-in{ background:#16a89c; color:#fff; font-family:var(--font-mono); font-size:.8rem; padding:.9rem 1rem; }
+
+  /* borda */
+  .bdbox{ width:150px; height:150px; display:grid; place-items:center; text-align:center; font-family:var(--font-mono); font-size:.8rem; background:rgba(22,168,156,.18); transition:all .15s; }
+
+  /* position */
+  .stack{ display:flex; flex-direction:column; gap:.5rem; width:min(100%,300px); padding:1rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; }
+  .blk{ background:var(--slate); color:#0c1f2e; font-family:var(--font-mono); font-weight:500; padding:.8rem 1rem; border-radius:8px; height:3rem; display:flex; align-items:center; }
+  .slot{ border:2px dashed var(--ink-dim); border-radius:8px; height:3rem; }
+  .slot .blk{ background:var(--accent); color:var(--accent-ink); width:calc(100% + 0px); transition:top .15s, left .15s; }
+  .slot .blk.moved{ width:60%; }
+  .ign{ opacity:.55; text-decoration:line-through; }
+  .pg{ position:relative; border:2px dashed var(--ink-dim); border-radius:12px; padding:2.2rem 1.2rem 1.2rem; height:310px; background:var(--bg-elev); }
+  .pg-l, .pr-l{ position:absolute; top:.4rem; left:.7rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); }
+  .pr{ position:static; margin:1.6rem 0 0 auto; width:68%; height:190px; border:2px solid var(--accent); border-radius:10px; background:color-mix(in srgb, var(--accent) 10%, transparent); }
+  .pr.rel{ position:relative; }
+  .pr-l{ position:static; display:block; padding:.4rem .7rem; color:var(--accent); }
+  .ch{ position:absolute; width:38px; height:38px; border-radius:8px; background:var(--amber); color:#3a2300; display:grid; place-items:center; font-size:1.2rem; z-index:2; }
+  .ch.pop{ animation:pop .35s ease; }
+
+  /* card de personagem */
+  .card{ background:#fff; color:#1a1a1a; font-family:"Times New Roman", serif; max-width:280px; transition:all .45s ease; }
+  .card h3{ margin:0 0 .3em; font-size:1.4em; font-family:inherit; text-transform:none; }
+  .card p{ margin:0; }
+  .ln.new{ background:color-mix(in srgb, var(--accent) 26%, transparent); border-radius:4px; }
+  .quiz-opt{ text-align:left; }
+  .quiz-opt.right{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .quiz-opt.wrong{ background:color-mix(in srgb, #ff6b5e 25%, transparent); border-color:#ff6b5e; }
+  .fb{ min-height:3rem; }
+
+  /* anotações do professor (nunca aparecem pro aluno sem apertar N) */
+  #notesPanel{
+    position:fixed; right:12px; bottom:52px; width:min(390px,92vw); max-height:72vh; overflow:auto; z-index:40;
+    background:var(--bg-elev); border:1px solid var(--amber); border-radius:12px; padding:.9rem 1.05rem;
+    box-shadow:var(--shadow); font-size:.9rem; line-height:1.45;
+  }
+  #notesPanel[hidden]{ display:none; }
+  #notesPanel .np-h{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:.4rem; }
+  #notesPanel h4{ margin:.7rem 0 .2rem; font-family:var(--font-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); font-weight:500; }
+  #notesPanel ul{ margin:0; padding-left:1.1rem; } #notesPanel li{ margin:.15rem 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    .glow, .ch.pop, body[data-hover] *{ animation:none !important; }
+  }
+
+  /* ===== Tema VS Code Dark+ nos blocos de código ===== */
+  pre.code{
+    background:#1e1e1e; color:#d4d4d4; border:1px solid #3c3c3c; border-radius:8px;
+    font-family:Consolas, "Cascadia Code", "Cascadia Mono", "Courier New", monospace;
+    font-size:clamp(.85rem,1.35vw,1.05rem); line-height:1.55; padding:1rem 1.2rem;
+    box-shadow:0 10px 30px -16px rgba(0,0,0,.6); color-scheme:dark;
+  }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.4rem); }
+  pre.code .t{ color:#569cd6; }
+  pre.code .at{ color:#9cdcfe; }
+  pre.code .v{ color:#ce9178; }
+  pre.code .n{ color:#b5cea8; }
+  pre.code .sel{ color:#d7ba7d; }
+  pre.code .c, pre.code .hint{ color:#6a9955; font-style:italic; font-family:inherit; font-size:inherit; }
+  pre.code .prop{ color:#9cdcfe; border-bottom-color:#9cdcfe; }
+  pre.code .prop:hover, pre.code .prop:focus-visible{ background:rgba(86,156,214,.28); }
+  pre.code .k-seletor{ color:#d7ba7d; } pre.code .k-propriedade{ color:#9cdcfe; } pre.code .k-valor{ color:#ce9178; }
+  pre.code .ln.new{ background:rgba(255,255,255,.1); }
+  pre.code .ign{ opacity:.5; }
+  .fname{ color:#cccccc; background:#2d2d2d; display:inline-block; padding:.2em .8em; border-radius:6px 6px 0 0; margin-bottom:0; border:1px solid #3c3c3c; border-bottom:none; }
+  .fname + pre.code{ border-top-left-radius:0; }
+
+  /* ===== CSS 2: seletores ===== */
+  .radar{ display:grid; gap:.9rem; grid-template-columns:1fr; position:relative; z-index:6; }
+  @media (min-width:900px){ .radar{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .radar .rb-bar{ grid-column:1/-1; display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; }
+  .radar .rb-bar label{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .radar input.selin{
+    font-family:Consolas,"Cascadia Code","Courier New",monospace; font-size:1.1rem; background:#1e1e1e; color:#d7ba7d;
+    border:1px solid var(--accent); border-radius:6px; padding:.35em .7em; width:min(100%,17rem);
+  }
+  .radar input.selin.bad{ border-color:#ff6b5e; color:#ff9d93; }
+  .radar pre.code{ font-size:clamp(.72rem,1.1vw,.9rem); line-height:1.45; padding:.7rem .9rem; }
+  .radar pre.code .ln{ border-radius:3px; transition:background .2s; }
+  .radar pre.code .ln.hit{ background:rgba(86,156,214,.32); box-shadow:inset 3px 0 0 #569cd6; }
+  .radar .count{ margin:.2rem 0 0; }
+  .page{ font-family:"Times New Roman",serif; font-size:1rem; line-height:1.4; color:#1a1a1a; }
+  .page h1{ font-family:inherit; text-transform:none; font-size:1.7em; margin:.15em 0; line-height:1.2; color:inherit; }
+  .page header{ padding-bottom:.4rem; border-bottom:1px solid #ccc; margin-bottom:.4rem; }
+  .page nav{ display:flex; gap:1rem; }
+  .page p, .page ul{ margin:.4em 0; }
+  .page a{ color:#00e; }
+  .page *{ border-radius:4px; transition:background .2s, outline-color .2s; }
+  .page .hit{ outline:3px solid #16a89c; outline-offset:2px; background:rgba(22,168,156,.2); animation:hitpulse 1.1s ease-in-out infinite; }
+  @keyframes hitpulse{ 0%,100%{ outline-offset:2px; } 50%{ outline-offset:5px; } }
+  .radar.tog .page *{ cursor:pointer; }
+  @media (prefers-reduced-motion: reduce){ .page .hit{ animation:none; } }
+
+  /* demos com CSS de verdade */
+  #dorSample p{ margin:.3em 0; transition:all .3s; }
+  #dorSample.on p{ color:#e0452e; font-weight:700; }
+  #mcDiv{ font-family:"Times New Roman",serif; color:#1a1a1a; transition:all .3s; padding:.4rem 0; }
+  #mcDiv.card{ border:3px solid #16a89c; padding:14px; border-radius:12px; }
+  #mcDiv.destaque{ background:#fff3a8; }
+  #mcDiv.grande{ font-size:1.7em; }
+  .chk{ display:flex; flex-wrap:wrap; gap:.6rem; }
+  .chk label{ font-family:var(--font-mono); font-size:.88rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:8px; padding:.4em .8em; cursor:pointer; display:flex; gap:.5rem; align-items:center; }
+  .chk input{ accent-color:var(--accent); }
+  .rule{ display:flex; justify-content:space-between; gap:.6rem; align-items:center; }
+  .pts{ font-family:var(--font-mono); font-size:.75rem; background:#3c3c3c; color:#ddd; border-radius:999px; padding:.1em .7em; white-space:nowrap; }
+  .rule.win{ background:rgba(255,255,255,.12); border-radius:4px; }
+  .rule.off{ opacity:.35; }
+  .rule .pts.w{ background:var(--accent); color:var(--accent-ink); }
+  .hv-btn, .tr-btn{
+    background:#123f63; color:#fff; padding:.8em 1.7em; border:none; border-radius:8px; font:600 1rem "Barlow",system-ui,sans-serif; cursor:pointer;
+  }
+  .hv-btn:hover{ background:#f2a63b; color:#3a2300; }
+  .tr-btn{ transition:all var(--dur,0s) ease; }
+  .tr-btn:hover{ transform:var(--tf,none); background:#f2a63b; color:#3a2300; }
+  .btnarea{ display:grid; place-items:center; min-height:9rem; }
+  pre.code .dim{ color:#808080; }
+
+  .radar .goal{ grid-column:1/-1; background:color-mix(in srgb, var(--amber) 16%, transparent); border-left:4px solid var(--amber); border-radius:0 8px 8px 0; padding:.6rem .9rem; font-size:1.02rem; }
+  .vd{ font-family:var(--font-mono); font-size:.8rem; padding:.15em .7em; border-radius:999px; margin-left:.4rem; white-space:nowrap; }
+  .vd.ok{ background:var(--accent); color:var(--accent-ink); }
+  .vd.no{ background:color-mix(in srgb, #ff6b5e 25%, transparent); color:#ff8f84; }
+  .page .card{ border:1px solid #bbb; padding:.5rem .8rem; margin:.4rem 0; border-radius:8px; }
+  .page footer{ border-top:1px solid #ccc; margin-top:.5rem; padding-top:.4rem; }
+  .page ul, .page ol{ padding-left:1.4rem; } .page li ul{ margin:.1em 0; }
+
+  .radar[data-compact]{ grid-template-columns:1fr !important; }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="brandbar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="zones" aria-hidden="true">
+      <button class="zone prev" id="zprev" tabindex="-1" aria-label="Slide anterior"></button>
+      <span class="zone spacer"></span>
+      <button class="zone next" id="znext" tabindex="-1" aria-label="Próximo slide"></button>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide" aria-label="Slide 1">
+      <p class="eyebrow">Aula &middot; CSS parte 2</p>
+      <h1>Seletores e <em>classes</em></h1>
+      <p class="subtitle">como escolher exatamente quem recebe cada estilo</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Última aula: cor, texto, caixa e posição.</li>
+          <li>Ficou uma dor no ar: <code>p { }</code> muda <b>todos</b> os parágrafos. Hoje a gente resolve isso.</li>
+          <li>Reforçar o combinado: pausar e testar no computador.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Ter à mão o <code>index.html</code> e o <code>estilo.css</code> da aula passada.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" aria-label="Slide 2">
+      <p class="eyebrow">O problema</p>
+      <h2>Todos ficaram <em>iguais</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <pre class="code big"><span class="ln"><span class="sel">p</span> {</span>
+<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">tomato</span>;</span>
+<span class="ln">  <span class="prop" data-p="font-weight">font-weight</span>: <span class="n">700</span>;</span>
+<span class="ln">}</span></pre>
+          <div class="btns"><button class="btn big" id="dorBtn">Aplicar a regra</button></div>
+          <p class="hint" id="dorMsg">Queremos destacar só o aviso, o primeiro parágrafo.</p>
+        </div>
+        <div class="pane">
+          <div class="sample" id="dorSample">
+            <p>Inscrições abertas até sexta!</p>
+            <p>A rodada final é no sábado.</p>
+            <p>Leve seu próprio fone de ouvido.</p>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Pedir pra turma adivinhar antes de clicar: o que vai acontecer?</li>
+          <li>Seletor <code>p</code> = &ldquo;todo parágrafo da página&rdquo;. Sem exceção.</li>
+          <li>Hoje a pergunta é: como eu aponto <b>um</b> parágrafo específico?</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Apertar o botão e deixar o silêncio: os três ficaram vermelhos.</li>
+          <li>Depois: &ldquo;e se eu quisesse só o primeiro?&rdquo; Deixar a dúvida pairar.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" aria-label="Slide 3">
+      <p class="eyebrow">Seletores &middot; Tag</p>
+      <h2>O radar de <em>seletores</em></h2>
+      <div class="radar wide" data-page="tag" data-presets="p|h1|li|ul" data-start="h1" data-target="p" data-goal="pegar <b>os dois parágrafos</b>. Teste os botões e veja o que acende." data-free="1"></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Essa ferramenta vai aparecer várias vezes. À esquerda o HTML, à direita a página. O seletor escolhido acende quem é atingido.</li>
+          <li>Cada slide tem uma missão: achar o seletor que pega exatamente o que a missão pede.</li>
+          <li>Seletor de tag = o nome da tag. Pega <b>todos</b> os elementos daquele tipo. Já conhecem do css-01.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Clicar em <code>h1</code>: pega o título. Clicar em <code>p</code>: missão cumprida.</li>
+          <li>Digitar um seletor qualquer no campo (<code>ul</code>, <code>li</code>). Notar que <code>li</code> pega os dois itens da lista.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem e testem seletores de tag no campo. Qual não acende nada? Por quê?</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" aria-label="Slide 4">
+      <p class="eyebrow">Seletores &middot; Classe</p>
+      <h2>Dê um nome com a <em>classe</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <span class="fname">index.html</span>
+          <pre class="code"><span class="ln"><span class="t">&lt;p</span> <span class="at">class</span>=<span class="v">"aviso"</span><span class="t">&gt;</span>Atraso = eliminação!<span class="t">&lt;/p&gt;</span></span></pre>
+          <span class="fname">estilo.css</span>
+          <pre class="code"><span class="ln"><span class="sel">.aviso</span> {</span>
+<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">tomato</span>;</span>
+<span class="ln">}</span></pre>
+          <div class="chips"><span>HTML: <b>sem</b> ponto</span><span>CSS: <b>com</b> ponto</span></div>
+          <p class="hint"><code>p</code> pega <b>todos</b> os parágrafos. <code>.aviso</code> pega só quem tem o crachá.</p>
+        </div>
+        <div class="pane lab">
+          <div class="radar tog" data-page="classe" data-presets="p|.aviso" data-start=".aviso" data-toggle="1" data-compact="1" data-free="1"></div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Problema: são quatro <code>&lt;p&gt;</code>, mas só dois são avisos importantes. O seletor <code>p</code> pega os quatro.</li>
+          <li>Solução em dois passos: 1) no HTML, dar um nome com <code>class=&quot;aviso&quot;</code>; 2) no CSS, usar <code>.aviso</code>.</li>
+          <li>O ponto é só do CSS. No HTML não leva ponto.</li>
+          <li>Classe é um crachá: quem tem o crachá recebe o estilo, mesmo que seja do mesmo tipo de tag.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Começar com <code>p</code>: acende os quatro. Trocar para <code>.aviso</code>: só dois.</li>
+          <li><b>Clicar num parágrafo da página</b> dá ou tira a classe. O HTML ao lado muda e o seletor reage.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Seletor mais simples possível: uma classe só é o cenário ideal.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Escrever <code>class=&quot;.aviso&quot;</code> no HTML, com ponto. Não funciona.</li>
+          <li>Esquecer o ponto no CSS: <code>aviso { }</code> procura uma tag chamada aviso.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: criem a classe <code>.aviso</code> e apliquem em um parágrafo só.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" aria-label="Slide 5">
+      <p class="eyebrow">Seletores &middot; Classe</p>
+      <h2>Um elemento, <em>várias</em> classes</h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <pre class="code"><span class="ln"><span class="sel">.card</span> { <span class="prop" data-p="border">border</span>: <span class="n">3px</span> <span class="v">solid</span> <span class="n">#16a89c</span>; <span class="prop" data-p="padding">padding</span>: <span class="n">14px</span>; }</span>
+<span class="ln"><span class="sel">.destaque</span> { <span class="prop" data-p="background-color">background-color</span>: <span class="v">khaki</span>; }</span>
+<span class="ln"><span class="sel">.grande</span> { <span class="prop" data-p="font-size">font-size</span>: <span class="n">1.7em</span>; }</span></pre>
+          <div class="chk" id="mcChk">
+            <label><input type="checkbox" data-c="card" checked> card</label>
+            <label><input type="checkbox" data-c="destaque"> destaque</label>
+            <label><input type="checkbox" data-c="grande"> grande</label>
+          </div>
+          <pre class="code" id="mcCode"></pre>
+        </div>
+        <div class="pane">
+          <div class="sample"><div id="mcDiv" class="card">Rodada final no sábado!</div></div>
+          <p class="hint">As classes se somam. Separe com <b>espaço</b>, a ordem no HTML não importa.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Um elemento pode ter várias classes, separadas por espaço.</li>
+          <li>Cada classe é um pedaço do visual. Juntando, monta o resultado. É a ideia de peças de Lego.</li>
+          <li>Vantagem: <code>.card</code> reaproveito em todo lugar.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Marcar e desmarcar os checkboxes e olhar o <code>class=&quot;...&quot;</code> mudando.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Achar que a ordem em <code>class=&quot;a b&quot;</code> decide quem ganha. Não decide.</li>
+          <li>Escrever duas vezes o atributo: <code>class=&quot;a&quot; class=&quot;b&quot;</code>. Só o primeiro vale.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>O que acontece com <code>class=&quot;card destaque&quot;</code>? (recebe os dois estilos)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" aria-label="Slide 6">
+      <p class="eyebrow">Seletores &middot; Id</p>
+      <h2>O <em>id</em>: um nome só</h2>
+      <div class="radar wide" data-page="id" data-presets="div|.card|#vip" data-start=".card" data-target="#vip" data-goal="dar destaque <b>só ao Lucas (VIP)</b>. Os três cartões têm a mesma classe." data-free="1"></div>
+      <div class="kv wide">
+        <div><span class="k">class &middot; .nome</span><span class="v">vários elementos podem ter. Se repete à vontade.</span></div>
+        <div><span class="k">id &middot; #nome</span><span class="v">um elemento só, único na página. Como o CPF.</span></div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Três cartões iguais, todos com <code>class=&quot;card&quot;</code>. Se eu uso <code>.card</code>, os três mudam. Quero só o VIP.</li>
+          <li>O id é parecido com classe, mas usa <code>#</code> e é <b>único</b> na página.</li>
+          <li>Analogia: classe = turma (vários alunos), id = CPF (um só).</li>
+          <li>Regra prática pra eles: <b>use classe</b> pra estilizar. Id fica pra ocasiões específicas, como o JavaScript de módulos futuros.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Clicar em <code>.card</code> (pega 3, &ldquo;pegou demais&rdquo;) e depois em <code>#vip</code> (missão cumprida).</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Usar o mesmo id em dois elementos. O navegador até aceita, mas está errado.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Se eu tenho 5 botões iguais, uso classe ou id? (classe)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" aria-label="Slide 7">
+      <p class="eyebrow">Combinando &middot; Vírgula</p>
+      <h2>A vírgula diz <em>&ldquo;e&rdquo;</em></h2>
+      <div class="radar wide" data-page="virgula" data-presets="h1|h2|h1, h2|h1, h2, p" data-start="h1" data-target="h1, h2" data-goal="pintar <b>o título e os subtítulos</b> (h1 e h2) com uma regra só, sem tocar nos parágrafos." data-free="1"></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Vírgula entre seletores = &ldquo;este E aquele&rdquo;. Dá o mesmo estilo a vários grupos de uma vez.</li>
+          <li>Sem a vírgula eu teria que escrever duas regras iguais: <code>h1 { }</code> e <code>h2 { }</code>.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>No vídeo: &ldquo;chaining with a comma just means select this and this&rdquo;.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li><code>h1</code> sozinho: &ldquo;faltou pegar 2&rdquo;. <code>h1, h2</code>: missão cumprida. <code>h1, h2, p</code>: &ldquo;pegou demais&rdquo;.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Esquecer a vírgula: <code>h1 h2</code> vira outra coisa (próximo slide).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" aria-label="Slide 8">
+      <p class="eyebrow">Combinando &middot; Espaço</p>
+      <h2>O espaço diz <em>&ldquo;dentro de&rdquo;</em></h2>
+      <div class="radar wide" data-page="espaco" data-presets="a|nav a|main a|footer a" data-start="a" data-target="nav a" data-goal="estilizar <b>só os links do menu</b> (Início e Jogos). Os links do texto e do rodapé ficam como estão." data-free="1"></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>A página tem links em três lugares: menu, texto e rodapé. Só <code>a</code> pega todos.</li>
+          <li>Espaço entre seletores = &ldquo;este DENTRO daquele&rdquo;. <code>nav a</code>: só os links que estão dentro do menu.</li>
+          <li>Útil quando a mesma tag aparece em lugares diferentes e cada lugar precisa de um visual.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li><code>a</code>: &ldquo;pegou demais&rdquo;. <code>nav a</code>: missão cumprida. Depois testar <code>main a</code> e <code>footer a</code> e ver cada região acender.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Qual seletor pega só o link do rodapé? (<code>footer a</code>)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" aria-label="Slide 9">
+      <p class="eyebrow">Bônus &middot; Filho direto</p>
+      <h2>O <code>&gt;</code> diz <em>&ldquo;filho direto&rdquo;</em></h2>
+      <div class="radar wide" data-page="filho" data-presets="li|.menu li|.menu > li" data-start=".menu li" data-target=".menu > li" data-goal="destacar <b>só os itens do menu principal</b> (Jogos, Ranking, Contato), sem os subitens Ação e Corrida." data-free="1"></div>
+      <p class="dim">Espaço: em qualquer nível lá dentro. <code>&gt;</code>: só um nível abaixo.</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Slide bônus: pode pular se estiver apertado de tempo.</li>
+          <li>Exemplo clássico: menu com submenu. O submenu também é feito de <code>li</code>, então <code>.menu li</code> pega tudo.</li>
+          <li>Espaço pega netos, bisnetos... <code>&gt;</code> pega só os filhos diretos.</li>
+          <li>Analogia: &ldquo;qualquer parente&rdquo; versus &ldquo;só os filhos&rdquo;.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li><code>.menu li</code>: pegou 5, &ldquo;pegou demais&rdquo; (inclui Ação e Corrida). <code>.menu &gt; li</code>: pegou 3, missão cumprida.</li>
+          <li>Olhar o HTML: os subitens estão numa <code>ul</code> dentro do <code>li</code> Jogos.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>No vídeo, o <code>&gt;</code> é apresentado como &ldquo;one level deep&rdquo;. Usar só quando precisar.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" aria-label="Slide 10">
+      <p class="eyebrow">Quando brigam &middot; Ordem</p>
+      <h2>Duas regras, <em>um</em> vencedor</h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <pre class="code big" id="ordCode"></pre>
+          <div class="btns"><button class="btn big" id="ordSwap">Inverter a ordem</button></div>
+          <p class="hint" id="ordMsg"></p>
+        </div>
+        <div class="pane">
+          <div class="sample"><p id="ordP" style="font-size:1.5rem;margin:0;font-weight:700">Qual cor eu tenho?</p></div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>O CSS lê de cima pra baixo. Se duas regras brigam pelo mesmo elemento e têm a mesma força, <b>a última vence</b>.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>&ldquo;these styles get applied from the top to the bottom of your css file&rdquo;.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Apertar &ldquo;Inverter a ordem&rdquo; algumas vezes: a cor troca.</li>
+          <li>No VS Code: mudar a ordem de duas regras e F5.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>&ldquo;Escrevi a regra e nada muda!&rdquo; Procurar outra regra mais embaixo mexendo na mesma coisa.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" aria-label="Slide 11">
+      <p class="eyebrow">Quando brigam &middot; Especificidade</p>
+      <h2>O <em>ringue</em> dos seletores</h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <div class="chk" id="ringChk">
+            <label><input type="checkbox" data-r="tag" checked> p</label>
+            <label><input type="checkbox" data-r="classe" checked> .destaque</label>
+            <label><input type="checkbox" data-r="id"> #aviso</label>
+          </div>
+          <pre class="code big" id="ringCode"></pre>
+          <p class="hint" id="ringMsg"></p>
+        </div>
+        <div class="pane">
+          <div class="sample"><p id="ringP" class="destaque" style="font-size:1.5rem;margin:0;font-weight:700">Aviso importante</p></div>
+          <p class="hint">HTML: <code>&lt;p class=&quot;destaque&quot; id=&quot;aviso&quot;&gt;</code></p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Antes da ordem, vem a <b>força</b> do seletor: quanto mais específico, mais força.</li>
+          <li>Placar simples: tag = 1 ponto, classe = 10, id = 100. Maior pontuação vence, não importa a ordem.</li>
+          <li>Pensem num jogo de cartas: id ganha de classe, que ganha de tag.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>&ldquo;more specific selectors get priority, from id down to class down to broad elements&rdquo;.</li>
+          <li>Juntando seletores o cálculo complica. Com o tempo se pega o jeito. Não entrar nisso hoje.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Ligar só <code>p</code>, depois adicionar <code>.destaque</code>, depois <code>#aviso</code>. Ver o vencedor mudando.</li>
+          <li>Abrir F12 &rarr; aba Styles de um site. As regras perdedoras aparecem <b>riscadas</b>.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Se <code>.destaque</code> está no começo do arquivo e <code>p</code> no fim, quem vence? (<code>.destaque</code>)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" aria-label="Slide 12">
+      <p class="eyebrow">Boa prática</p>
+      <h2>Quanto mais <em>simples</em>, melhor</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="verdict bad">difícil de ler e de sobrescrever</span>
+          <pre class="code big"><span class="ln"><span class="sel">body main section ul li a.link</span> {</span>
+<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">tomato</span>;</span>
+<span class="ln">}</span></pre>
+        </div>
+        <div class="pane">
+          <span class="verdict ok">uma classe resolve</span>
+          <pre class="code big"><span class="ln"><span class="sel">.link</span> {</span>
+<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">tomato</span>;</span>
+<span class="ln">}</span></pre>
+        </div>
+      </div>
+      <ul class="bullets wide">
+        <li>Quanto mais comprido o seletor, mais <strong>força</strong> ele tem e mais difícil é mudar depois</li>
+        <li>Na dúvida, dê uma classe ao elemento e use só ela</li>
+      </ul>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Seletor comprido funciona, mas vira armadilha: ganha de tudo e é difícil de desfazer.</li>
+          <li>Regra do dedão: uma classe, um nome claro.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>&ldquo;keeping your selectors as simple as possible, like a single class name, is the best case scenario&rdquo;.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Por que <code>.link</code> é um nome melhor que <code>.vermelho</code>? (e se amanhã o link ficar azul?)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" aria-label="Slide 13">
+      <p class="eyebrow">Pseudo-classes &middot; Hover</p>
+      <h2><code>:hover</code> &mdash; quando o mouse passa</h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <pre class="code big"><span class="ln"><span class="sel">.botao</span> {</span>
+<span class="ln">  <span class="prop" data-p="background-color">background-color</span>: <span class="n">#123f63</span>;</span>
+<span class="ln">  <span class="prop" data-p="cursor">cursor</span>: <span class="v">pointer</span>;</span>
+<span class="ln">}</span>
+<span class="ln"><span class="sel"><span class="prop" data-p="hover" data-name=":hover">.botao:hover</span></span> {</span>
+<span class="ln">  <span class="prop" data-p="background-color">background-color</span>: <span class="v">orange</span>;</span>
+<span class="ln">}</span></pre>
+        </div>
+        <div class="pane">
+          <div class="sample btnarea"><button class="hv-btn glow-target">Passe o mouse aqui</button></div>
+          <p class="hint">Dois-pontos: a regra só vale <b>enquanto</b> o mouse está em cima.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Pseudo-classe = um estado do elemento. Escreve com dois-pontos depois do seletor.</li>
+          <li><code>:hover</code> é o mais usado: estilo diferente enquanto o mouse está em cima.</li>
+          <li><code>cursor: pointer</code> transforma a seta em mãozinha. Passa a ideia de &ldquo;clicável&rdquo;.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>&ldquo;a different set of styles for when your mouse is over the element&rdquo;.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Passar o mouse no botão e notar que a troca é seca, instantânea. Gancho pro próximo slide.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Espaço antes dos dois-pontos: <code>.botao :hover</code> é outra coisa. Tudo junto: <code>.botao:hover</code>.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: façam um botão que muda de cor ao passar o mouse.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide" aria-label="Slide 14">
+      <p class="eyebrow">Pseudo-classes &middot; Animação</p>
+      <h2>Suavize com <em>transition</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <label class="ctl"><span>transition</span><input type="range" id="trDur" min="0" max="1000" step="50" value="300" data-u="ms"><output></output></label>
+          <label class="ctl"><span>transform</span>
+            <select id="trTf">
+              <option value="none">nenhum</option>
+              <option value="translateY(-8px)">subir (translateY)</option>
+              <option value="scale(1.15)">crescer (scale)</option>
+              <option value="rotate(-4deg)">girar (rotate)</option>
+            </select></label>
+          <pre class="code" id="trCode"></pre>
+        </div>
+        <div class="pane">
+          <div class="sample btnarea"><button class="tr-btn glow-target" id="trBtn">Passe o mouse aqui</button></div>
+          <p class="hint">O <b>transition</b> vai na regra normal, não no :hover.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li><code>transition</code>: diz quanto tempo a mudança leva, em vez de pular de uma vez.</li>
+          <li><code>transform</code>: move, gira ou aumenta sem bagunçar o resto da página.</li>
+          <li>Combinando os dois, qualquer botão fica com cara de jogo.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>No vídeo: o transition recebe o tempo e uma curva (&ldquo;bezier&rdquo;). Hoje só o tempo.</li>
+          <li>&ldquo;make this button move on hover with the extremely cool transform property&rdquo;.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Passar o mouse com 0ms, depois com 300ms, depois com 1000ms. Sentir a diferença.</li>
+          <li>Trocar o transform e passar o mouse de novo.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Pôr o <code>transition</code> só no <code>:hover</code>: a animação de ida funciona, mas a volta fica seca.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide" aria-label="Slide 15">
+      <p class="eyebrow">Bônus &middot; Posição na lista</p>
+      <h2><code>:first-child</code> e <code>:last-child</code></h2>
+      <div class="radar wide" data-page="primeiro" data-presets="li|li:first-child|li:last-child" data-start="li" data-target="li:first-child" data-goal="destacar <b>só o campeão</b> (1º lugar) do ranking, sem criar uma classe nova." data-free="1"></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Slide bônus. Mais pseudo-classes: escolhem pela <b>posição</b> dentro do pai.</li>
+          <li>O ranking muda toda semana, mas o campeão sempre é o primeiro da lista. Não preciso lembrar de mover uma classe.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>O vídeo cita <code>first-child</code> e o seguinte, mas lembra: &ldquo;keep it simpler than this whenever you can&rdquo;.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li><code>li</code>: pegou demais (4). <code>li:first-child</code>: Ana, missão cumprida. <code>li:last-child</code>: Davi.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 16 -->
+    <section class="slide" aria-label="Slide 16">
+      <p class="eyebrow">Fecho &middot; Cola</p>
+      <h2>O que levar pra casa</h2>
+      <div class="tagtable wide">
+        <span class="grp">Escolhendo quem recebe</span>
+        <code class="prop" data-p="s-tag" data-name="tag" data-tip="O nome da tag pega TODAS elas na página. Ex: p, h1, li.">p</code><span>todas as tags daquele tipo</span>
+        <code class="prop" data-p="s-classe" data-name=".classe" data-tip="O ponto no CSS, e class=&quot;nome&quot; (sem ponto) no HTML. Vários elementos podem ter a mesma classe.">.classe</code><span>quem tem class=&ldquo;classe&rdquo;</span>
+        <code class="prop" data-p="s-id" data-name="#id" data-tip="A hashtag no CSS, e id=&quot;nome&quot; no HTML. Único na página.">#id</code><span>o único com aquele id</span>
+        <code class="prop" data-p="s-virgula" data-name="a, b" data-tip="Vírgula = este E aquele. Mesmo estilo para os dois grupos.">a, b</code><span>este e aquele</span>
+        <code class="prop" data-p="s-espaco" data-name="a b" data-tip="Espaço = b que está DENTRO de a, em qualquer nível.">a b</code><span>b dentro de a</span>
+        <code class="prop" data-p="s-filho" data-name="a > b" data-tip="Só b que é filho DIRETO de a (um nível abaixo).">a &gt; b</code><span>b filho direto de a</span>
+        <span class="grp">Quando brigam</span>
+        <code class="prop" data-p="s-ordem" data-name="ordem" data-tip="Com a mesma força, a regra que vem por último vence.">ordem</code><span>a última vence</span>
+        <code class="prop" data-p="s-forca" data-name="força" data-tip="Placar simples: tag = 1, classe = 10, id = 100. Quem tem mais pontos vence, não importa a ordem.">força</code><span>id &gt; classe &gt; tag</span>
+        <span class="grp">Mouse e animação</span>
+        <code class="prop" data-p="hover" data-name=":hover">:hover</code><span>estilo enquanto o mouse está em cima</span>
+        <code class="prop" data-p="transition">transition</code><span>mudança suave, em segundos</span>
+        <code class="prop" data-p="transform">transform</code><span>mover, girar, aumentar</span>
+        <code class="prop" data-p="cursor">cursor</code><span>o formato do mouse (pointer = mão)</span>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Cola da aula. O PDF &ldquo;Guia de referências: propriedades CSS&rdquo; tem o resto.</li>
+          <li>Passar o mouse nos itens: cada um tem a explicação em uma frase.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Qual a diferença entre <code>.a .b</code> e <code>.a, .b</code>? (dentro de versus este e aquele)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 17 -->
+    <section class="slide" aria-label="Slide 17">
+      <p class="eyebrow">Mão na massa</p>
+      <h2>Escolha quem você quer <em>estilizar</em></h2>
+      <ul class="bullets wide">
+        <li>Crie a classe <code>.destaque</code> e aplique em um só parágrafo</li>
+        <li>Dê <code>class=&quot;card destaque&quot;</code> a um elemento e combine os dois estilos</li>
+        <li>Mude só os links do menu com <code>nav a</code></li>
+        <li>Faça um botão com <code>:hover</code>, <code>transition</code> e <code>transform</code></li>
+      </ul>
+      <p class="lead">Desafio: faça <code>.destaque</code> e <code>#aviso</code> brigarem e descubra quem vence.</p>
+      <p class="lead dim">Próximo vídeo: <span class="hl">estilizando um site inteiro</span>, usando tudo isso junto.</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Agora o <code>p { }</code> não é mais um problema: eu escolho quem recebe.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausar o vídeo aqui e dar tempo.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Lembrar o quiz &ldquo;estilizando e selecionando&rdquo; (depois do próximo vídeo, conforme a ordem do módulo).</li>
+        </ul>
+      </aside>
+    </section>
+
+  </div>
+
+  <div class="chrome">
+    <span class="label" id="partLabel">CSS 2 &middot; Seletores e classes</span>
+    <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
+    <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+    <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
+    <span class="count" id="count">01 / 17</span>
+    <button id="btnTheme" aria-label="Alternar tema">tema</button>
+  </div>
+</div>
+
+<div id="tip" role="tooltip"></div>
+<div id="notesPanel" hidden></div>
+
+<script>
+(function(){
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+  /* ---------- dicas de cada propriedade ---------- */
+  var TIPS = {
+    'seletor': 'QUEM vai receber o estilo. Aqui: todos os títulos h1 da página.',
+    'propriedade': 'O QUE você quer mudar: cor, tamanho, espaço...',
+    'valor': 'COMO deve ficar: a cor, o número, a palavra.',
+    'chaves': 'As chaves abrem e fecham a regra. Tudo entre elas pertence ao seletor.',
+    'pontovirgula': 'Fecha a linha. Sem ele, o navegador se perde e ignora a regra.',
+    'color': 'A cor do TEXTO. Aceita nome (red) ou hex (#16a89c).',
+    'background-color': 'A cor de FUNDO. Pinta o conteúdo e o padding, mas nunca a margin.',
+    'font-family': 'Qual fonte usar. Sempre escreva uma reserva no fim (Arial, sans-serif), caso a primeira não exista no computador.',
+    'font-size': 'Tamanho da letra. 16px é o normal; 40px é um título grandão.',
+    'font-weight': 'Grossura da letra. 400 = normal, 700 = negrito.',
+    'text-align': 'Alinha o texto dentro da caixa: left, center ou right.',
+    'width': 'Largura do CONTEÚDO (só o miolo, sem contar padding nem borda).',
+    'padding': 'Espaço DENTRO da caixa, entre o conteúdo e a borda. O fundo pinta o padding.',
+    'border': 'A borda, em 3 partes: tamanho, tipo e cor. Ex: 2px solid navy.',
+    'border-radius': 'Arredonda os cantos. 50% numa caixa quadrada vira um círculo!',
+    'margin': 'Espaço FORA da caixa, empurrando os vizinhos. O fundo NÃO pinta a margin.',
+    'content': 'O conteúdo: texto, imagem... O tamanho dele é o width (e o height).',
+    'position': 'Como o elemento é posicionado: static (normal), relative (ajustável) ou absolute (livre, em cima de tudo).',
+    'hover': 'Pseudo-classe: o estilo só vale ENQUANTO o mouse está em cima do elemento.',
+    'transition': 'Faz a mudança acontecer aos poucos (ex: 0.3s) em vez de pular. Vai na regra normal, não no :hover.',
+    'transform': 'Move, gira ou aumenta o elemento sem bagunçar o resto da página (translateY, rotate, scale).',
+    'cursor': 'O formato do mouse em cima do elemento. pointer = mãozinha de "clicável".',
+    'top': 'Distância a partir de cima (e left, right e bottom: lados). Só funciona depois de definir position.'
+  };
+  var NAMES = { chaves:'chaves { }', pontovirgula:'ponto e vírgula', content:'conteúdo' };
+  function P(n){ return '<span class="prop" data-p="'+n+'">'+n+'</span>'; }
+  function L(h, extra){ return '<span class="ln'+(extra?' '+extra:'')+'">'+h+'</span>'; }
+  function outs(){ $$('input[type=range]').forEach(function(r){ var o = r.parentNode.querySelector('output'); if (o) o.textContent = r.value + (r.getAttribute('data-u') || 'px'); }); }
+
+  var tip = $('#tip');
+  function hideTip(){
+    tip.classList.remove('show');
+    document.body.removeAttribute('data-hover');
+    $$('.glow').forEach(function(g){ g.classList.remove('glow'); });
+  }
+  function showTip(el){
+    var key = el.getAttribute('data-p');
+    var txt = el.getAttribute('data-tip') || TIPS[key];
+    if (!txt) return;
+    var name = el.getAttribute('data-name') || NAMES[key] || key || el.textContent.trim();
+    tip.innerHTML = '<b></b><span></span>';
+    tip.firstChild.textContent = name;
+    tip.lastChild.textContent = txt;
+    tip.classList.add('show');
+    var r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+    var x = Math.min(Math.max(8, r.left + r.width/2 - tw/2), window.innerWidth - tw - 8);
+    var y = r.top - th - 10; if (y < 8) y = r.bottom + 10;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function onOver(e){
+    var el = e.target.closest && e.target.closest('[data-p]');
+    if (!el){ hideTip(); return; }
+    document.body.setAttribute('data-hover', el.getAttribute('data-prop') || el.getAttribute('data-p'));
+    var slide = el.closest('.slide');
+    $$('.glow').forEach(function(g){ g.classList.remove('glow'); });
+    if (slide && el.closest('pre.code, .tagtable')) $$('.glow-target', slide).forEach(function(g){ g.classList.add('glow'); });
+    showTip(el);
+  }
+  document.addEventListener('mouseover', onOver);
+  document.addEventListener('click', function(e){ if (e.target.closest && e.target.closest('[data-p]')) onOver(e); });
+  document.addEventListener('mouseout', function(e){ if (!e.relatedTarget) hideTip(); });
+  document.addEventListener('focusin', function(e){ if (e.target.matches && e.target.matches('[data-p]')) onOver(e); });
+
+  /* ---------- radar de seletores (uma página de exemplo por slide) ---------- */
+  var PAGES = {
+    tag:
+      '<h1>Arena Pixel</h1><p>Inscrições abertas!</p><p>Rodada final no sábado.</p><ul><li>Ana</li><li>Lucas</li></ul>',
+    classe:
+      '<p>Inscrições abertas!</p><p class="aviso">Rodada final: sábado às 14h</p><p>Leve seu fone de ouvido.</p><p class="aviso">Atraso = eliminação!</p>',
+    id:
+      '<div class="card">Ana</div><div class="card" id="vip">Lucas (VIP)</div><div class="card">Bia</div>',
+    virgula:
+      '<h1>Arena Pixel</h1><h2>Ranking</h2><p>Atualizado toda semana.</p><h2>Inscrições</h2><p>Abertas até sexta.</p>',
+    espaco:
+      '<nav><a href="#">Início</a><a href="#">Jogos</a></nav><main><p>Leia o <a href="#">regulamento</a> e veja o <a href="#">ranking</a>.</p></main><footer><a href="#">Contato</a></footer>',
+    filho:
+      '<ul class="menu"><li>Jogos<ul><li>Ação</li><li>Corrida</li></ul></li><li>Ranking</li><li>Contato</li></ul>',
+    primeiro:
+      '<h2>Ranking</h2><ol><li>Ana</li><li>Lucas</li><li>Bia</li><li>Davi</li></ol>'
+  };
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function sameSet(a, b){ return a.length === b.length && a.every(function(x){ return b.indexOf(x) > -1; }); }
+
+  function initRadar(root){
+    var presets = (root.getAttribute('data-presets') || '').split('|').filter(Boolean);
+    var sel = root.getAttribute('data-start') || presets[0] || 'p';
+    var goal = root.getAttribute('data-goal'), target = root.getAttribute('data-target');
+    var free = root.getAttribute('data-free') === '1', toggle = root.getAttribute('data-toggle') === '1';
+    root.innerHTML = (goal ? '<div class="goal"><b>Missão:</b> ' + goal + '</div>' : '')
+      + '<div class="rb-bar"><label>seletor:</label><input class="selin" type="text" spellcheck="false" autocomplete="off"' + (free ? '' : ' readonly') + '><span class="btns"></span></div>'
+      + '<pre class="code"></pre><div><div class="sample"><div class="page"></div></div><p class="hint count"></p></div>';
+    var input = $('.selin', root), btns = $('.btns', root), code = $('pre', root), page = $('.page', root), count = $('.count', root);
+    page.innerHTML = PAGES[root.getAttribute('data-page')]; input.value = sel;
+    var lineOf = [];
+
+    function attrs(el){
+      var h = '';
+      Array.prototype.forEach.call(el.attributes, function(a){
+        if (a.name === 'class' && !a.value.trim()) return;
+        h += ' <span class="at">' + a.name + '</span>=<span class="v">"' + esc(a.value) + '"</span>';
+      });
+      return h;
+    }
+    function walk(node, depth, out){
+      var pad = new Array(depth + 1).join('  ');
+      Array.prototype.forEach.call(node.childNodes, function(c){
+        if (c.nodeType === 3){ var t = c.nodeValue.trim(); if (t) out.push({ h: pad + esc(t) }); return; }
+        var tag = c.tagName.toLowerCase();
+        var open = '<span class="t">&lt;' + tag + '</span>' + attrs(c) + '<span class="t">&gt;</span>';
+        var close = '<span class="t">&lt;/' + tag + '&gt;</span>';
+        if (!c.children.length){ out.push({ h: pad + open + esc(c.textContent) + close, el: c }); return; }
+        out.push({ h: pad + open, el: c });
+        walk(c, depth + 1, out);
+        out.push({ h: pad + close });
+      });
+    }
+    function build(){
+      var out = []; walk(page, 0, out); lineOf = [];
+      code.innerHTML = out.map(function(o, k){ lineOf[k] = o.el || null; return '<span class="ln">' + o.h + '</span>'; }).join('');
+    }
+    function verdict(hits){
+      if (!target) return '';
+      var want = $$(target, page);
+      if (sameSet(hits, want)) return ' <span class="vd ok">missão cumprida!</span>';
+      if (!hits.length) return ' <span class="vd no">não pegou nada</span>';
+      var extra = hits.filter(function(h){ return want.indexOf(h) < 0; }).length;
+      var miss = want.filter(function(w){ return hits.indexOf(w) < 0; }).length;
+      if (extra && !miss) return ' <span class="vd no">pegou demais (' + extra + ' a mais)</span>';
+      if (miss && !extra) return ' <span class="vd no">faltou pegar ' + miss + '</span>';
+      return ' <span class="vd no">pegou os elementos errados</span>';
+    }
+    function mark(){
+      var hits = [], bad = false;
+      $$('.hit', page).forEach(function(e){ e.classList.remove('hit'); });
+      try { hits = $$(input.value.trim() || '#nada-aqui', page); } catch (e){ bad = true; }
+      input.classList.toggle('bad', bad);
+      hits.forEach(function(e){ e.classList.add('hit'); });
+      $$('.ln', code).forEach(function(l, k){ l.classList.toggle('hit', !!lineOf[k] && hits.indexOf(lineOf[k]) > -1); });
+      count.innerHTML = bad ? 'seletor inválido: confira a escrita'
+        : '<b>' + hits.length + '</b> ' + (hits.length === 1 ? 'elemento atingido' : 'elementos atingidos') + verdict(hits)
+          + (toggle ? '<br>Clique num elemento da página para dar ou tirar a classe <b>aviso</b>.' : '');
+    }
+    presets.forEach(function(p){
+      var b = document.createElement('button'); b.className = 'btn'; b.textContent = p;
+      b.addEventListener('click', function(){ input.value = p; mark(); });
+      btns.appendChild(b);
+    });
+    input.addEventListener('input', mark);
+    if (toggle){
+      root.classList.add('tog');
+      page.addEventListener('click', function(e){
+        e.preventDefault();
+        var el = e.target; if (el === page) return;
+        $$('.hit', page).forEach(function(h){ h.classList.remove('hit'); if (!h.getAttribute('class')) h.removeAttribute('class'); });
+        el.classList.toggle('aviso');
+        if (!el.getAttribute('class')) el.removeAttribute('class');
+        build(); mark();
+      });
+    }
+    build(); mark();
+  }
+  $$('.radar').forEach(initRadar);
+
+  /* ---------- 2: a dor ---------- */
+  (function(){
+    var s = $('#dorSample'), b = $('#dorBtn'), m = $('#dorMsg');
+    b.addEventListener('click', function(){
+      var on = s.classList.toggle('on');
+      b.textContent = on ? 'Desfazer' : 'Aplicar a regra';
+      m.textContent = on ? 'Os TRÊS mudaram. Eu só queria o primeiro!' : 'Queremos destacar só o aviso, o primeiro parágrafo.';
+    });
+  })();
+
+  /* ---------- 5: várias classes ---------- */
+  (function(){
+    var div = $('#mcDiv'), code = $('#mcCode');
+    function draw(){
+      var cs = $$('#mcChk input').filter(function(c){ return c.checked; }).map(function(c){ return c.getAttribute('data-c'); });
+      div.className = cs.join(' ');
+      code.innerHTML = L('<span class="t">&lt;div</span> <span class="at">class</span>=<span class="v">"' + cs.join(' ') + '"</span><span class="t">&gt;</span>');
+    }
+    $$('#mcChk input').forEach(function(c){ c.addEventListener('change', draw); });
+    draw();
+  })();
+
+  /* ---------- 10: ordem ---------- */
+  (function(){
+    var rules = [['royalblue', 'azul'], ['tomato', 'vermelho']], p = $('#ordP'), code = $('#ordCode'), msg = $('#ordMsg');
+    function draw(){
+      var h = '';
+      rules.forEach(function(r){ h += L('<span class="sel">p</span> { ' + P('color') + ': <span class="v">' + r[0] + '</span>; }'); });
+      code.innerHTML = h;
+      var win = rules[rules.length - 1];
+      p.style.color = win[0];
+      msg.innerHTML = 'Mesma força: vence a <b>última</b> (' + win[1] + ').';
+    }
+    $('#ordSwap').addEventListener('click', function(){ rules.reverse(); draw(); });
+    draw();
+  })();
+
+  /* ---------- 11: ringue de especificidade ---------- */
+  (function(){
+    var R = [
+      { k:'tag', sel:'p', val:'royalblue', pts:1 },
+      { k:'classe', sel:'.destaque', val:'darkorange', pts:10 },
+      { k:'id', sel:'#aviso', val:'seagreen', pts:100 }
+    ];
+    var p = $('#ringP'), code = $('#ringCode'), msg = $('#ringMsg');
+    function draw(){
+      var on = {}; $$('#ringChk input').forEach(function(c){ on[c.getAttribute('data-r')] = c.checked; });
+      var win = null; R.forEach(function(r){ if (on[r.k] && (!win || r.pts > win.pts)) win = r; });
+      p.style.color = win ? win.val : '#1a1a1a';
+      code.innerHTML = R.map(function(r){
+        var cls = (on[r.k] ? '' : 'off') + (win === r ? ' win' : '');
+        return '<span class="ln rule ' + cls + '"><span><span class="sel">' + r.sel + '</span> { ' + P('color') + ': <span class="v">' + r.val + '</span>; }</span><span class="pts' + (win === r ? ' w' : '') + '">' + r.pts + ' pt' + (r.pts > 1 ? 's' : '') + '</span></span>';
+      }).join('');
+      msg.innerHTML = win ? 'Vence <b>' + win.sel + '</b> com ' + win.pts + ' ponto' + (win.pts > 1 ? 's' : '') + ', mesmo que esteja em qualquer posição do arquivo.' : 'Nenhuma regra ligada: o parágrafo fica com a cor padrão.';
+    }
+    $$('#ringChk input').forEach(function(c){ c.addEventListener('change', draw); });
+    draw();
+  })();
+
+  /* ---------- 14: transition + transform ---------- */
+  (function(){
+    var dur = $('#trDur'), tf = $('#trTf'), btn = $('#trBtn'), code = $('#trCode');
+    function draw(){
+      btn.style.setProperty('--dur', dur.value / 1000 + 's'); btn.style.setProperty('--tf', tf.value);
+      code.innerHTML = L('<span class="sel">.botao</span> {') + L('  ' + P('transition') + ': <span class="n">' + dur.value / 1000 + 's</span>;') + L('}')
+        + L('<span class="sel">.botao:hover</span> {') + L('  ' + P('transform') + ': <span class="v">' + tf.value + '</span>;') + L('}');
+      outs();
+    }
+    dur.addEventListener('input', draw); tf.addEventListener('change', draw);
+    draw();
+  })();
+
+  /* ---------- cores de sintaxe (VS Code) nos blocos gerados ---------- */
+  (function(){
+    var busy = false;
+    function tok(v){
+      return v.replace(/(\S+)/g, function(t){ return '<span class="' + (/^[#\d.-]/.test(t) ? 'n' : 'v') + '">' + t + '</span>'; });
+    }
+    function hl(pre){
+      if (busy) return; busy = true;
+      var w = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT), list = [], n;
+      while ((n = w.nextNode())) list.push(n);
+      list.forEach(function(t){
+        var p = t.parentNode; if (p.matches('.v,.n,.sel,.hint,.t,.at,.c')) return;
+        var x = t.nodeValue, m, h = null;
+        if ((m = x.match(/^:\s(.*?)(;?)\s*$/)) && m[1]) h = ': ' + tok(m[1]) + m[2];
+        else if ((m = x.match(/^(\s*)([.#]?[\w-]+)(\s*\{)$/))) h = m[1] + '<span class="sel">' + m[2] + '</span>' + m[3];
+        if (h !== null){ var sp = document.createElement('span'); sp.innerHTML = h; while (sp.firstChild) p.insertBefore(sp.firstChild, t); p.removeChild(t); }
+      });
+      busy = false;
+    }
+    $$('pre.code').forEach(function(pre){
+      new MutationObserver(function(){ hl(pre); }).observe(pre, { childList:true });
+      hl(pre);
+    });
+  })();
+
+  /* ---------- navegação + anotações ---------- */
+  var slides = $$('.slide'), total = slides.length;
+  var pfill = $('#pfill'), count = $('#count'), partLabel = $('#partLabel'), panel = $('#notesPanel');
+  var i = 0, pop = null;
+  function pad(n){ return (n<10?'0':'') + n; }
+
+  function notesHTML(){
+    var n = slides[i].querySelector('aside.notes');
+    return n ? n.innerHTML : '<h4>Sem anotações</h4>';
+  }
+  function updateNotes(){
+    panel.innerHTML = '<div class="np-h">Só você vê &middot; slide ' + (i+1) + ' &middot; N fecha &middot; P abre janela</div>' + notesHTML();
+    if (pop && !pop.closed){ pop.document.body.innerHTML = '<div class="np-h">Slide ' + (i+1) + ' / ' + total + '</div>' + notesHTML(); }
+  }
+  function openPop(){
+    pop = window.open('', 'css02notas', 'width=520,height=720');
+    if (!pop){ panel.hidden = false; return; }
+    var d = pop.document; d.title = 'Notas do professor';
+    d.head.innerHTML = '<meta charset="utf-8"><style>body{font:16px/1.5 system-ui,sans-serif;background:#0c1f2e;color:#e4ecf3;padding:1rem 1.3rem}h4{font:500 12px monospace;letter-spacing:.1em;text-transform:uppercase;color:#f4ac4a;margin:1.1rem 0 .2rem}ul{margin:0;padding-left:1.2rem}li{margin:.25rem 0}code{background:#123047;padding:.05em .35em;border-radius:4px}.np-h{font:12px monospace;color:#93a6b5}</style>';
+    panel.hidden = true; updateNotes();
+  }
+
+  function render(){
+    slides.forEach(function(s, x){ s.classList.toggle('active', x === i); s.setAttribute('aria-hidden', x === i ? 'false' : 'true'); });
+    pfill.style.width = ((i+1)/total*100) + '%';
+    count.textContent = pad(i+1) + ' / ' + pad(total);
+    var eb = slides[i].querySelector('.eyebrow');
+    partLabel.textContent = eb ? eb.textContent.replace(/\s+/g,' ').trim() : 'CSS 2';
+    if (history.replaceState) history.replaceState(null, '', '#' + (i+1));
+    hideTip(); updateNotes();
+  }
+  function go(n){
+    var nx = Math.max(0, Math.min(total-1, n));
+    if (nx === i) return;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    i = nx; render();
+  }
+  function next(){ go(i+1); } function prev(){ go(i-1); }
+
+  document.addEventListener('keydown', function(e){
+    var t = e.target, tag = t && t.tagName;
+    if (e.key === 'Escape'){ if (document.activeElement) document.activeElement.blur(); panel.hidden = true; return; }
+    if (tag === 'TEXTAREA' || tag === 'SELECT' || (tag === 'INPUT' && t.type !== 'range' && t.type !== 'color')) return;
+    if (tag === 'INPUT' && t.type === 'range' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+    if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+    if (e.key === 'n' || e.key === 'N'){ panel.hidden = !panel.hidden; return; }
+    if (e.key === 'p' || e.key === 'P'){ openPop(); return; }
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ' || e.key === 'ArrowDown'){ e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){ e.preventDefault(); prev(); }
+    else if (e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if (e.key === 'End'){ e.preventDefault(); go(total-1); }
+  });
+  $('#btnNext').addEventListener('click', next);
+  $('#btnPrev').addEventListener('click', prev);
+  $('#znext').addEventListener('click', function(){ this.blur(); next(); });
+  $('#zprev').addEventListener('click', function(){ this.blur(); prev(); });
+
+  var root = document.documentElement;
+  $('#btnTheme').addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme');
+    var isDark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  if (!isNaN(start) && start >= 1 && start <= total) i = start - 1;
+  outs(); render();
+})();
+</script>
+
+</body>
+</html>

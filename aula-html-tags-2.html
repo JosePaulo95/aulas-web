@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mais Tags HTML</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    color-scheme: dark;
+    /* paleta: navy #123f63 / slate #8fa3c4 / teal #16a89c / lime #bcd230 / orange #f2a63b */
+    --navy:#123f63;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+    --font-display:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body:"Barlow", system-ui, -apple-system, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      color-scheme: light;
+      --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+      --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+      --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+    --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+    --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:clamp(15px,1.1vw,18px); line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  .deck{ position:fixed; inset:0; display:grid; grid-template-rows:1fr auto; }
+  .stage{ position:relative; overflow:hidden; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+    padding:clamp(2rem,6vw,5.5rem) clamp(1.6rem,7vw,7rem) clamp(3.2rem,8vh,5rem);
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .34s ease, transform .34s ease, visibility 0s linear .34s;
+    overflow-y:auto;
+  }
+  .slide.active{
+    opacity:1; visibility:visible; transform:none;
+    transition:opacity .38s ease, transform .38s ease;
+  }
+  .slide > *{ max-width:60ch; }
+  .slide .wide{ max-width:min(1080px,92vw); }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0; display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before{ content:""; width:1.8rem; height:2px; background:var(--accent); display:inline-block; }
+
+  h1,h2{ font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.02; text-transform:uppercase; letter-spacing:.005em; }
+  h1{ font-size:clamp(2.9rem,9vw,6.2rem); }
+  h2{ font-size:clamp(2rem,5vw,3.6rem); }
+  h2 em, h1 em{ font-style:normal; color:var(--accent); }
+  h1 code, h2 code{ text-transform:none; font-size:.82em; vertical-align:.04em; }
+
+  .lead{ font-size:clamp(1.15rem,2.1vw,1.7rem); color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+  .slide p{ margin:0; }
+  strong{ font-weight:600; color:var(--ink); }
+  .hl{ color:var(--accent); font-weight:600; }
+  .hl-amber{ color:var(--amber); font-weight:600; }
+
+  code, kbd{
+    font-family:var(--font-mono); font-size:.92em;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:5px;
+    padding:.1em .45em;
+  }
+  kbd{ box-shadow:0 2px 0 var(--line); }
+
+  .subtitle{ font-family:var(--font-mono); color:var(--ink-dim); font-size:clamp(.95rem,1.6vw,1.15rem); letter-spacing:.02em; }
+
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.35rem); }
+  ul.bullets li{ display:flex; gap:.7rem; align-items:baseline; }
+  ul.bullets li::before{ content:"▸"; color:var(--accent); flex:none; }
+
+  .callout{
+    border-left:3px solid var(--amber); background:var(--bg-elev);
+    padding:1rem 1.2rem; border-radius:0 10px 10px 0; font-size:clamp(1.02rem,1.8vw,1.3rem);
+  }
+  .callout.good{ border-color:var(--accent); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:.55rem; }
+  .chips span{
+    font-family:var(--font-mono); font-size:.92rem;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.4em .9em;
+  }
+  .chips.done span{ color:var(--ink-dim); }
+
+  .kv{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.9rem; }
+  .kv > div{ display:flex; flex-direction:column; gap:.3rem; }
+  .kv .k{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .kv .v{ font-size:1.05rem; }
+
+  /* trio de blocos da agenda */
+  .trio{ display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .trio > div{
+    background:var(--bg-elev); border:1px solid var(--line); border-top:4px solid var(--c,var(--accent));
+    border-radius:12px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.5rem;
+  }
+  .trio .k{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:1.6rem; line-height:1; }
+  .trio .tags{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .trio .t1{ --c:var(--accent); } .trio .t2{ --c:var(--amber); } .trio .t3{ --c:var(--lime); }
+
+  /* footer chrome */
+  .chrome{
+    display:flex; align-items:center; gap:1rem;
+    padding:.55rem clamp(1rem,4vw,2.4rem); border-top:1px solid var(--line);
+    background:var(--bg); font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+    z-index:10;
+  }
+  .chrome .label{ letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progress{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; min-width:60px; }
+  .progress__fill{ height:100%; background:var(--accent); width:0; transition:width .35s ease; }
+  .chrome .count{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .chrome button{
+    font:inherit; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line);
+    border-radius:7px; padding:.3em .7em; cursor:pointer;
+  }
+  .chrome button:hover{ color:var(--ink); border-color:var(--accent); }
+  .chrome button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .zones{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+  .zone{ pointer-events:auto; border:none; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; }
+  .zone:focus, .zone:focus-visible{ outline:none; }
+  .zone.prev{ width:28%; }
+  .zone.spacer{ flex:1; cursor:default; pointer-events:none; }
+  .zone.next{ width:40%; }
+
+  /* faixa tricolor no topo */
+  .brandbar{ position:absolute; left:0; right:0; top:0; height:5px; display:flex; z-index:8; }
+  .brandbar i{ flex:1; }
+  .brandbar i:nth-child(1){ background:var(--accent); }
+  .brandbar i:nth-child(2){ background:var(--lime); }
+  .brandbar i:nth-child(3){ background:var(--amber); }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide, .slide.active, .progress__fill{ transition:none; }
+  }
+
+  /* código e demonstração lado a lado */
+  pre.code{
+    font-family:var(--font-mono); font-size:clamp(.78rem,1.3vw,.98rem); line-height:1.6;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; margin:0; overflow-x:auto; color:var(--ink);
+    white-space:pre; tab-size:2;
+  }
+  pre.code .t{ color:var(--accent); }
+  pre.code .at{ color:var(--amber); }
+  pre.code .v{ color:var(--slate); }
+  pre.code .c{ color:var(--ink-dim); font-style:italic; }
+
+  .demo{ display:grid; gap:.9rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .demo{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .demo .pane{ display:flex; flex-direction:column; gap:.45rem; min-width:0; }
+  .demo .pane-label{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-dim);
+  }
+  /* o "navegador": estilos padrão, sem CSS nenhum — e clicável por cima das zonas de navegação */
+  .render{
+    color-scheme:light;
+    position:relative; z-index:6;
+    background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .render :is(h1,h2,h3){ font-family:inherit; text-transform:none; letter-spacing:0; color:inherit; margin:.35em 0; line-height:1.2; }
+  .render h1{ font-size:2em; font-weight:700; }
+  .render h2{ font-size:1.5em; font-weight:700; }
+  .render p{ margin:.7em 0; }
+  .render a{ color:#00e; text-decoration:underline; }
+  .render table{ border-collapse:separate; border-spacing:2px; }
+  .render th, .render td{ padding:1px; text-align:left; }
+  .render th{ font-weight:700; text-align:center; }
+  .render table[border] th, .render table[border] td{ border:1px solid #808080; }
+  .render input, .render button{ font-family:system-ui, sans-serif; font-size:13px; }
+  .render > :first-child{ margin-top:0; }
+  .render > :last-child{ margin-bottom:0; }
+
+  .tagtable{ display:grid; grid-template-columns:auto 1fr; gap:.55rem 1.1rem; align-items:baseline; }
+  .tagtable code{ white-space:nowrap; }
+  .tagtable .grp{
+    grid-column:1/-1; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent); margin-top:.4rem;
+  }
+
+  /* diagrama da página semântica */
+  .layout{ display:grid; gap:.5rem; font-family:var(--font-mono); font-size:.9rem; }
+  .layout > div{
+    border:2px dashed var(--line); border-radius:10px; padding:.8rem 1rem;
+    display:flex; justify-content:space-between; gap:1rem; color:var(--ink-dim);
+  }
+  .layout b{ color:var(--accent); font-weight:500; }
+  .layout .main{ min-height:7rem; align-items:flex-start; }
+  .layout .hd b, .layout .ft b{ color:var(--amber); }
+  .layout .hd, .layout .ft{ border-style:solid; border-color:var(--amber); }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="brandbar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="zones" aria-hidden="true">
+      <button class="zone prev" id="zprev" tabindex="-1" aria-label="Slide anterior"></button>
+      <span class="zone spacer"></span>
+      <button class="zone next" id="znext" tabindex="-1" aria-label="Próximo slide"></button>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide" aria-label="Slide 1">
+      <p class="eyebrow">Aula &middot; HTML parte 2</p>
+      <h1>Mais <em>tags</em></h1>
+      <p class="subtitle">tabelas, formulários e tags que dizem o que cada parte da página é</p>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" aria-label="Slide 2">
+      <p class="eyebrow">De onde a gente parou</p>
+      <h2>Você já sabe escrever uma página</h2>
+      <div class="chips done wide">
+        <span>&lt;p&gt;</span><span>&lt;br&gt;</span><span>&lt;h1&gt; &lt;h2&gt; &lt;h3&gt;</span><span>&lt;img&gt;</span><span>&lt;a href&gt;</span><span>&lt;ul&gt; &lt;ol&gt; &lt;li&gt;</span>
+      </div>
+      <p class="lead">Texto, títulos, imagens, links e listas. Mas até agora a sua página só <strong>fala</strong>.</p>
+      <p class="lead dim">Hoje ela aprende a organizar dados em grade, a <span class="hl">ouvir</span> quem está do outro lado e a dizer o que cada pedaço dela é.</p>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" aria-label="Slide 3">
+      <p class="eyebrow">O plano de hoje</p>
+      <h2>Três blocos</h2>
+      <div class="trio wide">
+        <div class="t1"><span class="k">Tabelas</span><span>dados em linhas e colunas</span><span class="tags">&lt;table&gt; &lt;tr&gt; &lt;th&gt; &lt;td&gt;</span></div>
+        <div class="t2"><span class="k">Formulários</span><span>a página que pergunta</span><span class="tags">&lt;form&gt; &lt;label&gt; &lt;input&gt; &lt;button&gt;</span></div>
+        <div class="t3"><span class="k">Semânticas</span><span>dar nome às partes</span><span class="tags">&lt;header&gt; &lt;footer&gt;</span></div>
+      </div>
+    </section>
+
+    <!-- ================= TABELAS ================= -->
+
+    <!-- 4 -->
+    <section class="slide" aria-label="Slide 4">
+      <p class="eyebrow">Parte 1 &middot; Tabelas</p>
+      <h2>Quando usar uma <em>tabela</em>?</h2>
+      <p class="lead">Quando a informação tem <strong>linhas e colunas</strong> de verdade &mdash; aquilo que você faria numa planilha.</p>
+      <ul class="bullets wide">
+        <li>Ranking de um campeonato</li>
+        <li>Horário das aulas da semana</li>
+        <li>Status dos personagens de um jogo: vida, ataque, defesa</li>
+      </ul>
+      <p class="lead dim">Se dá pra ler &ldquo;na linha do fulano, na coluna tal, o valor é...&rdquo;, é tabela.</p>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" aria-label="Slide 5">
+      <p class="eyebrow">Parte 1 &middot; Tabelas</p>
+      <h2>Caixas dentro de caixas, de novo</h2>
+      <pre class="code wide"><span class="t">&lt;table&gt;</span>       <span class="c">&lt;!-- a tabela inteira --&gt;</span>
+  <span class="t">&lt;tr&gt;</span>        <span class="c">&lt;!-- table row: uma linha --&gt;</span>
+    <span class="t">&lt;td&gt;</span>…<span class="t">&lt;/td&gt;</span>  <span class="c">&lt;!-- table data: uma célula --&gt;</span>
+    <span class="t">&lt;td&gt;</span>…<span class="t">&lt;/td&gt;</span>
+  <span class="t">&lt;/tr&gt;</span>
+<span class="t">&lt;/table&gt;</span></pre>
+      <div class="kv wide">
+        <div><span class="k">table</span><span class="v">a caixa de fora</span></div>
+        <div><span class="k">tr</span><span class="v">cada linha, de cima pra baixo</span></div>
+        <div><span class="k">td</span><span class="v">cada célula, da esquerda pra direita</span></div>
+      </div>
+      <p class="dim">Repare: não existe tag de coluna. As colunas aparecem sozinhas quando as células das linhas se alinham.</p>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" aria-label="Slide 6">
+      <p class="eyebrow">Parte 1 &middot; Tabelas</p>
+      <h2><code>&lt;tr&gt;</code> + <code>&lt;td&gt;</code> na prática</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;table&gt;</span>
+  <span class="t">&lt;tr&gt;</span>
+    <span class="t">&lt;td&gt;</span>Ana<span class="t">&lt;/td&gt;</span>
+    <span class="t">&lt;td&gt;</span>1200<span class="t">&lt;/td&gt;</span>
+  <span class="t">&lt;/tr&gt;</span>
+  <span class="t">&lt;tr&gt;</span>
+    <span class="t">&lt;td&gt;</span>Lucas<span class="t">&lt;/td&gt;</span>
+    <span class="t">&lt;td&gt;</span>950<span class="t">&lt;/td&gt;</span>
+  <span class="t">&lt;/tr&gt;</span>
+<span class="t">&lt;/table&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <table>
+              <tr><td>Ana</td><td>1200</td></tr>
+              <tr><td>Lucas</td><td>950</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <p class="dim">Duas linhas, duas células cada &rarr; uma grade 2&times;2. Sem borda, sem cor: deixar bonito é trabalho do <strong>CSS</strong>.</p>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" aria-label="Slide 7">
+      <p class="eyebrow">Parte 1 &middot; Tabelas</p>
+      <h2><code>&lt;th&gt;</code> &mdash; o cabeçalho</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;table</span> <span class="at">border</span>=<span class="v">"1"</span><span class="t">&gt;</span>
+  <span class="t">&lt;tr&gt;</span>
+    <span class="t">&lt;th&gt;</span>Jogador<span class="t">&lt;/th&gt;</span>
+    <span class="t">&lt;th&gt;</span>Pontos<span class="t">&lt;/th&gt;</span>
+  <span class="t">&lt;/tr&gt;</span>
+  <span class="t">&lt;tr&gt;</span>
+    <span class="t">&lt;td&gt;</span>Ana<span class="t">&lt;/td&gt;</span>
+    <span class="t">&lt;td&gt;</span>1200<span class="t">&lt;/td&gt;</span>
+  <span class="t">&lt;/tr&gt;</span>
+<span class="t">&lt;/table&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <table border="1">
+              <tr><th>Jogador</th><th>Pontos</th></tr>
+              <tr><td>Ana</td><td>1200</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <ul class="bullets wide">
+        <li><code>th</code> = <em>table header</em>: a célula que dá <strong>nome</strong> à coluna &mdash; sai em negrito e centralizada</li>
+        <li><code>border="1"</code> é um atalho antigo só pra enxergar a grade enquanto estuda. No projeto de verdade, borda é CSS.</li>
+      </ul>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" aria-label="Slide 8">
+      <p class="eyebrow">Parte 1 &middot; Tabelas</p>
+      <h2>Tabela é pra <em>dado</em>, não pra layout</h2>
+      <p class="lead">Lá pelos anos 2000, muito site usava tabela pra posicionar coisas na tela: menu numa célula, texto em outra.</p>
+      <div class="callout wide">Funciona, mas é gambiarra: um leitor de tela vai anunciar &ldquo;tabela, 3 colunas&rdquo; pra quem só queria ler uma notícia. Pra arrumar a tela existe o <strong>CSS</strong>.</div>
+      <p class="lead dim">Regra rápida: se você apagar as linhas da grade e a informação perder o sentido, era tabela mesmo.</p>
+    </section>
+
+    <!-- ================= FORMULÁRIOS ================= -->
+
+    <!-- 9 -->
+    <section class="slide" aria-label="Slide 9">
+      <p class="eyebrow">Parte 2 &middot; Formulários</p>
+      <h2>A página que <em>pergunta</em></h2>
+      <p class="lead">Login, cadastro, busca, comentário, chat de jogo: tudo isso é <strong>formulário</strong>.</p>
+      <p class="lead">Até agora o servidor mandava e você só lia. O formulário é o caminho de volta: <span class="hl">você</span> manda algo pro servidor.</p>
+      <div class="chips wide">
+        <span>&lt;form&gt; &rarr; a caixa</span><span>&lt;input&gt; &rarr; o campo</span><span>&lt;label&gt; &rarr; o nome do campo</span><span>&lt;button&gt; &rarr; o envio</span>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" aria-label="Slide 10">
+      <p class="eyebrow">Parte 2 &middot; Formulários</p>
+      <h2><code>&lt;input&gt;</code> &mdash; o campo</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;form&gt;</span>
+  <span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"text"</span>
+         <span class="at">placeholder</span>=<span class="v">"Seu nick"</span><span class="t">&gt;</span>
+<span class="t">&lt;/form&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra (pode digitar!)</span>
+          <div class="render">
+            <form onsubmit="return false">
+              <input type="text" placeholder="Seu nick">
+            </form>
+          </div>
+        </div>
+      </div>
+      <ul class="bullets wide">
+        <li>Igual <code>&lt;img&gt;</code> e <code>&lt;br&gt;</code>, o <code>&lt;input&gt;</code> <strong>não fecha</strong></li>
+        <li><span class="hl-amber">placeholder</span> = a dica cinza que some quando você começa a digitar</li>
+        <li>Todo campo mora <strong>dentro</strong> de um <code>&lt;form&gt;</code> &mdash; é ele que junta tudo pra enviar</li>
+      </ul>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" aria-label="Slide 11">
+      <p class="eyebrow">Parte 2 &middot; Formulários</p>
+      <h2>Uma tag, vários <em>tipos</em></h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"text"</span><span class="t">&gt;</span>
+<span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"email"</span><span class="t">&gt;</span>
+<span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"password"</span><span class="t">&gt;</span>
+<span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"number"</span><span class="t">&gt;</span>
+<span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"checkbox"</span><span class="t">&gt;</span>
+<span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"color"</span><span class="t">&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra (teste cada um)</span>
+          <div class="render">
+            <form onsubmit="return false">
+              <p><input type="text" value="texto livre"></p>
+              <p><input type="email" placeholder="voce@email.com"></p>
+              <p><input type="password" value="segredo123"></p>
+              <p><input type="number" value="7"></p>
+              <p><input type="checkbox" checked></p>
+              <p><input type="color" value="#16a89c"></p>
+            </form>
+          </div>
+        </div>
+      </div>
+      <p class="dim">Só trocando o <code>type</code> o navegador muda o campo inteiro: esconde a senha, põe setinhas no número, abre uma paleta de cor. No celular, <code>email</code> até troca o teclado.</p>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" aria-label="Slide 12">
+      <p class="eyebrow">Parte 2 &middot; Formulários</p>
+      <h2><code>&lt;label&gt;</code> &mdash; o nome do campo</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;label</span> <span class="at">for</span>=<span class="v">"nick"</span><span class="t">&gt;</span>Nick:<span class="t">&lt;/label&gt;</span>
+<span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"text"</span> <span class="at">id</span>=<span class="v">"nick"</span><span class="t">&gt;</span>
+
+<span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"checkbox"</span> <span class="at">id</span>=<span class="v">"som"</span><span class="t">&gt;</span>
+<span class="t">&lt;label</span> <span class="at">for</span>=<span class="v">"som"</span><span class="t">&gt;</span>Ativar som<span class="t">&lt;/label&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra (clique no texto!)</span>
+          <div class="render">
+            <form onsubmit="return false">
+              <p><label for="d-nick">Nick:</label> <input type="text" id="d-nick"></p>
+              <p><input type="checkbox" id="d-som"> <label for="d-som">Ativar som</label></p>
+            </form>
+          </div>
+        </div>
+      </div>
+      <ul class="bullets wide">
+        <li>O <span class="hl-amber">for</span> do label aponta pro <span class="hl-amber">id</span> do campo: os dois ficam <strong>ligados</strong></li>
+        <li>Clicar no texto ativa o campo &mdash; checkbox fica muito mais fácil de acertar</li>
+        <li>E o leitor de tela sabe ler &ldquo;Nick&rdquo; quando chega no campo</li>
+      </ul>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" aria-label="Slide 13">
+      <p class="eyebrow">Parte 2 &middot; Formulários</p>
+      <h2><code>&lt;button&gt;</code> &mdash; e pra onde vai?</h2>
+      <pre class="code wide"><span class="t">&lt;form</span> <span class="at">action</span>=<span class="v">"/inscricao"</span><span class="t">&gt;</span>
+  <span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"text"</span> <span class="at">name</span>=<span class="v">"nick"</span><span class="t">&gt;</span>
+  <span class="t">&lt;button&gt;</span>Enviar<span class="t">&lt;/button&gt;</span>
+<span class="t">&lt;/form&gt;</span></pre>
+      <ul class="bullets wide">
+        <li><code>&lt;button&gt;</code> dentro do form = botão de <strong>enviar</strong>. Apertar <kbd>Enter</kbd> num campo faz o mesmo.</li>
+        <li><span class="hl-amber">action</span> = o endereço que recebe os dados &middot; <span class="hl-amber">name</span> = o nome do dado lá no servidor</li>
+      </ul>
+      <div class="callout wide">Lembra da aula de como a web funciona? Alguém precisa <strong>receber</strong> esse pedido. Sem um servidor programado pra isso, o botão envia&hellip; pro nada. Por enquanto a gente monta a parte da frente.</div>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide" aria-label="Slide 14">
+      <p class="eyebrow">Parte 2 &middot; Formulários</p>
+      <h2>Inscrição no campeonato</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;form&gt;</span>
+  <span class="t">&lt;p&gt;</span>
+    <span class="t">&lt;label</span> <span class="at">for</span>=<span class="v">"nick"</span><span class="t">&gt;</span>Nick:<span class="t">&lt;/label&gt;</span>
+    <span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"text"</span> <span class="at">id</span>=<span class="v">"nick"</span><span class="t">&gt;</span>
+  <span class="t">&lt;/p&gt;</span>
+  <span class="t">&lt;p&gt;</span>
+    <span class="t">&lt;label</span> <span class="at">for</span>=<span class="v">"email"</span><span class="t">&gt;</span>E-mail:<span class="t">&lt;/label&gt;</span>
+    <span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"email"</span> <span class="at">id</span>=<span class="v">"email"</span><span class="t">&gt;</span>
+  <span class="t">&lt;/p&gt;</span>
+  <span class="t">&lt;p&gt;</span>
+    <span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"checkbox"</span> <span class="at">id</span>=<span class="v">"regras"</span><span class="t">&gt;</span>
+    <span class="t">&lt;label</span> <span class="at">for</span>=<span class="v">"regras"</span><span class="t">&gt;</span>Li as regras<span class="t">&lt;/label&gt;</span>
+  <span class="t">&lt;/p&gt;</span>
+  <span class="t">&lt;button&gt;</span>Inscrever<span class="t">&lt;/button&gt;</span>
+<span class="t">&lt;/form&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <form onsubmit="return false">
+              <p><label for="i-nick">Nick:</label> <input type="text" id="i-nick"></p>
+              <p><label for="i-email">E-mail:</label> <input type="email" id="i-email"></p>
+              <p><input type="checkbox" id="i-regras"> <label for="i-regras">Li as regras</label></p>
+              <button>Inscrever</button>
+            </form>
+          </div>
+          <p class="dim">Cada par label + campo vai num <code>&lt;p&gt;</code> só pra ficar um embaixo do outro.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SEMÂNTICAS ================= -->
+
+    <!-- 15 -->
+    <section class="slide" aria-label="Slide 15">
+      <p class="eyebrow">Parte 3 &middot; Semânticas</p>
+      <h2>Tags que dizem o que a parte <em>é</em></h2>
+      <p class="lead">Olhe qualquer site: tem um <strong>topo</strong> (logo, menu), o <strong>meio</strong> (o conteúdo) e um <strong>rodapé</strong> (contato, direitos autorais).</p>
+      <p class="lead">Você entende isso olhando. O navegador, o Google e um leitor de tela <span class="hl">não olham</span> &mdash; eles leem as tags.</p>
+      <div class="callout good wide">É como etiquetar as caixas de uma mudança: &ldquo;cozinha&rdquo;, &ldquo;quarto&rdquo;. O que está dentro é o mesmo, mas agora todo mundo sabe onde fica cada coisa.</div>
+    </section>
+
+    <!-- 16 -->
+    <section class="slide" aria-label="Slide 16">
+      <p class="eyebrow">Parte 3 &middot; Semânticas</p>
+      <h2><code>&lt;header&gt;</code> e <code>&lt;footer&gt;</code></h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">você escreve</span>
+          <pre class="code"><span class="t">&lt;body&gt;</span>
+  <span class="t">&lt;header&gt;</span>
+    <span class="t">&lt;h1&gt;</span>Arena Pixel<span class="t">&lt;/h1&gt;</span>
+    <span class="t">&lt;a</span> <span class="at">href</span>=<span class="v">"ranking.html"</span><span class="t">&gt;</span>Ranking<span class="t">&lt;/a&gt;</span>
+  <span class="t">&lt;/header&gt;</span>
+
+  <span class="t">&lt;p&gt;</span>Bem-vindo ao torneio!<span class="t">&lt;/p&gt;</span>
+
+  <span class="t">&lt;footer&gt;</span>
+    <span class="t">&lt;p&gt;</span>Feito pela turma de 2026<span class="t">&lt;/p&gt;</span>
+  <span class="t">&lt;/footer&gt;</span>
+<span class="t">&lt;/body&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">a estrutura</span>
+          <div class="layout">
+            <div class="hd"><span>Arena Pixel &middot; Ranking</span><b>&lt;header&gt;</b></div>
+            <div class="main"><span>Bem-vindo ao torneio!</span></div>
+            <div class="ft"><span>Feito pela turma de 2026</span><b>&lt;footer&gt;</b></div>
+          </div>
+        </div>
+      </div>
+      <ul class="bullets wide">
+        <li><code>&lt;header&gt;</code> = o <strong>cabeçalho</strong> da página: nome, logo, menu</li>
+        <li><code>&lt;footer&gt;</code> = o <strong>rodapé</strong>: autor, contato, links finais</li>
+      </ul>
+    </section>
+
+    <!-- 17 -->
+    <section class="slide" aria-label="Slide 17">
+      <p class="eyebrow">Parte 3 &middot; Semânticas</p>
+      <h2>Mas na tela não muda <em>nada</em>?</h2>
+      <p class="lead">Não. Abra a página: com ou sem <code>&lt;header&gt;</code>, ela aparece igualzinha. E é isso mesmo.</p>
+      <ul class="bullets wide">
+        <li><strong>Leitor de tela</strong>: deixa a pessoa pular direto pro conteúdo, sem ouvir o menu toda vez</li>
+        <li><strong>Google</strong>: entende o que é conteúdo principal e o que é só rodapé</li>
+        <li><strong>Você daqui a um mês</strong> (e seu colega): acha cada parte do código bem mais rápido</li>
+      </ul>
+      <p class="lead dim">Tem mais da mesma família: <code>&lt;nav&gt;</code> (menu), <code>&lt;main&gt;</code> (conteúdo principal), <code>&lt;section&gt;</code> (uma seção). Mesma ideia: nome certo pra cada parte.</p>
+    </section>
+
+    <!-- ================= FECHO ================= -->
+
+    <!-- 18 -->
+    <section class="slide" aria-label="Slide 18">
+      <p class="eyebrow">Juntando tudo</p>
+      <h2>Uma página de torneio</h2>
+      <div class="demo wide">
+        <div class="pane">
+          <span class="pane-label">torneio.html</span>
+          <pre class="code"><span class="t">&lt;header&gt;</span>
+  <span class="t">&lt;h1&gt;</span>Arena Pixel<span class="t">&lt;/h1&gt;</span>
+<span class="t">&lt;/header&gt;</span>
+<span class="t">&lt;h2&gt;</span>Ranking<span class="t">&lt;/h2&gt;</span>
+<span class="t">&lt;table</span> <span class="at">border</span>=<span class="v">"1"</span><span class="t">&gt;</span>
+  <span class="t">&lt;tr&gt;&lt;th&gt;</span>Jogador<span class="t">&lt;/th&gt;&lt;th&gt;</span>Pontos<span class="t">&lt;/th&gt;&lt;/tr&gt;</span>
+  <span class="t">&lt;tr&gt;&lt;td&gt;</span>Ana<span class="t">&lt;/td&gt;&lt;td&gt;</span>1200<span class="t">&lt;/td&gt;&lt;/tr&gt;</span>
+  <span class="t">&lt;tr&gt;&lt;td&gt;</span>Lucas<span class="t">&lt;/td&gt;&lt;td&gt;</span>950<span class="t">&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="t">&lt;/table&gt;</span>
+<span class="t">&lt;h2&gt;</span>Inscreva-se<span class="t">&lt;/h2&gt;</span>
+<span class="t">&lt;form&gt;</span>
+  <span class="t">&lt;label</span> <span class="at">for</span>=<span class="v">"nick"</span><span class="t">&gt;</span>Nick:<span class="t">&lt;/label&gt;</span>
+  <span class="t">&lt;input</span> <span class="at">type</span>=<span class="v">"text"</span> <span class="at">id</span>=<span class="v">"nick"</span><span class="t">&gt;</span>
+  <span class="t">&lt;button&gt;</span>Entrar<span class="t">&lt;/button&gt;</span>
+<span class="t">&lt;/form&gt;</span>
+<span class="t">&lt;footer&gt;</span>Turma de 2026<span class="t">&lt;/footer&gt;</span></pre>
+        </div>
+        <div class="pane">
+          <span class="pane-label">o navegador mostra</span>
+          <div class="render">
+            <header><h1>Arena Pixel</h1></header>
+            <h2>Ranking</h2>
+            <table border="1">
+              <tr><th>Jogador</th><th>Pontos</th></tr>
+              <tr><td>Ana</td><td>1200</td></tr>
+              <tr><td>Lucas</td><td>950</td></tr>
+            </table>
+            <h2>Inscreva-se</h2>
+            <form onsubmit="return false">
+              <label for="f-nick">Nick:</label> <input type="text" id="f-nick"> <button>Entrar</button>
+            </form>
+            <footer><br>Turma de 2026</footer>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 19 -->
+    <section class="slide" aria-label="Slide 19">
+      <p class="eyebrow">Fecho &middot; Cola</p>
+      <h2>O que levar pra casa</h2>
+      <div class="tagtable wide">
+        <span class="grp">Tabelas</span>
+        <code>&lt;table&gt;</code><span>a tabela inteira</span>
+        <code>&lt;tr&gt;</code><span>uma linha</span>
+        <code>&lt;th&gt;</code><span>célula de cabeçalho (nome da coluna)</span>
+        <code>&lt;td&gt;</code><span>célula comum, com o dado</span>
+        <span class="grp">Formulários</span>
+        <code>&lt;form&gt;</code><span>junta os campos pra enviar</span>
+        <code>&lt;input type="..."&gt;</code><span>campo (não fecha) &mdash; text, email, password, number, checkbox&hellip;</span>
+        <code>&lt;label for="..."&gt;</code><span>nome do campo, ligado pelo <code>id</code></span>
+        <code>&lt;button&gt;</code><span>botão de enviar</span>
+        <span class="grp">Semânticas</span>
+        <code>&lt;header&gt; &lt;footer&gt;</code><span>topo e rodapé da página &mdash; não mudam o visual, mudam o significado</span>
+      </div>
+    </section>
+
+    <!-- 20 -->
+    <section class="slide" aria-label="Slide 20">
+      <p class="eyebrow">Mão na massa</p>
+      <h2>A página do seu jogo favorito</h2>
+      <ul class="bullets wide">
+        <li>Um <code>&lt;header&gt;</code> com o nome do jogo num <code>&lt;h1&gt;</code></li>
+        <li>Uma <code>&lt;table&gt;</code> com 3 personagens: nome, vida e ataque (use <code>&lt;th&gt;</code> no topo)</li>
+        <li>Um <code>&lt;form&gt;</code> &ldquo;Vote no melhor personagem&rdquo;: um campo de texto, um de e-mail e um checkbox &mdash; todos com <code>&lt;label&gt;</code></li>
+        <li>Um <code>&lt;button&gt;</code> pra enviar</li>
+        <li>Um <code>&lt;footer&gt;</code> com seu nome</li>
+      </ul>
+      <p class="lead">Teste: clicar no texto do label marca o checkbox? Então ligou certo.</p>
+      <p class="lead dim">Desafio: troque o <code>type</code> de um campo pra <code>color</code> ou <code>date</code> e veja o que aparece.</p>
+    </section>
+
+  </div>
+
+  <div class="chrome">
+    <span class="label" id="partLabel">Mais tags HTML</span>
+    <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
+    <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+    <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
+    <span class="count" id="count">01 / 20</span>
+    <button id="btnTheme" aria-label="Alternar tema">tema</button>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var total = slides.length;
+    var pfill = document.getElementById('pfill');
+    var count = document.getElementById('count');
+    var partLabel = document.getElementById('partLabel');
+    var i = 0;
+
+    function pad(n){ return (n<10?'0':'') + n; }
+
+    function render(){
+      slides.forEach(function(s, x){
+        s.classList.toggle('active', x === i);
+        s.setAttribute('aria-hidden', x === i ? 'false' : 'true');
+      });
+      pfill.style.width = ((i+1)/total*100) + '%';
+      count.textContent = pad(i+1) + ' / ' + pad(total);
+      var eb = slides[i].querySelector('.eyebrow');
+      partLabel.textContent = eb ? eb.textContent.replace(/\s+/g,' ').trim() : 'Mais tags HTML';
+      if (history.replaceState) history.replaceState(null, '', '#' + (i+1));
+    }
+
+    function go(n){
+      var next = Math.max(0, Math.min(total-1, n));
+      if (next === i) return;
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      i = next; render();
+    }
+    function next(){ go(i+1); }
+    function prev(){ go(i-1); }
+
+    document.addEventListener('keydown', function(e){
+      // não roubar as teclas de quem está digitando nos campos de demonstração
+      var t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.tagName === 'BUTTON' && t.closest('.render'))) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ' || e.key === 'ArrowDown'){ e.preventDefault(); next(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){ e.preventDefault(); prev(); }
+      else if (e.key === 'Home'){ e.preventDefault(); go(0); }
+      else if (e.key === 'End'){ e.preventDefault(); go(total-1); }
+    });
+
+    document.getElementById('btnNext').addEventListener('click', next);
+    document.getElementById('btnPrev').addEventListener('click', prev);
+    document.getElementById('znext').addEventListener('click', function(){ this.blur(); next(); });
+    document.getElementById('zprev').addEventListener('click', function(){ this.blur(); prev(); });
+
+    var root = document.documentElement;
+    document.getElementById('btnTheme').addEventListener('click', function(){
+      var cur = root.getAttribute('data-theme');
+      var isDark = cur ? cur === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    });
+
+    var start = parseInt((location.hash || '').replace('#',''), 10);
+    if (!isNaN(start) && start >= 1 && start <= total) i = start - 1;
+
+    render();
+  })();
+</script>
+
+</body>
+</html>

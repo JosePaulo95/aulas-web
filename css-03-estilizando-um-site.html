@@ -1,0 +1,1315 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSS 3 - Estilizando um site</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    color-scheme: dark;
+    /* paleta: navy #123f63 / slate #8fa3c4 / teal #16a89c / lime #bcd230 / orange #f2a63b */
+    --navy:#123f63;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+    --font-display:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body:"Barlow", system-ui, -apple-system, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      color-scheme: light;
+      --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+      --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+      --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+    --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+    --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:clamp(15px,1.1vw,18px); line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  .deck{ position:fixed; inset:0; display:grid; grid-template-rows:1fr auto; }
+  .stage{ position:relative; overflow:hidden; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+    padding:clamp(2rem,6vw,5.5rem) clamp(1.6rem,7vw,7rem) clamp(3.2rem,8vh,5rem);
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .34s ease, transform .34s ease, visibility 0s linear .34s;
+    overflow-y:auto;
+  }
+  .slide.active{
+    opacity:1; visibility:visible; transform:none;
+    transition:opacity .38s ease, transform .38s ease;
+  }
+  .slide > *{ max-width:60ch; }
+  .slide .wide{ max-width:min(1080px,92vw); }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0; display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before{ content:""; width:1.8rem; height:2px; background:var(--accent); display:inline-block; }
+
+  h1,h2{ font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.02; text-transform:uppercase; letter-spacing:.005em; }
+  h1{ font-size:clamp(2.9rem,9vw,6.2rem); }
+  h2{ font-size:clamp(2rem,5vw,3.6rem); }
+  h2 em, h1 em{ font-style:normal; color:var(--accent); }
+  h1 code, h2 code{ text-transform:none; font-size:.82em; vertical-align:.04em; }
+
+  .lead{ font-size:clamp(1.15rem,2.1vw,1.7rem); color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+  .slide p{ margin:0; }
+  strong{ font-weight:600; color:var(--ink); }
+  .hl{ color:var(--accent); font-weight:600; }
+  .hl-amber{ color:var(--amber); font-weight:600; }
+
+  code, kbd{
+    font-family:var(--font-mono); font-size:.92em;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:5px;
+    padding:.1em .45em;
+  }
+  kbd{ box-shadow:0 2px 0 var(--line); }
+
+  .subtitle{ font-family:var(--font-mono); color:var(--ink-dim); font-size:clamp(.95rem,1.6vw,1.15rem); letter-spacing:.02em; }
+
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.35rem); }
+  ul.bullets li{ display:flex; gap:.7rem; align-items:baseline; }
+  ul.bullets li::before{ content:"▸"; color:var(--accent); flex:none; }
+
+  .callout{
+    border-left:3px solid var(--amber); background:var(--bg-elev);
+    padding:1rem 1.2rem; border-radius:0 10px 10px 0; font-size:clamp(1.02rem,1.8vw,1.3rem);
+  }
+  .callout.good{ border-color:var(--accent); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:.55rem; }
+  .chips span{
+    font-family:var(--font-mono); font-size:.92rem;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.4em .9em;
+  }
+  .chips.done span{ color:var(--ink-dim); }
+
+  .kv{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.9rem; }
+  .kv > div{ display:flex; flex-direction:column; gap:.3rem; }
+  .kv .k{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .kv .v{ font-size:1.05rem; }
+
+  /* trio de blocos da agenda */
+  .trio{ display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .trio > div{
+    background:var(--bg-elev); border:1px solid var(--line); border-top:4px solid var(--c,var(--accent));
+    border-radius:12px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.5rem;
+  }
+  .trio .k{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:1.6rem; line-height:1; }
+  .trio .tags{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .trio .t1{ --c:var(--accent); } .trio .t2{ --c:var(--amber); } .trio .t3{ --c:var(--lime); }
+
+  /* footer chrome */
+  .chrome{
+    display:flex; align-items:center; gap:1rem;
+    padding:.55rem clamp(1rem,4vw,2.4rem); border-top:1px solid var(--line);
+    background:var(--bg); font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+    z-index:10;
+  }
+  .chrome .label{ letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progress{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; min-width:60px; }
+  .progress__fill{ height:100%; background:var(--accent); width:0; transition:width .35s ease; }
+  .chrome .count{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .chrome button{
+    font:inherit; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line);
+    border-radius:7px; padding:.3em .7em; cursor:pointer;
+  }
+  .chrome button:hover{ color:var(--ink); border-color:var(--accent); }
+  .chrome button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .zones{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+  .zone{ pointer-events:auto; border:none; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; }
+  .zone:focus, .zone:focus-visible{ outline:none; }
+  .zone.prev{ width:28%; }
+  .zone.spacer{ flex:1; cursor:default; pointer-events:none; }
+  .zone.next{ width:40%; }
+
+  /* faixa tricolor no topo */
+  .brandbar{ position:absolute; left:0; right:0; top:0; height:5px; display:flex; z-index:8; }
+  .brandbar i{ flex:1; }
+  .brandbar i:nth-child(1){ background:var(--accent); }
+  .brandbar i:nth-child(2){ background:var(--lime); }
+  .brandbar i:nth-child(3){ background:var(--amber); }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide, .slide.active, .progress__fill{ transition:none; }
+  }
+
+  /* código e demonstração lado a lado */
+  pre.code{
+    font-family:var(--font-mono); font-size:clamp(.78rem,1.3vw,.98rem); line-height:1.6;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; margin:0; overflow-x:auto; color:var(--ink);
+    white-space:pre; tab-size:2;
+  }
+  pre.code .t{ color:var(--accent); }
+  pre.code .at{ color:var(--amber); }
+  pre.code .v{ color:var(--slate); }
+  pre.code .c{ color:var(--ink-dim); font-style:italic; }
+
+  .demo{ display:grid; gap:.9rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .demo{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .demo .pane{ display:flex; flex-direction:column; gap:.45rem; min-width:0; }
+  .demo .pane-label{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-dim);
+  }
+  /* o "navegador": estilos padrão, sem CSS nenhum — e clicável por cima das zonas de navegação */
+  .render{
+    color-scheme:light;
+    position:relative; z-index:6;
+    background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .render :is(h1,h2,h3){ font-family:inherit; text-transform:none; letter-spacing:0; color:inherit; margin:.35em 0; line-height:1.2; }
+  .render h1{ font-size:2em; font-weight:700; }
+  .render h2{ font-size:1.5em; font-weight:700; }
+  .render p{ margin:.7em 0; }
+  .render a{ color:#00e; text-decoration:underline; }
+  .render table{ border-collapse:separate; border-spacing:2px; }
+  .render th, .render td{ padding:1px; text-align:left; }
+  .render th{ font-weight:700; text-align:center; }
+  .render table[border] th, .render table[border] td{ border:1px solid #808080; }
+  .render input, .render button{ font-family:system-ui, sans-serif; font-size:13px; }
+  .render > :first-child{ margin-top:0; }
+  .render > :last-child{ margin-bottom:0; }
+
+  .tagtable{ display:grid; grid-template-columns:auto 1fr; gap:.55rem 1.1rem; align-items:baseline; }
+  .tagtable code{ white-space:nowrap; }
+  .tagtable .grp{
+    grid-column:1/-1; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent); margin-top:.4rem;
+  }
+
+  /* diagrama da página semântica */
+  .layout{ display:grid; gap:.5rem; font-family:var(--font-mono); font-size:.9rem; }
+  .layout > div{
+    border:2px dashed var(--line); border-radius:10px; padding:.8rem 1rem;
+    display:flex; justify-content:space-between; gap:1rem; color:var(--ink-dim);
+  }
+  .layout b{ color:var(--accent); font-weight:500; }
+  .layout .main{ min-height:7rem; align-items:flex-start; }
+  .layout .hd b, .layout .ft b{ color:var(--amber); }
+  .layout .hd, .layout .ft{ border-style:solid; border-color:var(--amber); }
+
+  /* ===== CSS 1: extras ===== */
+  .slide aside.notes{ display:none; }
+  .lab, pre.code, .tabs, .seg, .btns, .swatches{ position:relative; z-index:6; }
+  pre.code .ln{ display:block; }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.5rem); }
+
+  /* dicas ao passar o mouse */
+  .prop{ border-bottom:1px dotted var(--accent); cursor:help; border-radius:2px; transition:background .15s; }
+  .prop:hover, .prop:focus-visible{ background:color-mix(in srgb, var(--accent) 24%, transparent); outline:none; }
+  #tip{
+    position:fixed; z-index:60; max-width:min(330px,86vw); left:0; top:0;
+    background:var(--ink); color:var(--bg); padding:.65rem .85rem; border-radius:10px;
+    font-size:.92rem; line-height:1.4; pointer-events:none; opacity:0; transform:translateY(5px);
+    transition:opacity .15s ease, transform .15s ease; box-shadow:var(--shadow);
+  }
+  #tip.show{ opacity:1; transform:none; }
+  #tip b{ display:block; font-family:var(--font-mono); font-weight:500; font-size:.82rem; letter-spacing:.04em; margin-bottom:.15rem; color:var(--accent-ink); background:var(--accent); width:max-content; padding:.05em .5em; border-radius:4px; }
+
+  @keyframes glow{
+    0%,100%{ box-shadow:0 0 0 0 transparent; }
+    50%{ box-shadow:0 0 0 7px color-mix(in srgb, var(--accent) 55%, transparent); }
+  }
+  @keyframes pop{ 0%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+  .glow{ animation:glow .9s ease-in-out infinite; }
+
+  /* controles */
+  .btn{
+    font-family:var(--font-mono); font-size:.85rem; color:var(--ink); background:var(--bg-elev);
+    border:1px solid var(--line); border-radius:8px; padding:.45em .9em; cursor:pointer;
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .btn:hover{ border-color:var(--accent); }
+  .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn.on{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .btn.big{ font-size:1.05rem; padding:.7em 1.3em; font-weight:500; }
+  .btns, .seg, .tabs{ display:flex; flex-wrap:wrap; gap:.5rem; }
+  .ctl{ display:grid; grid-template-columns:8.5rem 1fr 4rem; align-items:center; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .ctl output{ text-align:right; color:var(--ink); }
+  .ctl select, .ctl input[type=color]{ grid-column:2/4; font:inherit; background:var(--bg-elev); color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.3em .5em; height:2.1rem; }
+  .ctl input[type=text]{ grid-column:2/4; font:inherit; font-size:1rem; background:var(--bg-elev); color:var(--ink); border:1px solid var(--accent); border-radius:7px; padding:.35em .6em; }
+  input[type=range]{ accent-color:var(--accent); width:100%; }
+  .lab{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .hint{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim); }
+  .hint b{ color:var(--amber); font-weight:500; }
+
+  /* a mini-página liga/desliga CSS */
+  .mini{
+    background:#fff; color:#1a1a1a; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem; box-shadow:var(--shadow);
+    transition:background .6s ease, color .6s ease, padding .6s ease, border-radius .6s ease;
+  }
+  .mini h1{ font-family:inherit; text-transform:none; font-size:2em; margin:.3em 0; line-height:1.15; color:inherit; transition:all .6s ease; }
+  .mini p{ margin:.6em 0; transition:all .6s ease; }
+  .mini button{ font-family:inherit; font-size:13px; transition:all .6s ease; }
+  .mini .tag{ display:inline-block; font-family:inherit; font-size:1em; transition:all .6s ease; }
+  .mini.on{ background:#123f63; color:#e4ecf3; font-family:"Barlow", system-ui, sans-serif; padding:1.8rem 1.8rem; border-radius:18px; }
+  .mini.on h1{ font-family:"Barlow Condensed", "Arial Narrow", sans-serif; text-transform:uppercase; color:#2ec9bd; font-size:2.6em; letter-spacing:.01em; }
+  .mini.on p{ color:#c9d6e2; }
+  .mini.on button{ background:#f2a63b; color:#3a2300; border:none; border-radius:999px; padding:.7em 1.4em; font-weight:600; font-size:15px; }
+  .mini.on .tag{ background:#16a89c; color:#fff; border-radius:6px; padding:.1em .6em; font-size:.85em; }
+
+  /* abas de "como o css entra" */
+  .tabs button{ font-family:var(--font-mono); font-size:.9rem; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line); border-radius:8px 8px 0 0; padding:.5em 1em; cursor:pointer; }
+  .tabs button.on{ color:var(--ink); border-color:var(--accent); border-bottom-color:var(--bg-elev); box-shadow:inset 0 3px 0 var(--accent); }
+  .tp{ display:none; }
+  .tp.on{ display:flex; flex-direction:column; gap:.8rem; }
+  .files{ display:grid; gap:.8rem; grid-template-columns:1fr; }
+  @media (min-width:800px){ .files{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .fname{ font-family:var(--font-mono); font-size:.78rem; color:var(--amber); letter-spacing:.06em; margin-bottom:.3rem; display:block; }
+  .verdict{ font-family:var(--font-mono); font-size:.88rem; padding:.45em .9em; border-radius:8px; width:max-content; max-width:100%; }
+  .verdict.bad{ background:color-mix(in srgb, var(--amber) 20%, transparent); color:var(--amber); }
+  .verdict.ok{ background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--accent); }
+
+  /* anatomia de uma regra */
+  .k-seletor{ color:var(--accent); } .k-propriedade{ color:var(--amber); } .k-valor{ color:var(--slate); }
+  .k-seletor, .k-propriedade, .k-valor, .k-fim{ border-radius:4px; }
+  body[data-hover="seletor"] .k-seletor, body[data-hover="propriedade"] .k-propriedade,
+  body[data-hover="valor"] .k-valor, body[data-hover="fim"] .k-fim{ animation:glow .9s ease-in-out infinite; }
+  .legend{ display:flex; flex-wrap:wrap; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; }
+  .legend span{ background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.3em .85em; }
+  .semi.miss::after{ content:"\2190 faltou!"; color:#ff6b5e; font-size:.8em; margin-left:.4rem; }
+  .s-h1{ font-family:"Times New Roman", serif; font-weight:700; margin:0; color:#16a89c; font-size:40px; line-height:1.1; transition:all .35s ease; }
+  .s-h1.broken{ color:#1a1a1a; font-size:32px; }
+
+  /* amostras */
+  .sample{ color-scheme:light; background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px; padding:1.2rem; box-shadow:var(--shadow); font-family:"Times New Roman", serif; min-height:7rem; }
+  .sample p{ margin:0; padding:.6rem .8rem; border-radius:6px; transition:all .25s ease; }
+  .swatches{ display:flex; flex-wrap:wrap; gap:.45rem; }
+  .sw{ font-family:var(--font-mono); font-size:.76rem; border:2px solid var(--line); border-radius:8px; padding:.35em .6em; cursor:pointer; color:#111; }
+  .sw:hover{ border-color:var(--accent); }
+  .sw.dark{ color:#fff; }
+
+  /* caixa: diagrama */
+  .bm{ max-width:560px; }
+  .bm-margin, .bm-border, .bm-padding, .bm-content{ position:relative; border-radius:6px; transition:filter .2s; }
+  .bm-tag{ position:absolute; top:.25rem; left:.55rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#1a1a1a; font-weight:500; pointer-events:none; }
+  .bm-margin{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.38) 8px 16px); padding:2.1rem 1.4rem 1.4rem; border:2px dashed #f2a63b; cursor:help; }
+  .bm-border{ background:#4f7cac; padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-border .bm-tag{ color:#fff; }
+  .bm-padding{ background:rgba(188,210,48,.92); padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-content{ background:#16a89c; color:#fff; padding:1.3rem .6rem; text-align:center; font-family:var(--font-mono); cursor:help; }
+  .bm-content .bm-tag{ display:none; }
+  body[data-hover="margin"] .bm-margin, body[data-hover="border"] .bm-border,
+  body[data-hover="padding"] .bm-padding, body[data-hover="content"] .bm-content{ animation:glow .9s ease-in-out infinite; filter:brightness(1.15); }
+
+  /* caixa: laboratório */
+  .mstage{ min-height:310px; display:grid; place-items:center; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .mwrap{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.35) 8px 16px); outline:1px dashed #f2a63b; transition:padding .12s; }
+  .mbox{ border-style:solid; border-color:#4f7cac; background:rgba(188,210,48,.95); background-clip:padding-box; transition:padding .12s, border-width .12s; }
+  .mcontent{ background:#16a89c; color:#fff; height:70px; display:grid; place-items:center; font-family:var(--font-mono); font-size:.8rem; transition:width .12s; }
+
+  /* padding: 1, 2, 3 ou 4 valores */
+  .sh-grid{ display:grid; grid-template-columns:auto auto auto; grid-template-rows:auto auto auto; gap:.35rem; align-items:center; justify-items:center; justify-content:center; }
+  .sh-b{ font-family:var(--font-mono); font-size:.85rem; color:var(--accent); min-width:4.2rem; text-align:center; }
+  .sh-box{ background:rgba(188,210,48,.95); border:2px solid #4f7cac; transition:padding .2s ease; }
+  .sh-in{ background:#16a89c; color:#fff; font-family:var(--font-mono); font-size:.8rem; padding:.9rem 1rem; }
+
+  /* borda */
+  .bdbox{ width:150px; height:150px; display:grid; place-items:center; text-align:center; font-family:var(--font-mono); font-size:.8rem; background:rgba(22,168,156,.18); transition:all .15s; }
+
+  /* position */
+  .stack{ display:flex; flex-direction:column; gap:.5rem; width:min(100%,300px); padding:1rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; }
+  .blk{ background:var(--slate); color:#0c1f2e; font-family:var(--font-mono); font-weight:500; padding:.8rem 1rem; border-radius:8px; height:3rem; display:flex; align-items:center; }
+  .slot{ border:2px dashed var(--ink-dim); border-radius:8px; height:3rem; }
+  .slot .blk{ background:var(--accent); color:var(--accent-ink); width:calc(100% + 0px); transition:top .15s, left .15s; }
+  .slot .blk.moved{ width:60%; }
+  .ign{ opacity:.55; text-decoration:line-through; }
+  .pg{ position:relative; border:2px dashed var(--ink-dim); border-radius:12px; padding:2.2rem 1.2rem 1.2rem; height:310px; background:var(--bg-elev); }
+  .pg-l, .pr-l{ position:absolute; top:.4rem; left:.7rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); }
+  .pr{ position:static; margin:1.6rem 0 0 auto; width:68%; height:190px; border:2px solid var(--accent); border-radius:10px; background:color-mix(in srgb, var(--accent) 10%, transparent); }
+  .pr.rel{ position:relative; }
+  .pr-l{ position:static; display:block; padding:.4rem .7rem; color:var(--accent); }
+  .ch{ position:absolute; width:38px; height:38px; border-radius:8px; background:var(--amber); color:#3a2300; display:grid; place-items:center; font-size:1.2rem; z-index:2; }
+  .ch.pop{ animation:pop .35s ease; }
+
+  /* card de personagem */
+  .card{ background:#fff; color:#1a1a1a; font-family:"Times New Roman", serif; max-width:280px; transition:all .45s ease; }
+  .card h3{ margin:0 0 .3em; font-size:1.4em; font-family:inherit; text-transform:none; }
+  .card p{ margin:0; }
+  .ln.new{ background:color-mix(in srgb, var(--accent) 26%, transparent); border-radius:4px; }
+  .quiz-opt{ text-align:left; }
+  .quiz-opt.right{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .quiz-opt.wrong{ background:color-mix(in srgb, #ff6b5e 25%, transparent); border-color:#ff6b5e; }
+  .fb{ min-height:3rem; }
+
+  /* anotações do professor (nunca aparecem pro aluno sem apertar N) */
+  #notesPanel{
+    position:fixed; right:12px; bottom:52px; width:min(390px,92vw); max-height:72vh; overflow:auto; z-index:40;
+    background:var(--bg-elev); border:1px solid var(--amber); border-radius:12px; padding:.9rem 1.05rem;
+    box-shadow:var(--shadow); font-size:.9rem; line-height:1.45;
+  }
+  #notesPanel[hidden]{ display:none; }
+  #notesPanel .np-h{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:.4rem; }
+  #notesPanel h4{ margin:.7rem 0 .2rem; font-family:var(--font-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); font-weight:500; }
+  #notesPanel ul{ margin:0; padding-left:1.1rem; } #notesPanel li{ margin:.15rem 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    .glow, .ch.pop, body[data-hover] *{ animation:none !important; }
+  }
+
+  /* ===== Tema VS Code Dark+ nos blocos de código ===== */
+  pre.code{
+    background:#1e1e1e; color:#d4d4d4; border:1px solid #3c3c3c; border-radius:8px;
+    font-family:Consolas, "Cascadia Code", "Cascadia Mono", "Courier New", monospace;
+    font-size:clamp(.85rem,1.35vw,1.05rem); line-height:1.55; padding:1rem 1.2rem;
+    box-shadow:0 10px 30px -16px rgba(0,0,0,.6); color-scheme:dark;
+  }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.4rem); }
+  pre.code .t{ color:#569cd6; }
+  pre.code .at{ color:#9cdcfe; }
+  pre.code .v{ color:#ce9178; }
+  pre.code .n{ color:#b5cea8; }
+  pre.code .sel{ color:#d7ba7d; }
+  pre.code .c, pre.code .hint{ color:#6a9955; font-style:italic; font-family:inherit; font-size:inherit; }
+  pre.code .prop{ color:#9cdcfe; border-bottom-color:#9cdcfe; }
+  pre.code .prop:hover, pre.code .prop:focus-visible{ background:rgba(86,156,214,.28); }
+  pre.code .k-seletor{ color:#d7ba7d; } pre.code .k-propriedade{ color:#9cdcfe; } pre.code .k-valor{ color:#ce9178; }
+  pre.code .ln.new{ background:rgba(255,255,255,.1); }
+  pre.code .ign{ opacity:.5; }
+  .fname{ color:#cccccc; background:#2d2d2d; display:inline-block; padding:.2em .8em; border-radius:6px 6px 0 0; margin-bottom:0; border:1px solid #3c3c3c; border-bottom:none; }
+  .fname + pre.code{ border-top-left-radius:0; }
+
+  /* ===== CSS 3: estilizando um site ===== */
+  .sp{ font-family:"Times New Roman",serif; font-size:1rem; line-height:1.3; color:#1a1a1a; }
+  .sp :is(h1,h2,h3){ font-family:inherit; text-transform:none; letter-spacing:0; color:inherit; font-weight:700; line-height:1.2; }
+  .sp h1{ font-size:2em; margin:.67em 0; }
+  .sp h2{ font-size:1.5em; margin:.83em 0; }
+  .sp p{ margin:1em 0; }
+  .sp a{ color:#00e; }
+  .sp button{ font-size:13px; }
+  .sp > :first-child{ margin-top:0; }
+  .stepper{ display:grid; gap:.9rem; grid-template-columns:1fr; position:relative; z-index:6; }
+  @media (min-width:900px){ .stepper{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .stepper .st-l{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .stepper .sample{ overflow:hidden; }
+
+  .ba{ position:relative; border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); background:#fff; z-index:6; }
+  .ba .ba-a, .ba .ba-b{ padding:0; }
+  .ba .ba-b{ position:absolute; inset:0; background:#fff; clip-path:inset(0 0 0 var(--cut,50%)); }
+  .ba .ba-bar{ position:absolute; top:0; bottom:0; left:var(--cut,50%); width:3px; background:var(--accent); z-index:3; }
+  .ba .ba-lab{ position:absolute; top:.5rem; font-family:var(--font-mono); font-size:.72rem; background:#0c1f2e; color:#fff; padding:.15em .6em; border-radius:999px; z-index:4; }
+  .ba .ba-lab.l{ left:.5rem; } .ba .ba-lab.r{ right:.5rem; }
+  .ba-range{ width:100%; margin-top:.5rem; position:relative; z-index:6; }
+
+  .tree{ font-family:Consolas,"Cascadia Code",monospace; font-size:1.05rem; background:#1e1e1e; color:#d4d4d4; border:1px solid #3c3c3c; border-radius:8px; padding:1rem 1.3rem; line-height:1.7; }
+  .tree .dir{ color:#d7ba7d; } .tree .f-html{ color:#e8a87c; } .tree .f-css{ color:#569cd6; } .tree .f-img{ color:#b5cea8; } .tree .why{ color:#6a9955; font-style:italic; }
+
+  .bsz{ background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:1rem; display:flex; flex-direction:column; gap:.6rem; }
+  .bsz .ref{ height:12px; width:200px; border-top:2px solid var(--amber); position:relative; }
+  .bsz .ref::after{ content:"200px"; position:absolute; top:-1.5rem; left:0; font-family:var(--font-mono); font-size:.72rem; color:var(--amber); }
+  .bsz .bx{ width:200px; padding:20px; border:5px solid #4f7cac; background:rgba(22,168,156,.45); font-family:var(--font-mono); font-size:.8rem; color:var(--ink); transition:all .25s; }
+  .bsz .bx.bb{ box-sizing:border-box; }
+
+  .inh{ background:#fff; color:#1a1a1a; font-family:"Times New Roman",serif; border-radius:12px; padding:0; transition:all .3s; }
+  .inh h3{ font-family:inherit; text-transform:none; font-size:1.3em; margin:.2em 0; color:inherit; }
+  .inh p{ margin:.3em 0; }
+  .inh.c1{ color:#e0452e; } .inh.c2{ font-family:Georgia,serif; }
+  .inh.c3{ border:3px solid #4f7cac; } .inh.c4{ padding:20px; }
+
+  .shp{ min-height:230px; display:grid; place-items:center; background:#e6ebf2; border-radius:12px; }
+  .shp .shbox{ background:#fff; color:#1a1a1a; padding:24px 36px; border-radius:12px; font-family:Arial,sans-serif; font-weight:700; transition:box-shadow .15s; }
+  .bgp{ height:190px; border:2px solid var(--ink-dim); border-radius:10px; background-color:#fff; }
+  .cen-wrap{ background:var(--bg-elev); border:1px dashed var(--ink-dim); border-radius:10px; padding:.8rem 0; }
+  .cen-wrap .cb{ background:rgba(22,168,156,.35); border:2px solid #16a89c; padding:.8rem; text-align:center; font-family:var(--font-mono); font-size:.85rem; color:var(--ink); transition:all .2s; }
+  .site-prev{ font-family:Arial,sans-serif; }
+  pre.code .cm{ color:#6a9955; font-style:italic; }
+  pre.code.scroll{ max-height:48vh; overflow:auto; }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="brandbar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="zones" aria-hidden="true">
+      <button class="zone prev" id="zprev" tabindex="-1" aria-label="Slide anterior"></button>
+      <span class="zone spacer"></span>
+      <button class="zone next" id="znext" tabindex="-1" aria-label="Próximo slide"></button>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide" aria-label="Slide 1">
+      <p class="eyebrow">Aula &middot; CSS parte 3</p>
+      <h1>Estilizando um <em>site</em></h1>
+      <p class="subtitle">juntando tudo: da página pelada ao site pronto, passo a passo</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Já sabemos cor, texto, caixa, posição, classe e seletor. Hoje é <b>juntar tudo</b> numa página de verdade.</li>
+          <li>Vamos construir o site do torneio Arena Pixel, uma peça de cada vez.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausar e abrir a página do torneio da aula de HTML. É nela que eles vão aplicar tudo.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" aria-label="Slide 2">
+      <p class="eyebrow">Onde vamos chegar</p>
+      <h2>Antes e <em>depois</em></h2>
+      <div class="wide">
+        <div class="ba" id="ba"><div class="ba-a site-prev"></div><div class="ba-b site-prev"></div><div class="ba-bar"></div><span class="ba-lab l">só HTML</span><span class="ba-lab r">HTML + CSS</span></div>
+        <input class="ba-range" id="baRange" type="range" min="0" max="100" value="50" aria-label="Arraste para comparar">
+      </div>
+      <p class="hint">Arraste o controle. É o mesmo HTML dos dois lados.</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Esse é o resultado do vídeo. A mesma página, lado esquerdo sem CSS e lado direito com.</li>
+          <li>Tudo o que aparece à direita a gente já viu. Hoje é questão de ordem e de método.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Arrastar devagar sobre o cabeçalho, depois o botão, depois os cards.</li>
+          <li>Pedir pra turma apontar: &ldquo;qual propriedade fez isso?&rdquo;.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" aria-label="Slide 3">
+      <p class="eyebrow">Passo 0 &middot; Organização</p>
+      <h2>Uma pasta, <em>três</em> coisas</h2>
+      <div class="tree wide">
+<span class="dir">arena-pixel/</span><br>
+&nbsp;&nbsp;├─ <span class="f-html">index.html</span> <span class="why">&nbsp;&nbsp;&larr; a estrutura</span><br>
+&nbsp;&nbsp;├─ <span class="f-css">estilo.css</span> <span class="why">&nbsp;&nbsp;&larr; a aparência</span><br>
+&nbsp;&nbsp;└─ <span class="dir">imagens/</span> <span class="why">&nbsp;&nbsp;&larr; fotos e ícones</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ <span class="f-img">logo.png</span>
+      </div>
+      <pre class="code wide"><span class="ln"><span class="t">&lt;link</span> <span class="at">rel</span>=<span class="v">"stylesheet"</span> <span class="at">href</span>=<span class="v">"estilo.css"</span><span class="t">&gt;</span>  <span class="cm">&lt;!-- dentro do &lt;head&gt; --&gt;</span></span></pre>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Antes de estilizar, arrumar a casa: o HTML, o CSS e as imagens ficam na mesma pasta do projeto, cada um no seu lugar.</li>
+          <li>O <code>&lt;link&gt;</code> no <code>&lt;head&gt;</code> é a ponte entre o HTML e o CSS.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>No VS Code: mostrar a pasta aberta na barra lateral, com os três itens.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Nome do arquivo diferente do <code>href</code> (<code>estilo.css</code> versus <code>style.css</code>). Nada muda e não há aviso.</li>
+          <li>Arquivo salvo em outra pasta. Conferir sempre se o <code>.css</code> está ao lado do <code>.html</code>.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: organizem a pasta do projeto do jeito que aparece aqui.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" aria-label="Slide 4">
+      <p class="eyebrow">Passo 1 &middot; Ponto de partida</p>
+      <h2>O reset e o <em>box-sizing</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <pre class="code big"><span class="ln"><span class="sel">*</span> {</span>
+<span class="ln">  <span class="prop" data-p="margin">margin</span>: <span class="n">0</span>;</span>
+<span class="ln">  <span class="prop" data-p="padding">padding</span>: <span class="n">0</span>;</span>
+<span class="ln">  <span class="prop" data-p="box-sizing">box-sizing</span>: <span class="v" id="bsVal">content-box</span>;</span>
+<span class="ln">}</span></pre>
+          <div class="seg" id="bsSeg">
+            <button class="btn on" data-v="content-box">content-box (padrão)</button>
+            <button class="btn" data-v="border-box">border-box</button>
+          </div>
+          <p class="hint" id="bsMsg"></p>
+        </div>
+        <div class="pane">
+          <div class="bsz glow-target">
+            <div class="ref"></div>
+            <div class="bx" id="bsBox">width: 200px<br>padding: 20px · border: 5px</div>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>O <code>*</code> seleciona <b>tudo</b>. Esse reset zera as margens que o navegador põe sozinho e muda como o tamanho é calculado.</li>
+          <li>Padrão (<code>content-box</code>): o <code>width</code> é só do miolo. O padding e a borda somam por fora e a caixa fica maior que 200.</li>
+          <li><code>border-box</code>: o <code>width</code> vale a caixa inteira. Se eu digo 200, ocupa 200. Previsível.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Alternar os dois botões e comparar a caixa com a linha laranja de 200px.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>No vídeo: width e height são melhores em porcentagem do pai, senão tudo bagunça e sai da tela. O <code>border-box</code> ajuda nisso.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Com <code>content-box</code>, qual a largura real da caixa? (200 + 40 + 10 = 250px)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" aria-label="Slide 5">
+      <p class="eyebrow">Passo 2 &middot; A página toda</p>
+      <h2>Herança: pai manda no <em>filho</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <pre class="code"><span class="ln"><span class="sel">body</span> {</span>
+<span class="ln" id="inhLines"></span>
+<span class="ln">}</span></pre>
+          <div class="chk" id="inhChk">
+            <label><input type="checkbox" data-c="c1"> color</label>
+            <label><input type="checkbox" data-c="c2"> font-family</label>
+            <label><input type="checkbox" data-c="c3"> border</label>
+            <label><input type="checkbox" data-c="c4"> padding</label>
+          </div>
+          <p class="hint" id="inhMsg">Marque propriedades e veja quem passa para os filhos.</p>
+        </div>
+        <div class="pane">
+          <div class="sample"><div class="inh glow-target" id="inh"><h3>Arena Pixel</h3><p>Inscrições abertas até sexta.</p></div></div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Algumas propriedades <b>passam de pai pra filho</b> sozinhas: cor do texto, fonte, tamanho da letra. Chama-se herança.</li>
+          <li>Outras, como borda e padding, são só da caixa. Não passam.</li>
+          <li>Na prática: ponho <code>font-family</code> e <code>color</code> no <code>body</code> uma vez e a página inteira ganha.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Marcar <code>color</code>: título e parágrafo mudam. Marcar <code>border</code>: só a caixa de fora ganha moldura.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Se eu quero a mesma fonte em tudo, onde escrevo a regra? (no <code>body</code>)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" aria-label="Slide 6">
+      <p class="eyebrow">Passo 3 &middot; Cabeçalho</p>
+      <h2>Vestindo o <em>cabeçalho</em></h2>
+      <div class="stepper wide" data-preview="hdr" data-steps='[["header","background-color","#123f63"],["header","color","white"],["header","padding","20px"],["header","text-align","center"],["nav a","color","#2ec9bd"],["nav a","margin","0 10px"],["nav a","text-decoration","none"],["nav a:hover","text-decoration","underline"]]'></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Uma propriedade por clique. Peça pra turma adivinhar a próxima antes de clicar.</li>
+          <li>Seletor de tag (<code>header</code>) para a faixa e <code>nav a</code> para só os links do menu (css-02).</li>
+          <li><code>text-decoration: none</code> tira o sublinhado. O <code>:hover</code> traz de volta quando passa o mouse.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Passar o mouse nas propriedades do código: o cabeçalho acende.</li>
+          <li>No fim, passar o mouse nos links para ver o sublinhado voltar.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem e estilizem o cabeçalho da página de vocês com as mesmas propriedades.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" aria-label="Slide 7">
+      <p class="eyebrow">Passo 4 &middot; Texto e links</p>
+      <h2>Texto que dá <em>gosto</em> de ler</h2>
+      <div class="stepper wide" data-preview="txt" data-steps='[["body","font-family","Arial, sans-serif"],["body","line-height","1.6"],["h2","color","#123f63"],["p","color","#3b4a57"],["a","color","#0e857b"],["a","text-decoration","none"],["a:hover","text-decoration","underline"]]'></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li><code>line-height</code>: altura da linha. 1.6 dá respiro entre as linhas e melhora muito a leitura.</li>
+          <li>A fonte vai no <code>body</code>: toda a página herda (slide anterior).</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Fontes sempre com reserva: <code>Arial, sans-serif</code>. Se a primeira falhar, vale a segunda.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Comparar o texto antes e depois do <code>line-height</code>. A diferença é grande.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Escrever <code>line-height: 1.6px</code>. Sem unidade (1.6) é um múltiplo do tamanho da letra. Com px, vira 1,6 pixel e o texto se atropela.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" aria-label="Slide 8">
+      <p class="eyebrow">Passo 5 &middot; Cards</p>
+      <h2>Sombra: <em>box-shadow</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <label class="ctl"><span>deslocar X</span><input type="range" id="shX" min="-30" max="30" value="0"><output></output></label>
+          <label class="ctl"><span>deslocar Y</span><input type="range" id="shY" min="-30" max="40" value="10"><output></output></label>
+          <label class="ctl"><span>desfoque</span><input type="range" id="shB" min="0" max="60" value="24"><output></output></label>
+          <label class="ctl"><span>opacidade</span><input type="range" id="shO" min="0" max="100" value="25" data-u="%"><output></output></label>
+          <pre class="code" id="shCode"></pre>
+        </div>
+        <div class="pane">
+          <div class="shp"><div class="shbox glow-target" id="shBox">Ana &middot; 1200 pts</div></div>
+          <p class="hint">Dica do vídeo: no dia a dia use um <b>gerador de box-shadow</b> (pesquise assim) e copie o CSS.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li><code>box-shadow</code> faz o elemento parecer descolado do fundo. Valores: deslocamento X, Y, desfoque e cor.</li>
+          <li>Cor com <code>rgba(0,0,0,0.25)</code>: preto com 25% de força. Sombra boa é discreta.</li>
+          <li>Junto com <code>border-radius</code>, é o que transforma um retângulo em um card.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>&ldquo;I usually use a box shadow generator and copy the CSS&rdquo;. Ninguém decora esses números.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Mexer nos sliders um de cada vez. Depois abrir um gerador de sombra no navegador e copiar.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: criem um card com sombra e cantos arredondados.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" aria-label="Slide 9">
+      <p class="eyebrow">Passo 6 &middot; Destaque</p>
+      <h2>Imagem de <em>fundo</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <label class="ctl"><span>size</span>
+            <select id="bgS"><option>auto</option><option>contain</option><option selected>cover</option><option>40px</option></select></label>
+          <label class="ctl"><span>repeat</span>
+            <select id="bgR"><option>repeat</option><option selected>no-repeat</option></select></label>
+          <label class="ctl"><span>position</span>
+            <select id="bgP"><option selected>center</option><option>top left</option><option>bottom right</option></select></label>
+          <pre class="code" id="bgCode"></pre>
+        </div>
+        <div class="pane">
+          <div class="bgp glow-target" id="bgBox"></div>
+          <p class="hint">A imagem de teste é pequena e com formato quadrado para você ver o efeito de cada valor.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li><code>background-image</code> põe uma imagem no fundo da caixa, e o texto continua por cima.</li>
+          <li><code>cover</code>: a imagem cobre tudo, cortando o que sobrar. <code>contain</code>: aparece inteira, podem sobrar espaços.</li>
+          <li><code>no-repeat</code>: sem ladrilho. <code>position</code>: de onde a imagem parte.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Existe um atalho <code>background:</code> que junta tudo numa linha. No começo, prefira as propriedades separadas, que são mais claras.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Trocar <code>size</code> e <code>repeat</code> e ver o que acontece. Começar de <code>auto</code> + <code>repeat</code>: vira ladrilho.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Caminho da imagem errado em <code>url()</code>: aparece só o fundo vazio. O caminho vale a partir do arquivo <code>.css</code>.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" aria-label="Slide 10">
+      <p class="eyebrow">Passo 7 &middot; Botão</p>
+      <h2>Botão com <em>personalidade</em></h2>
+      <div class="stepper wide" data-preview="btn" data-steps='[[".botao","background-color","#f2a63b"],[".botao","color","#3a2300"],[".botao","border","none"],[".botao","padding","12px 28px"],[".botao","border-radius","999px"],[".botao","font-weight","bold"],[".botao","cursor","pointer"],[".botao","transition","0.3s"],[".botao:hover","transform","scale(1.1)"]]'></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Revisão de tudo: cor, padding, border, radius, hover e transition.</li>
+          <li>Uma classe, <code>.botao</code>, serve para todos os botões do site.</li>
+          <li>Se eu mudar a cor lá, todos mudam. Esse é o ganho de usar classe.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>No fim, passar o mouse no botão: cresce suavemente por causa do <code>transition</code>.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Esquecer o <code>border: none</code>: sobra a moldura cinza padrão do botão e parece amador.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" aria-label="Slide 11">
+      <p class="eyebrow">Passo 8 &middot; Layout</p>
+      <h2>Centralizando um <em>bloco</em></h2>
+      <div class="demo wide">
+        <div class="pane lab">
+          <label class="ctl"><span>max-width</span><input type="range" id="cnW" min="160" max="360" step="10" value="260"><output></output></label>
+          <div class="chk"><label><input type="checkbox" id="cnAuto"> margin: 0 auto</label></div>
+          <pre class="code" id="cnCode"></pre>
+        </div>
+        <div class="pane">
+          <div class="cen-wrap glow-target"><div class="cb" id="cnBox">card</div></div>
+          <p class="hint">A linha tracejada é a largura da página.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Bloco com largura menor que a página fica colado à esquerda. Pra centralizar: <code>margin: 0 auto</code>.</li>
+          <li><code>auto</code> nas laterais = &ldquo;divida o espaço que sobra igualmente&rdquo;.</li>
+          <li><code>max-width</code> em vez de <code>width</code>: o bloco pode encolher em telas menores sem estourar.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Marcar e desmarcar <code>margin: 0 auto</code> com larguras diferentes.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul>
+          <li>Usar <code>margin: auto</code> sem definir largura: o bloco ocupa tudo e não há o que centralizar.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" aria-label="Slide 12">
+      <p class="eyebrow">Passo 9 &middot; Organização</p>
+      <h2>Um CSS que dá pra <em>achar</em></h2>
+      <pre class="code wide scroll"><span class="ln"><span class="cm">/* 1. Reset */</span></span>
+<span class="ln"><span class="sel">*</span> { <span class="at">margin</span>: <span class="n">0</span>; <span class="at">padding</span>: <span class="n">0</span>; <span class="at">box-sizing</span>: <span class="v">border-box</span>; }</span>
+<span class="ln"></span>
+<span class="ln"><span class="cm">/* 2. Página (fonte e cores gerais) */</span></span>
+<span class="ln"><span class="sel">body</span> { <span class="at">font-family</span>: <span class="v">Arial, sans-serif</span>; <span class="at">line-height</span>: <span class="n">1.6</span>; }</span>
+<span class="ln"></span>
+<span class="ln"><span class="cm">/* 3. Cabeçalho */</span></span>
+<span class="ln"><span class="sel">header</span> { <span class="at">background-color</span>: <span class="n">#123f63</span>; }</span>
+<span class="ln"><span class="sel">nav a</span> { <span class="at">color</span>: <span class="n">#2ec9bd</span>; }</span>
+<span class="ln"></span>
+<span class="ln"><span class="cm">/* 4. Destaque e botão */</span></span>
+<span class="ln"><span class="sel">.hero</span> { <span class="at">padding</span>: <span class="n">50px</span>; }</span>
+<span class="ln"><span class="sel">.botao</span> { <span class="at">border-radius</span>: <span class="n">999px</span>; }</span>
+<span class="ln"></span>
+<span class="ln"><span class="cm">/* 5. Cards */</span></span>
+<span class="ln"><span class="sel">.card</span> { <span class="at">box-shadow</span>: <span class="n">0</span> <span class="n">6px</span> <span class="n">16px</span> <span class="v">rgba(0,0,0,0.12)</span>; }</span>
+<span class="ln"></span>
+<span class="ln"><span class="cm">/* 6. Rodapé */</span></span>
+<span class="ln"><span class="sel">footer</span> { <span class="at">text-align</span>: <span class="v">center</span>; }</span></pre>
+      <p class="lead dim">Do geral para o específico, na ordem em que aparece na página. Comentários <code>/* */</code> viram o índice do arquivo.</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Um arquivo de CSS cresce rápido. Se eu seguir a ordem da página e usar comentários, acho tudo.</li>
+          <li>Ordem geral → específico: primeiro o que vale pra tudo (reset, body), depois cada pedaço.</li>
+          <li>Lembrar: CSS lê de cima pra baixo (css-02), então a ordem também ajuda a não ter conflito.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>No VS Code: escrever um comentário <code>/* ... */</code> e mostrar que ele não muda nada na página.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausem: organizem o CSS de vocês em seções com comentários.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 13 -->
+    <section class="slide" aria-label="Slide 13">
+      <p class="eyebrow">Resultado</p>
+      <h2>O site <em>pronto</em></h2>
+      <div class="demo wide">
+        <div class="pane">
+          <div class="sample site-prev" style="padding:0"><div id="siteFinal"></div></div>
+        </div>
+        <div class="pane lab">
+          <div class="btns"><button class="btn" id="siteToggle">Ver o CSS completo</button></div>
+          <pre class="code scroll" id="siteCode" hidden></pre>
+          <ul class="bullets" id="siteList">
+            <li><span class="hl">reset</span> e <span class="hl">herança</span> no body</li>
+            <li>cabeçalho com <span class="hl-amber">nav a:hover</span></li>
+            <li>botão com <span class="hl-amber">transition</span></li>
+            <li>cards com <span class="hl-amber">box-shadow</span> e <span class="hl-amber">margin: auto</span></li>
+          </ul>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>É o site que acabamos de montar. Cada bloco veio de um dos passos anteriores.</li>
+          <li>Reparem nos cards: estão um embaixo do outro. Como colocar lado a lado? Esse é o gancho do próximo vídeo: Flexbox.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Passar o mouse no botão e nos links. Abrir o CSS completo e achar cada seção pelos comentários.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 14 -->
+    <section class="slide" aria-label="Slide 14">
+      <p class="eyebrow">Fecho &middot; Cola</p>
+      <h2>O que levar pra casa</h2>
+      <div class="tagtable wide">
+        <span class="grp">Ponto de partida</span>
+        <code class="prop" data-p="box-sizing">box-sizing</code><span>border-box = o width vale a caixa inteira</span>
+        <code class="prop" data-p="herança" data-name="herança" data-tip="Cor do texto e fonte passam do pai para os filhos. Borda e padding não passam.">herança</code><span>fonte e cor no body, a página toda herda</span>
+        <span class="grp">Texto</span>
+        <code class="prop" data-p="line-height">line-height</code><span>altura da linha (1.6, sem unidade)</span>
+        <code class="prop" data-p="text-decoration">text-decoration</code><span>none tira o sublinhado dos links</span>
+        <span class="grp">Aparência</span>
+        <code class="prop" data-p="box-shadow">box-shadow</code><span>sombra: X, Y, desfoque, cor</span>
+        <code class="prop" data-p="background-image">background-image</code><span>imagem de fundo (e size, repeat, position)</span>
+        <code class="prop" data-p="max-width">max-width</code><span>largura máxima do bloco</span>
+        <code class="prop" data-p="margin-auto" data-name="margin: 0 auto" data-tip="Centraliza um bloco que tem largura definida. O auto divide o espaço que sobra igualmente.">margin: 0 auto</code><span>centraliza um bloco com largura</span>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>As propriedades novas de hoje. O PDF &ldquo;Guia de referências: propriedades CSS&rdquo; reúne tudo, das três aulas.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul>
+          <li>Por que colocar a fonte no <code>body</code> e não em cada parágrafo? (herança)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 15 -->
+    <section class="slide" aria-label="Slide 15">
+      <p class="eyebrow">Mão na massa</p>
+      <h2>Estilize o <em>seu</em> site</h2>
+      <ul class="bullets wide">
+        <li>Monte a pasta com <code>index.html</code>, <code>estilo.css</code> e <code>imagens/</code></li>
+        <li>Comece pelo reset e pela fonte no <code>body</code></li>
+        <li>Estilize cabeçalho, links, um botão e cards com sombra</li>
+        <li>Organize o CSS em seções com comentários</li>
+      </ul>
+      <p class="lead dim">Os cards estão empilhados, e o menu poderia ficar em linha. Próximo vídeo: <span class="hl">Flexbox</span>.</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Agora é a vez deles. Usar a página de torneio ou a página do jogo favorito que fizeram na aula de HTML.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul>
+          <li>Pausar o vídeo aqui. Dar tempo longo: é a aula mais prática do módulo.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul>
+          <li>Depois: baixar o PDF &ldquo;Guia de referências: propriedades CSS&rdquo; e ir ao vídeo de Flexbox.</li>
+        </ul>
+      </aside>
+    </section>
+
+  </div>
+
+  <div class="chrome">
+    <span class="label" id="partLabel">CSS 3 &middot; Estilizando um site</span>
+    <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
+    <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+    <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
+    <span class="count" id="count">01 / 15</span>
+    <button id="btnTheme" aria-label="Alternar tema">tema</button>
+  </div>
+</div>
+
+<div id="tip" role="tooltip"></div>
+<div id="notesPanel" hidden></div>
+
+<script>
+(function(){
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+  /* ---------- dicas de cada propriedade ---------- */
+  var TIPS = {
+    'seletor': 'QUEM vai receber o estilo. Aqui: todos os títulos h1 da página.',
+    'propriedade': 'O QUE você quer mudar: cor, tamanho, espaço...',
+    'valor': 'COMO deve ficar: a cor, o número, a palavra.',
+    'chaves': 'As chaves abrem e fecham a regra. Tudo entre elas pertence ao seletor.',
+    'pontovirgula': 'Fecha a linha. Sem ele, o navegador se perde e ignora a regra.',
+    'color': 'A cor do TEXTO. Aceita nome (red) ou hex (#16a89c).',
+    'background-color': 'A cor de FUNDO. Pinta o conteúdo e o padding, mas nunca a margin.',
+    'font-family': 'Qual fonte usar. Sempre escreva uma reserva no fim (Arial, sans-serif), caso a primeira não exista no computador.',
+    'font-size': 'Tamanho da letra. 16px é o normal; 40px é um título grandão.',
+    'font-weight': 'Grossura da letra. 400 = normal, 700 = negrito.',
+    'text-align': 'Alinha o texto dentro da caixa: left, center ou right.',
+    'width': 'Largura do CONTEÚDO (só o miolo, sem contar padding nem borda).',
+    'padding': 'Espaço DENTRO da caixa, entre o conteúdo e a borda. O fundo pinta o padding.',
+    'border': 'A borda, em 3 partes: tamanho, tipo e cor. Ex: 2px solid navy.',
+    'border-radius': 'Arredonda os cantos. 50% numa caixa quadrada vira um círculo!',
+    'margin': 'Espaço FORA da caixa, empurrando os vizinhos. O fundo NÃO pinta a margin.',
+    'content': 'O conteúdo: texto, imagem... O tamanho dele é o width (e o height).',
+    'position': 'Como o elemento é posicionado: static (normal), relative (ajustável) ou absolute (livre, em cima de tudo).',
+    'box-sizing': 'border-box: o width vale a caixa INTEIRA (conteúdo + padding + borda). Muito mais previsível que o padrão.',
+    'line-height': 'Altura de cada linha de texto. 1.6 (sem unidade) dá respiro e melhora a leitura.',
+    'text-decoration': 'Decoração do texto. none tira o sublinhado dos links; underline coloca.',
+    'box-shadow': 'Sombra da caixa: deslocamento X, deslocamento Y, desfoque e cor (ex: rgba(0,0,0,0.25)).',
+    'background-image': 'Imagem no fundo da caixa: url("caminho.png"). O texto continua por cima.',
+    'background-size': 'Tamanho da imagem de fundo. cover cobre tudo (corta o excesso); contain mostra inteira.',
+    'background-repeat': 'Se a imagem de fundo se repete em ladrilho (repeat) ou aparece uma vez só (no-repeat).',
+    'background-position': 'De onde a imagem de fundo parte: center, top left, bottom right...',
+    'max-width': 'Largura MÁXIMA do bloco. Ele pode encolher em telas menores, mas nunca passa disso.',
+    'hover': 'Pseudo-classe: o estilo só vale ENQUANTO o mouse está em cima do elemento.',
+    'transition': 'Faz a mudança acontecer aos poucos (ex: 0.3s) em vez de pular. Vai na regra normal, não no :hover.',
+    'transform': 'Move, gira ou aumenta o elemento sem bagunçar o resto da página (translateY, rotate, scale).',
+    'cursor': 'O formato do mouse em cima do elemento. pointer = mãozinha de "clicável".',
+    'top': 'Distância a partir de cima (e left, right e bottom: lados). Só funciona depois de definir position.'
+  };
+  var NAMES = { chaves:'chaves { }', pontovirgula:'ponto e vírgula', content:'conteúdo' };
+  function P(n){ return '<span class="prop" data-p="'+n+'">'+n+'</span>'; }
+  function L(h, extra){ return '<span class="ln'+(extra?' '+extra:'')+'">'+h+'</span>'; }
+  function outs(){ $$('input[type=range]').forEach(function(r){ var o = r.parentNode.querySelector('output'); if (o) o.textContent = r.value + (r.getAttribute('data-u') || 'px'); }); }
+
+  var tip = $('#tip');
+  function hideTip(){
+    tip.classList.remove('show');
+    document.body.removeAttribute('data-hover');
+    $$('.glow').forEach(function(g){ g.classList.remove('glow'); });
+  }
+  function showTip(el){
+    var key = el.getAttribute('data-p');
+    var txt = el.getAttribute('data-tip') || TIPS[key];
+    if (!txt) return;
+    var name = el.getAttribute('data-name') || NAMES[key] || key || el.textContent.trim();
+    tip.innerHTML = '<b></b><span></span>';
+    tip.firstChild.textContent = name;
+    tip.lastChild.textContent = txt;
+    tip.classList.add('show');
+    var r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+    var x = Math.min(Math.max(8, r.left + r.width/2 - tw/2), window.innerWidth - tw - 8);
+    var y = r.top - th - 10; if (y < 8) y = r.bottom + 10;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function onOver(e){
+    var el = e.target.closest && e.target.closest('[data-p]');
+    if (!el){ hideTip(); return; }
+    document.body.setAttribute('data-hover', el.getAttribute('data-prop') || el.getAttribute('data-p'));
+    var slide = el.closest('.slide');
+    $$('.glow').forEach(function(g){ g.classList.remove('glow'); });
+    if (slide && el.closest('pre.code, .tagtable')) $$('.glow-target', slide).forEach(function(g){ g.classList.add('glow'); });
+    showTip(el);
+  }
+  document.addEventListener('mouseover', onOver);
+  document.addEventListener('click', function(e){ if (e.target.closest && e.target.closest('[data-p]')) onOver(e); });
+  document.addEventListener('mouseout', function(e){ if (!e.relatedTarget) hideTip(); });
+  document.addEventListener('focusin', function(e){ if (e.target.matches && e.target.matches('[data-p]')) onOver(e); });
+
+  /* ---------- o site de exemplo ---------- */
+  var SITE_HTML = '<header><h1>Arena Pixel</h1><nav><a href="#">Início</a> <a href="#">Ranking</a> <a href="#">Inscrição</a></nav></header>'
+    + '<section class="hero"><h2>Rodada final no sábado!</h2><p>Garanta sua vaga no torneio.</p><button class="botao">Inscrever-se</button></section>'
+    + '<main><div class="card"><h3>1º Ana</h3><p>1200 pontos</p></div><div class="card"><h3>2º Lucas</h3><p>950 pontos</p></div><div class="card"><h3>3º Bia</h3><p>800 pontos</p></div></main>'
+    + '<footer><p>Turma de 2026</p></footer>';
+  var SITE_CSS = [
+    '/* 1. Reset */',
+    '* {', '  margin: 0;', '  padding: 0;', '  box-sizing: border-box;', '}',
+    '/* 2. Página */',
+    'body {', '  font-family: Arial, sans-serif;', '  line-height: 1.6;', '  color: #1f2933;', '  background-color: #eef1f5;', '}',
+    '/* 3. Cabeçalho */',
+    'header {', '  background-color: #123f63;', '  color: white;', '  padding: 20px;', '  text-align: center;', '}',
+    'nav a {', '  color: #2ec9bd;', '  margin: 0 10px;', '  text-decoration: none;', '}',
+    'nav a:hover {', '  text-decoration: underline;', '}',
+    '/* 4. Destaque e botão */',
+    '.hero {', '  background-image: linear-gradient(135deg, #16a89c, #123f63);', '  color: white;', '  text-align: center;', '  padding: 50px 20px;', '}',
+    '.botao {', '  background-color: #f2a63b;', '  color: #3a2300;', '  border: none;', '  padding: 12px 28px;', '  border-radius: 999px;', '  font-weight: bold;', '  cursor: pointer;', '  transition: 0.3s;', '}',
+    '.botao:hover {', '  transform: scale(1.1);', '}',
+    '/* 5. Cards */',
+    '.card {', '  background-color: white;', '  border-radius: 12px;', '  box-shadow: 0 6px 16px rgba(0,0,0,0.12);', '  padding: 20px;', '  margin: 16px auto;', '  max-width: 420px;', '}',
+    '/* 6. Rodapé */',
+    'footer {', '  text-align: center;', '  padding: 20px;', '  color: #5a6b7a;', '}'
+  ].join('\n');
+
+  function scopeCSS(css, prefix){
+    return css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/([^{}]+)\{([^{}]*)\}/g, function(m, sel, body){
+      var s = sel.trim().split(',').map(function(x){
+        x = x.trim(); if (x === 'body') return prefix; if (x === '*') return prefix + ', ' + prefix + ' *';
+        return prefix + ' ' + x;
+      }).join(', ');
+      return s + '{' + body + '}';
+    });
+  }
+  function tokv(v){ return v.replace(/(\S+)/g, function(t){ return '<span class="' + (/^[#\d.-]/.test(t) ? 'n' : 'v') + '">' + t + '</span>'; }); }
+  function colorCSS(css){
+    return css.split('\n').map(function(line){
+      var m;
+      if (/^\s*\/\*/.test(line)) return L('<span class="cm">' + line + '</span>');
+      if ((m = line.match(/^([^{}]+)\{$/))) return L('<span class="sel">' + m[1].trim() + '</span> {');
+      if ((m = line.match(/^(\s*)([\w-]+):\s*(.*?);$/))) return L(m[1] + '<span class="at">' + m[2] + '</span>: ' + tokv(m[3]) + ';');
+      return L(line);
+    }).join('');
+  }
+  var SITE_SCOPED = function(prefix){ return scopeCSS(SITE_CSS, prefix); };
+
+  /* ---------- 2: antes e depois ---------- */
+  (function(){
+    var ba = $('#ba'), a = $('.ba-a', ba), b = $('.ba-b', ba), rg = $('#baRange');
+    a.innerHTML = '<div class="sp" style="padding:0">' + SITE_HTML + '</div>';
+    b.innerHTML = '<div class="sp" id="baSty">' + SITE_HTML + '</div><style>' + SITE_SCOPED('#baSty') + '</style>';
+    a.style.cssText = 'position:absolute;inset:0;overflow:hidden;background:#fff;padding:10px 14px';
+    b.style.overflow = 'hidden';
+    ba.style.height = 'min(54vh, 400px)';
+    function set(){ ba.style.setProperty('--cut', rg.value + '%'); }
+    rg.addEventListener('input', set); set();
+  })();
+
+  /* ---------- 4: box-sizing ---------- */
+  (function(){
+    var box = $('#bsBox'), val = $('#bsVal'), msg = $('#bsMsg');
+    function draw(v){
+      box.classList.toggle('bb', v === 'border-box'); val.textContent = v;
+      msg.innerHTML = 'Largura real da caixa: <b>' + box.offsetWidth + 'px</b>' + (v === 'border-box' ? ' (o width vale a caixa inteira)' : ' (200 + 40 de padding + 10 de borda)');
+    }
+    $$('#bsSeg button').forEach(function(b){
+      b.addEventListener('click', function(){
+        $$('#bsSeg button').forEach(function(x){ x.classList.toggle('on', x === b); });
+        draw(b.getAttribute('data-v'));
+      });
+    });
+    draw('content-box');
+  })();
+
+  /* ---------- 5: herança ---------- */
+  (function(){
+    var inh = $('#inh'), lines = $('#inhLines'), msg = $('#inhMsg');
+    var info = {
+      c1: ['color', '#e0452e', true], c2: ['font-family', 'Georgia, serif', true],
+      c3: ['border', '3px solid #4f7cac', false], c4: ['padding', '20px', false]
+    };
+    function draw(){
+      var h = '', pass = [], own = [];
+      $$('#inhChk input').forEach(function(c){
+        var k = c.getAttribute('data-c'); inh.classList.toggle(k, c.checked);
+        if (c.checked){ h += L('  ' + P(info[k][0]) + ': ' + info[k][1] + ';'); (info[k][2] ? pass : own).push(info[k][0]); }
+      });
+      lines.innerHTML = h || L('  <span class="cm">/* marque algo ao lado */</span>');
+      msg.innerHTML = (pass.length ? '<b>Herdado pelos filhos:</b> ' + pass.join(', ') + '. ' : '') + (own.length ? '<b>Só do body:</b> ' + own.join(', ') + '.' : '') || 'Marque propriedades e veja quem passa para os filhos.';
+    }
+    $$('#inhChk input').forEach(function(c){ c.addEventListener('change', draw); });
+    draw();
+  })();
+
+  /* ---------- steppers (cabeçalho, texto, botão) ---------- */
+  var TPL = {
+    hdr: '<header><h1>Arena Pixel</h1><nav><a href="#">Início</a> <a href="#">Ranking</a> <a href="#">Inscrição</a></nav></header>',
+    txt: '<h2>Regras do torneio</h2><p>Cada jogador tem três partidas. Vence quem somar mais pontos no fim da rodada. Chegue com dez minutos de antecedência.</p><p>Dúvidas? Veja o <a href="#">regulamento completo</a> ou fale com a organização.</p>',
+    btn: '<p>Última chamada!</p><button class="botao">Inscrever-se</button>'
+  };
+  var uid = 0;
+  function initStepper(root){
+    var steps = JSON.parse(root.getAttribute('data-steps')), n = 0, id = 'sp' + (++uid);
+    root.innerHTML = '<div class="st-l"><pre class="code"></pre><div class="btns"><button class="btn on next">Próxima propriedade &rarr;</button><button class="btn reset">Recomeçar</button></div></div>'
+      + '<div><span class="pane-label">o navegador mostra</span><div class="sample"><div class="sp glow-target" id="' + id + '"></div><style></style></div></div>';
+    var code = $('pre', root), nextB = $('.next', root), sty = $('style', root);
+    $('.sp', root).innerHTML = TPL[root.getAttribute('data-preview')];
+    function draw(){
+      var order = [], map = {};
+      steps.slice(0, n).forEach(function(s){ if (!map[s[0]]){ map[s[0]] = []; order.push(s[0]); } map[s[0]].push([s[1], s[2]]); });
+      var h = '', css = '';
+      order.forEach(function(sel){
+        h += L('<span class="sel">' + sel + '</span> {');
+        css += sel + '{';
+        map[sel].forEach(function(d){
+          var isNew = steps[n - 1][0] === sel && steps[n - 1][1] === d[0] && steps[n - 1][2] === d[1];
+          h += L('  ' + P(d[0]) + ': ' + d[1] + ';', isNew ? 'new' : '');
+          css += d[0] + ':' + d[1] + ';';
+        });
+        h += L('}'); css += '}';
+      });
+      code.innerHTML = h || L('<span class="cm">/* ainda sem estilo: clique em Próxima */</span>');
+      sty.textContent = scopeCSS(css, '#' + id);
+      nextB.disabled = n >= steps.length;
+      nextB.innerHTML = n >= steps.length ? 'Pronto!' : 'Próxima propriedade &rarr;';
+    }
+    nextB.addEventListener('click', function(){ if (n < steps.length){ n++; draw(); } });
+    $('.reset', root).addEventListener('click', function(){ n = 0; draw(); });
+    draw();
+  }
+  $$('.stepper').forEach(initStepper);
+
+  /* ---------- 8: box-shadow ---------- */
+  (function(){
+    var x = $('#shX'), y = $('#shY'), b = $('#shB'), o = $('#shO'), box = $('#shBox'), code = $('#shCode');
+    function draw(){
+      var col = 'rgba(0,0,0,' + (o.value / 100).toFixed(2) + ')';
+      var v = x.value + 'px ' + y.value + 'px ' + b.value + 'px ' + col;
+      box.style.boxShadow = v;
+      code.innerHTML = L('<span class="sel">.card</span> {') + L('  ' + P('box-shadow') + ': <span class="n">' + x.value + 'px</span> <span class="n">' + y.value + 'px</span> <span class="n">' + b.value + 'px</span> <span class="v">' + col + '</span>;') + L('}');
+      outs();
+    }
+    [x, y, b, o].forEach(function(e){ e.addEventListener('input', draw); });
+    draw();
+  })();
+
+  /* ---------- 9: background-image ---------- */
+  (function(){
+    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='120' height='120' rx='16' fill='%2316a89c'/><circle cx='60' cy='60' r='34' fill='%23f2a63b'/><rect x='46' y='46' width='28' height='28' fill='%23123f63'/></svg>";
+    var box = $('#bgBox'), s = $('#bgS'), r = $('#bgR'), p = $('#bgP'), code = $('#bgCode');
+    function draw(){
+      box.style.backgroundImage = 'url("data:image/svg+xml,' + svg + '")';
+      box.style.backgroundSize = s.value; box.style.backgroundRepeat = r.value; box.style.backgroundPosition = p.value;
+      code.innerHTML = L('<span class="sel">.destaque</span> {') + L('  ' + P('background-image') + ': <span class="v">url("robo.png")</span>;')
+        + L('  ' + P('background-size') + ': <span class="v">' + s.value + '</span>;') + L('  ' + P('background-repeat') + ': <span class="v">' + r.value + '</span>;')
+        + L('  ' + P('background-position') + ': <span class="v">' + p.value + '</span>;') + L('}');
+    }
+    [s, r, p].forEach(function(e){ e.addEventListener('change', draw); });
+    draw();
+  })();
+
+  /* ---------- 11: centralizar ---------- */
+  (function(){
+    var w = $('#cnW'), auto = $('#cnAuto'), box = $('#cnBox'), code = $('#cnCode');
+    function draw(){
+      box.style.maxWidth = w.value + 'px'; box.style.margin = auto.checked ? '0 auto' : '0';
+      code.innerHTML = L('<span class="sel">.card</span> {') + L('  ' + P('max-width') + ': <span class="n">' + w.value + 'px</span>;')
+        + L(auto.checked ? '  ' + P('margin') + ': <span class="n">0</span> <span class="v">auto</span>;' : '  <span class="cm">/* sem margin auto */</span>') + L('}');
+      outs();
+    }
+    w.addEventListener('input', draw); auto.addEventListener('change', draw);
+    draw();
+  })();
+
+  /* ---------- 13: o site pronto ---------- */
+  (function(){
+    var f = $('#siteFinal'), code = $('#siteCode'), list = $('#siteList'), btn = $('#siteToggle');
+    f.className = 'sp'; f.innerHTML = SITE_HTML;
+    var st = document.createElement('style'); st.textContent = SITE_SCOPED('#siteFinal'); f.parentNode.appendChild(st);
+    code.innerHTML = colorCSS(SITE_CSS);
+    btn.addEventListener('click', function(){
+      var show = code.hidden; code.hidden = !show; list.hidden = show;
+      btn.textContent = show ? 'Esconder o CSS' : 'Ver o CSS completo';
+    });
+  })();
+
+  /* ---------- cores de sintaxe (VS Code) nos blocos gerados ---------- */
+  (function(){
+    var busy = false;
+    function tok(v){
+      return v.replace(/(\S+)/g, function(t){ return '<span class="' + (/^[#\d.-]/.test(t) ? 'n' : 'v') + '">' + t + '</span>'; });
+    }
+    function hl(pre){
+      if (busy) return; busy = true;
+      var w = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT), list = [], n;
+      while ((n = w.nextNode())) list.push(n);
+      list.forEach(function(t){
+        var p = t.parentNode; if (p.matches('.v,.n,.sel,.hint,.t,.at,.c')) return;
+        var x = t.nodeValue, m, h = null;
+        if ((m = x.match(/^:\s(.*?)(;?)\s*$/)) && m[1]) h = ': ' + tok(m[1]) + m[2];
+        else if ((m = x.match(/^(\s*)([.#]?[\w-]+)(\s*\{)$/))) h = m[1] + '<span class="sel">' + m[2] + '</span>' + m[3];
+        if (h !== null){ var sp = document.createElement('span'); sp.innerHTML = h; while (sp.firstChild) p.insertBefore(sp.firstChild, t); p.removeChild(t); }
+      });
+      busy = false;
+    }
+    $$('pre.code').forEach(function(pre){
+      new MutationObserver(function(){ hl(pre); }).observe(pre, { childList:true });
+      hl(pre);
+    });
+  })();
+
+  /* ---------- navegação + anotações ---------- */
+  var slides = $$('.slide'), total = slides.length;
+  var pfill = $('#pfill'), count = $('#count'), partLabel = $('#partLabel'), panel = $('#notesPanel');
+  var i = 0, pop = null;
+  function pad(n){ return (n<10?'0':'') + n; }
+
+  function notesHTML(){
+    var n = slides[i].querySelector('aside.notes');
+    return n ? n.innerHTML : '<h4>Sem anotações</h4>';
+  }
+  function updateNotes(){
+    panel.innerHTML = '<div class="np-h">Só você vê &middot; slide ' + (i+1) + ' &middot; N fecha &middot; P abre janela</div>' + notesHTML();
+    if (pop && !pop.closed){ pop.document.body.innerHTML = '<div class="np-h">Slide ' + (i+1) + ' / ' + total + '</div>' + notesHTML(); }
+  }
+  function openPop(){
+    pop = window.open('', 'css03notas', 'width=520,height=720');
+    if (!pop){ panel.hidden = false; return; }
+    var d = pop.document; d.title = 'Notas do professor';
+    d.head.innerHTML = '<meta charset="utf-8"><style>body{font:16px/1.5 system-ui,sans-serif;background:#0c1f2e;color:#e4ecf3;padding:1rem 1.3rem}h4{font:500 12px monospace;letter-spacing:.1em;text-transform:uppercase;color:#f4ac4a;margin:1.1rem 0 .2rem}ul{margin:0;padding-left:1.2rem}li{margin:.25rem 0}code{background:#123047;padding:.05em .35em;border-radius:4px}.np-h{font:12px monospace;color:#93a6b5}</style>';
+    panel.hidden = true; updateNotes();
+  }
+
+  function render(){
+    slides.forEach(function(s, x){ s.classList.toggle('active', x === i); s.setAttribute('aria-hidden', x === i ? 'false' : 'true'); });
+    pfill.style.width = ((i+1)/total*100) + '%';
+    count.textContent = pad(i+1) + ' / ' + pad(total);
+    var eb = slides[i].querySelector('.eyebrow');
+    partLabel.textContent = eb ? eb.textContent.replace(/\s+/g,' ').trim() : 'CSS 3';
+    if (history.replaceState) history.replaceState(null, '', '#' + (i+1));
+    hideTip(); updateNotes();
+  }
+  function go(n){
+    var nx = Math.max(0, Math.min(total-1, n));
+    if (nx === i) return;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    i = nx; render();
+  }
+  function next(){ go(i+1); } function prev(){ go(i-1); }
+
+  document.addEventListener('keydown', function(e){
+    var t = e.target, tag = t && t.tagName;
+    if (e.key === 'Escape'){ if (document.activeElement) document.activeElement.blur(); panel.hidden = true; return; }
+    if (tag === 'TEXTAREA' || tag === 'SELECT' || (tag === 'INPUT' && t.type !== 'range' && t.type !== 'color')) return;
+    if (tag === 'INPUT' && t.type === 'range' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+    if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+    if (e.key === 'n' || e.key === 'N'){ panel.hidden = !panel.hidden; return; }
+    if (e.key === 'p' || e.key === 'P'){ openPop(); return; }
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ' || e.key === 'ArrowDown'){ e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){ e.preventDefault(); prev(); }
+    else if (e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if (e.key === 'End'){ e.preventDefault(); go(total-1); }
+  });
+  $('#btnNext').addEventListener('click', next);
+  $('#btnPrev').addEventListener('click', prev);
+  $('#znext').addEventListener('click', function(){ this.blur(); next(); });
+  $('#zprev').addEventListener('click', function(){ this.blur(); prev(); });
+
+  var root = document.documentElement;
+  $('#btnTheme').addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme');
+    var isDark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  if (!isNaN(start) && start >= 1 && start <= total) i = start - 1;
+  outs(); render();
+})();
+</script>
+
+</body>
+</html>

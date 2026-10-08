@@ -1,0 +1,23 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Comandos do Git</title><style>
+@page{size:A4 portrait;margin:0}
+*{box-sizing:border-box}
+body{font-family:"Segoe UI",Arial,sans-serif;color:#1f2933;margin:0;background:#f4f6fb}
+.bar{height:4mm;background:linear-gradient(90deg,#16a89c 0 33.3%,#bcd230 33.3% 66.6%,#f2a63b 66.6%)}
+.pg{padding:9mm 14mm 8mm}
+h1{font-size:24pt;margin:0 0 1mm;color:#123f63}
+.sub{color:#5b6672;margin:0 0 5mm;font-size:10.5pt}
+.g{margin-bottom:5mm;break-inside:avoid}
+.gh{display:flex;align-items:center;gap:3mm;margin-bottom:2mm}
+h2{font-size:13pt;margin:0;color:#123f63}
+.chip{width:7mm;height:7mm;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#123f63;font-weight:700;font-size:10.5pt}
+.r{display:flex;align-items:center;gap:6mm;margin-bottom:1.8mm}
+.c{flex:0 0 96mm;background:#0c1f31;border-left:2mm solid #16a89c;border-radius:2.5mm;padding:2.6mm 4mm;font-family:Consolas,monospace;font-size:10.5pt;color:#7be0d3;white-space:nowrap}
+.git{color:#bcd230;margin-right:2.2mm}
+.d{font-size:10.5pt;color:#1f2933}
+.tip{border-left:3px solid #2f7de1;background:#eaf1fb;padding:2.5mm 3.5mm;border-radius:0 2mm 2mm 0;font-size:10pt;margin-top:2mm}
+code{font-family:Consolas,monospace;background:#e3e8f0;padding:0 1.2mm;border-radius:1mm}
+</style></head><body><div class="bar"></div><div class="pg">
+<h1>Comandos do Git</h1>
+<p class="sub">Git e GitHub · Guia rápido para consultar durante as aulas</p>
+<div class="g"><div class="gh"><span class="chip" style="background:#16a89c">1</span><h2>Configurar e começar</h2></div><div class="r"><div class="c" style="border-left-color:#16a89c"><span class="git">git</span> config --global user.name "Nome"</div><div class="d">Define seu nome (uma única vez)</div></div><div class="r"><div class="c" style="border-left-color:#16a89c"><span class="git">git</span> config --global user.email "e-mail"</div><div class="d">Define seu e-mail (uma única vez)</div></div><div class="r"><div class="c" style="border-left-color:#16a89c"><span class="git">git</span> init</div><div class="d">Cria um repositório na pasta</div></div><div class="r"><div class="c" style="border-left-color:#16a89c"><span class="git">git</span> clone &lt;url&gt;</div><div class="d">Copia um repositório do GitHub</div></div></div><div class="g"><div class="gh"><span class="chip" style="background:#f2a63b">2</span><h2>No dia a dia</h2></div><div class="r"><div class="c" style="border-left-color:#f2a63b"><span class="git">git</span> status</div><div class="d">Mostra o que mudou</div></div><div class="r"><div class="c" style="border-left-color:#f2a63b"><span class="git">git</span> add .</div><div class="d">Prepara todas as mudanças da pasta</div></div><div class="r"><div class="c" style="border-left-color:#f2a63b"><span class="git">git</span> add *</div><div class="d">Também prepara tudo, mas o ponto (<b>.</b>) é a forma mais segura. Prefira ele</div></div><div class="r"><div class="c" style="border-left-color:#f2a63b"><span class="git">git</span> add nome-do-arquivo</div><div class="d">Prepara só um arquivo. Ex.: <b>git add index.html</b></div></div><div class="r"><div class="c" style="border-left-color:#f2a63b"><span class="git">git</span> commit -m "msg"</div><div class="d">Salva com uma mensagem</div></div><div class="r"><div class="c" style="border-left-color:#f2a63b"><span class="git">git</span> log --oneline</div><div class="d">Lista os salvamentos feitos</div></div><div class="r"><div class="c" style="border-left-color:#f2a63b"><span class="git">git</span> diff</div><div class="d">Mostra o que foi alterado, linha por linha</div></div></div><div class="g"><div class="gh"><span class="chip" style="background:#8fa3c4">3</span><h2>Conectar com o GitHub</h2></div><div class="r"><div class="c" style="border-left-color:#8fa3c4"><span class="git">git</span> remote add origin &lt;url&gt;</div><div class="d">Liga a pasta a um repositório do GitHub</div></div><div class="r"><div class="c" style="border-left-color:#8fa3c4"><span class="git">git</span> push</div><div class="d">Envia para o GitHub</div></div><div class="r"><div class="c" style="border-left-color:#8fa3c4"><span class="git">git</span> pull</div><div class="d">Baixa as novidades</div></div></div><div class="tip"><b>Ordem de um salvamento normal:</b> <code>git status</code> → <code>git add .</code> → <code>git commit -m "msg"</code> → <code>git push</code>. Onde aparecer <code>&lt;url&gt;</code>, troque pelo endereço do seu repositório; onde aparecer <code>nome-do-arquivo</code>, troque pelo nome do seu arquivo.</div>
+</div></body></html>
