@@ -1,0 +1,925 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calculadora - HTML e CSS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    color-scheme: dark;
+    /* paleta: navy #123f63 / slate #8fa3c4 / teal #16a89c / lime #bcd230 / orange #f2a63b */
+    --navy:#123f63;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+    --font-display:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body:"Barlow", system-ui, -apple-system, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      color-scheme: light;
+      --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+      --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+      --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+    --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+    --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:clamp(15px,1.1vw,18px); line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  .deck{ position:fixed; inset:0; display:grid; grid-template-rows:1fr auto; }
+  .stage{ position:relative; overflow:hidden; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+    padding:clamp(2rem,6vw,5.5rem) clamp(1.6rem,7vw,7rem) clamp(3.2rem,8vh,5rem);
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .34s ease, transform .34s ease, visibility 0s linear .34s;
+    overflow-y:auto;
+  }
+  .slide.active{
+    opacity:1; visibility:visible; transform:none;
+    transition:opacity .38s ease, transform .38s ease;
+  }
+  .slide > *{ max-width:60ch; }
+  .slide .wide{ max-width:min(1080px,92vw); }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0; display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before{ content:""; width:1.8rem; height:2px; background:var(--accent); display:inline-block; }
+
+  h1,h2{ font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.02; text-transform:uppercase; letter-spacing:.005em; }
+  h1{ font-size:clamp(2.9rem,9vw,6.2rem); }
+  h2{ font-size:clamp(2rem,5vw,3.6rem); }
+  h2 em, h1 em{ font-style:normal; color:var(--accent); }
+  h1 code, h2 code{ text-transform:none; font-size:.82em; vertical-align:.04em; }
+
+  .lead{ font-size:clamp(1.15rem,2.1vw,1.7rem); color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+  .slide p{ margin:0; }
+  strong{ font-weight:600; color:var(--ink); }
+  .hl{ color:var(--accent); font-weight:600; }
+  .hl-amber{ color:var(--amber); font-weight:600; }
+
+  code, kbd{
+    font-family:var(--font-mono); font-size:.92em;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:5px;
+    padding:.1em .45em;
+  }
+  kbd{ box-shadow:0 2px 0 var(--line); }
+
+  .subtitle{ font-family:var(--font-mono); color:var(--ink-dim); font-size:clamp(.95rem,1.6vw,1.15rem); letter-spacing:.02em; }
+
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.35rem); }
+  ul.bullets li{ display:flex; gap:.7rem; align-items:baseline; }
+  ul.bullets li::before{ content:"▸"; color:var(--accent); flex:none; }
+
+  .callout{
+    border-left:3px solid var(--amber); background:var(--bg-elev);
+    padding:1rem 1.2rem; border-radius:0 10px 10px 0; font-size:clamp(1.02rem,1.8vw,1.3rem);
+  }
+  .callout.good{ border-color:var(--accent); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:.55rem; }
+  .chips span{
+    font-family:var(--font-mono); font-size:.92rem;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.4em .9em;
+  }
+  .chips.done span{ color:var(--ink-dim); }
+
+  .kv{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.9rem; }
+  .kv > div{ display:flex; flex-direction:column; gap:.3rem; }
+  .kv .k{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .kv .v{ font-size:1.05rem; }
+
+  /* trio de blocos da agenda */
+  .trio{ display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .trio > div{
+    background:var(--bg-elev); border:1px solid var(--line); border-top:4px solid var(--c,var(--accent));
+    border-radius:12px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.5rem;
+  }
+  .trio .k{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:1.6rem; line-height:1; }
+  .trio .tags{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .trio .t1{ --c:var(--accent); } .trio .t2{ --c:var(--amber); } .trio .t3{ --c:var(--lime); }
+
+  /* footer chrome */
+  .chrome{
+    display:flex; align-items:center; gap:1rem;
+    padding:.55rem clamp(1rem,4vw,2.4rem); border-top:1px solid var(--line);
+    background:var(--bg); font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+    z-index:10;
+  }
+  .chrome .label{ letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progress{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; min-width:60px; }
+  .progress__fill{ height:100%; background:var(--accent); width:0; transition:width .35s ease; }
+  .chrome .count{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .chrome button{
+    font:inherit; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line);
+    border-radius:7px; padding:.3em .7em; cursor:pointer;
+  }
+  .chrome button:hover{ color:var(--ink); border-color:var(--accent); }
+  .chrome button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .zones{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+  .zone{ pointer-events:auto; border:none; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; }
+  .zone:focus, .zone:focus-visible{ outline:none; }
+  .zone.prev{ width:28%; }
+  .zone.spacer{ flex:1; cursor:default; pointer-events:none; }
+  .zone.next{ width:40%; }
+
+  /* faixa tricolor no topo */
+  .brandbar{ position:absolute; left:0; right:0; top:0; height:5px; display:flex; z-index:8; }
+  .brandbar i{ flex:1; }
+  .brandbar i:nth-child(1){ background:var(--accent); }
+  .brandbar i:nth-child(2){ background:var(--lime); }
+  .brandbar i:nth-child(3){ background:var(--amber); }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide, .slide.active, .progress__fill{ transition:none; }
+  }
+
+  /* código e demonstração lado a lado */
+  pre.code{
+    font-family:var(--font-mono); font-size:clamp(.78rem,1.3vw,.98rem); line-height:1.6;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; margin:0; overflow-x:auto; color:var(--ink);
+    white-space:pre; tab-size:2;
+  }
+  pre.code .t{ color:var(--accent); }
+  pre.code .at{ color:var(--amber); }
+  pre.code .v{ color:var(--slate); }
+  pre.code .c{ color:var(--ink-dim); font-style:italic; }
+
+  .demo{ display:grid; gap:.9rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .demo{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .demo .pane{ display:flex; flex-direction:column; gap:.45rem; min-width:0; }
+  .demo .pane-label{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-dim);
+  }
+  /* o "navegador": estilos padrão, sem CSS nenhum — e clicável por cima das zonas de navegação */
+  .render{
+    color-scheme:light;
+    position:relative; z-index:6;
+    background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .render :is(h1,h2,h3){ font-family:inherit; text-transform:none; letter-spacing:0; color:inherit; margin:.35em 0; line-height:1.2; }
+  .render h1{ font-size:2em; font-weight:700; }
+  .render h2{ font-size:1.5em; font-weight:700; }
+  .render p{ margin:.7em 0; }
+  .render a{ color:#00e; text-decoration:underline; }
+  .render table{ border-collapse:separate; border-spacing:2px; }
+  .render th, .render td{ padding:1px; text-align:left; }
+  .render th{ font-weight:700; text-align:center; }
+  .render table[border] th, .render table[border] td{ border:1px solid #808080; }
+  .render input, .render button{ font-family:system-ui, sans-serif; font-size:13px; }
+  .render > :first-child{ margin-top:0; }
+  .render > :last-child{ margin-bottom:0; }
+
+  .tagtable{ display:grid; grid-template-columns:auto 1fr; gap:.55rem 1.1rem; align-items:baseline; }
+  .tagtable code{ white-space:nowrap; }
+  .tagtable .grp{
+    grid-column:1/-1; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent); margin-top:.4rem;
+  }
+
+  /* diagrama da página semântica */
+  .layout{ display:grid; gap:.5rem; font-family:var(--font-mono); font-size:.9rem; }
+  .layout > div{
+    border:2px dashed var(--line); border-radius:10px; padding:.8rem 1rem;
+    display:flex; justify-content:space-between; gap:1rem; color:var(--ink-dim);
+  }
+  .layout b{ color:var(--accent); font-weight:500; }
+  .layout .main{ min-height:7rem; align-items:flex-start; }
+  .layout .hd b, .layout .ft b{ color:var(--amber); }
+  .layout .hd, .layout .ft{ border-style:solid; border-color:var(--amber); }
+
+  /* ===== CSS 1: extras ===== */
+  .slide aside.notes{ display:none; }
+  .lab, pre.code, .tabs, .seg, .btns, .swatches{ position:relative; z-index:6; }
+  pre.code .ln{ display:block; }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.5rem); }
+
+  /* dicas ao passar o mouse */
+  .prop{ border-bottom:1px dotted var(--accent); cursor:help; border-radius:2px; transition:background .15s; }
+  .prop:hover, .prop:focus-visible{ background:color-mix(in srgb, var(--accent) 24%, transparent); outline:none; }
+  #tip{
+    position:fixed; z-index:60; max-width:min(330px,86vw); left:0; top:0;
+    background:var(--ink); color:var(--bg); padding:.65rem .85rem; border-radius:10px;
+    font-size:.92rem; line-height:1.4; pointer-events:none; opacity:0; transform:translateY(5px);
+    transition:opacity .15s ease, transform .15s ease; box-shadow:var(--shadow);
+  }
+  #tip.show{ opacity:1; transform:none; }
+  #tip b{ display:block; font-family:var(--font-mono); font-weight:500; font-size:.82rem; letter-spacing:.04em; margin-bottom:.15rem; color:var(--accent-ink); background:var(--accent); width:max-content; padding:.05em .5em; border-radius:4px; }
+
+  @keyframes glow{
+    0%,100%{ box-shadow:0 0 0 0 transparent; }
+    50%{ box-shadow:0 0 0 7px color-mix(in srgb, var(--accent) 55%, transparent); }
+  }
+  @keyframes pop{ 0%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+  .glow{ animation:glow .9s ease-in-out infinite; }
+
+  /* controles */
+  .btn{
+    font-family:var(--font-mono); font-size:.85rem; color:var(--ink); background:var(--bg-elev);
+    border:1px solid var(--line); border-radius:8px; padding:.45em .9em; cursor:pointer;
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .btn:hover{ border-color:var(--accent); }
+  .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn.on{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .btn.big{ font-size:1.05rem; padding:.7em 1.3em; font-weight:500; }
+  .btns, .seg, .tabs{ display:flex; flex-wrap:wrap; gap:.5rem; }
+  .ctl{ display:grid; grid-template-columns:8.5rem 1fr 4rem; align-items:center; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .ctl output{ text-align:right; color:var(--ink); }
+  .ctl select, .ctl input[type=color]{ grid-column:2/4; font:inherit; background:var(--bg-elev); color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.3em .5em; height:2.1rem; }
+  .ctl input[type=text]{ grid-column:2/4; font:inherit; font-size:1rem; background:var(--bg-elev); color:var(--ink); border:1px solid var(--accent); border-radius:7px; padding:.35em .6em; }
+  input[type=range]{ accent-color:var(--accent); width:100%; }
+  .lab{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .hint{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim); }
+  .hint b{ color:var(--amber); font-weight:500; }
+
+  /* a mini-página liga/desliga CSS */
+  .mini{
+    background:#fff; color:#1a1a1a; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem; box-shadow:var(--shadow);
+    transition:background .6s ease, color .6s ease, padding .6s ease, border-radius .6s ease;
+  }
+  .mini h1{ font-family:inherit; text-transform:none; font-size:2em; margin:.3em 0; line-height:1.15; color:inherit; transition:all .6s ease; }
+  .mini p{ margin:.6em 0; transition:all .6s ease; }
+  .mini button{ font-family:inherit; font-size:13px; transition:all .6s ease; }
+  .mini .tag{ display:inline-block; font-family:inherit; font-size:1em; transition:all .6s ease; }
+  .mini.on{ background:#123f63; color:#e4ecf3; font-family:"Barlow", system-ui, sans-serif; padding:1.8rem 1.8rem; border-radius:18px; }
+  .mini.on h1{ font-family:"Barlow Condensed", "Arial Narrow", sans-serif; text-transform:uppercase; color:#2ec9bd; font-size:2.6em; letter-spacing:.01em; }
+  .mini.on p{ color:#c9d6e2; }
+  .mini.on button{ background:#f2a63b; color:#3a2300; border:none; border-radius:999px; padding:.7em 1.4em; font-weight:600; font-size:15px; }
+  .mini.on .tag{ background:#16a89c; color:#fff; border-radius:6px; padding:.1em .6em; font-size:.85em; }
+
+  /* abas de "como o css entra" */
+  .tabs button{ font-family:var(--font-mono); font-size:.9rem; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line); border-radius:8px 8px 0 0; padding:.5em 1em; cursor:pointer; }
+  .tabs button.on{ color:var(--ink); border-color:var(--accent); border-bottom-color:var(--bg-elev); box-shadow:inset 0 3px 0 var(--accent); }
+  .tp{ display:none; }
+  .tp.on{ display:flex; flex-direction:column; gap:.8rem; }
+  .files{ display:grid; gap:.8rem; grid-template-columns:1fr; }
+  @media (min-width:800px){ .files{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .fname{ font-family:var(--font-mono); font-size:.78rem; color:var(--amber); letter-spacing:.06em; margin-bottom:.3rem; display:block; }
+  .verdict{ font-family:var(--font-mono); font-size:.88rem; padding:.45em .9em; border-radius:8px; width:max-content; max-width:100%; }
+  .verdict.bad{ background:color-mix(in srgb, var(--amber) 20%, transparent); color:var(--amber); }
+  .verdict.ok{ background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--accent); }
+
+  /* anatomia de uma regra */
+  .k-seletor{ color:var(--accent); } .k-propriedade{ color:var(--amber); } .k-valor{ color:var(--slate); }
+  .k-seletor, .k-propriedade, .k-valor, .k-fim{ border-radius:4px; }
+  body[data-hover="seletor"] .k-seletor, body[data-hover="propriedade"] .k-propriedade,
+  body[data-hover="valor"] .k-valor, body[data-hover="fim"] .k-fim{ animation:glow .9s ease-in-out infinite; }
+  .legend{ display:flex; flex-wrap:wrap; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; }
+  .legend span{ background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.3em .85em; }
+  .semi.miss::after{ content:"\2190 faltou!"; color:#ff6b5e; font-size:.8em; margin-left:.4rem; }
+  .s-h1{ font-family:"Times New Roman", serif; font-weight:700; margin:0; color:#16a89c; font-size:40px; line-height:1.1; transition:all .35s ease; }
+  .s-h1.broken{ color:#1a1a1a; font-size:32px; }
+
+  /* amostras */
+  .sample{ color-scheme:light; background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px; padding:1.2rem; box-shadow:var(--shadow); font-family:"Times New Roman", serif; min-height:7rem; }
+  .sample p{ margin:0; padding:.6rem .8rem; border-radius:6px; transition:all .25s ease; }
+  .swatches{ display:flex; flex-wrap:wrap; gap:.45rem; }
+  .sw{ font-family:var(--font-mono); font-size:.76rem; border:2px solid var(--line); border-radius:8px; padding:.35em .6em; cursor:pointer; color:#111; }
+  .sw:hover{ border-color:var(--accent); }
+  .sw.dark{ color:#fff; }
+
+  /* caixa: diagrama */
+  .bm{ max-width:560px; }
+  .bm-margin, .bm-border, .bm-padding, .bm-content{ position:relative; border-radius:6px; transition:filter .2s; }
+  .bm-tag{ position:absolute; top:.25rem; left:.55rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#1a1a1a; font-weight:500; pointer-events:none; }
+  .bm-margin{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.38) 8px 16px); padding:2.1rem 1.4rem 1.4rem; border:2px dashed #f2a63b; cursor:help; }
+  .bm-border{ background:#4f7cac; padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-border .bm-tag{ color:#fff; }
+  .bm-padding{ background:rgba(188,210,48,.92); padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-content{ background:#16a89c; color:#fff; padding:1.3rem .6rem; text-align:center; font-family:var(--font-mono); cursor:help; }
+  .bm-content .bm-tag{ display:none; }
+  body[data-hover="margin"] .bm-margin, body[data-hover="border"] .bm-border,
+  body[data-hover="padding"] .bm-padding, body[data-hover="content"] .bm-content{ animation:glow .9s ease-in-out infinite; filter:brightness(1.15); }
+
+  /* caixa: laboratório */
+  .mstage{ min-height:310px; display:grid; place-items:center; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .mwrap{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.35) 8px 16px); outline:1px dashed #f2a63b; transition:padding .12s; }
+  .mbox{ border-style:solid; border-color:#4f7cac; background:rgba(188,210,48,.95); background-clip:padding-box; transition:padding .12s, border-width .12s; }
+  .mcontent{ background:#16a89c; color:#fff; height:70px; display:grid; place-items:center; font-family:var(--font-mono); font-size:.8rem; transition:width .12s; }
+
+  /* padding: 1, 2, 3 ou 4 valores */
+  .sh-grid{ display:grid; grid-template-columns:auto auto auto; grid-template-rows:auto auto auto; gap:.35rem; align-items:center; justify-items:center; justify-content:center; }
+  .sh-b{ font-family:var(--font-mono); font-size:.85rem; color:var(--accent); min-width:4.2rem; text-align:center; }
+  .sh-box{ background:rgba(188,210,48,.95); border:2px solid #4f7cac; transition:padding .2s ease; }
+  .sh-in{ background:#16a89c; color:#fff; font-family:var(--font-mono); font-size:.8rem; padding:.9rem 1rem; }
+
+  /* borda */
+  .bdbox{ width:150px; height:150px; display:grid; place-items:center; text-align:center; font-family:var(--font-mono); font-size:.8rem; background:rgba(22,168,156,.18); transition:all .15s; }
+
+  /* position */
+  .stack{ display:flex; flex-direction:column; gap:.5rem; width:min(100%,300px); padding:1rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; }
+  .blk{ background:var(--slate); color:#0c1f2e; font-family:var(--font-mono); font-weight:500; padding:.8rem 1rem; border-radius:8px; height:3rem; display:flex; align-items:center; }
+  .slot{ border:2px dashed var(--ink-dim); border-radius:8px; height:3rem; }
+  .slot .blk{ background:var(--accent); color:var(--accent-ink); width:calc(100% + 0px); transition:top .15s, left .15s; }
+  .slot .blk.moved{ width:60%; }
+  .ign{ opacity:.55; text-decoration:line-through; }
+  .pg{ position:relative; border:2px dashed var(--ink-dim); border-radius:12px; padding:2.2rem 1.2rem 1.2rem; height:310px; background:var(--bg-elev); }
+  .pg-l, .pr-l{ position:absolute; top:.4rem; left:.7rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); }
+  .pr{ position:static; margin:1.6rem 0 0 auto; width:68%; height:190px; border:2px solid var(--accent); border-radius:10px; background:color-mix(in srgb, var(--accent) 10%, transparent); }
+  .pr.rel{ position:relative; }
+  .pr-l{ position:static; display:block; padding:.4rem .7rem; color:var(--accent); }
+  .ch{ position:absolute; width:38px; height:38px; border-radius:8px; background:var(--amber); color:#3a2300; display:grid; place-items:center; font-size:1.2rem; z-index:2; }
+  .ch.pop{ animation:pop .35s ease; }
+
+  /* card de personagem */
+  .card{ background:#fff; color:#1a1a1a; font-family:"Times New Roman", serif; max-width:280px; transition:all .45s ease; }
+  .card h3{ margin:0 0 .3em; font-size:1.4em; font-family:inherit; text-transform:none; }
+  .card p{ margin:0; }
+  .ln.new{ background:color-mix(in srgb, var(--accent) 26%, transparent); border-radius:4px; }
+  .quiz-opt{ text-align:left; }
+  .quiz-opt.right{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .quiz-opt.wrong{ background:color-mix(in srgb, #ff6b5e 25%, transparent); border-color:#ff6b5e; }
+  .fb{ min-height:3rem; }
+
+  /* anotações do professor (nunca aparecem pro aluno sem apertar N) */
+  #notesPanel{
+    position:fixed; right:12px; bottom:52px; width:min(390px,92vw); max-height:72vh; overflow:auto; z-index:40;
+    background:var(--bg-elev); border:1px solid var(--amber); border-radius:12px; padding:.9rem 1.05rem;
+    box-shadow:var(--shadow); font-size:.9rem; line-height:1.45;
+  }
+  #notesPanel[hidden]{ display:none; }
+  #notesPanel .np-h{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:.4rem; }
+  #notesPanel h4{ margin:.7rem 0 .2rem; font-family:var(--font-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); font-weight:500; }
+  #notesPanel ul{ margin:0; padding-left:1.1rem; } #notesPanel li{ margin:.15rem 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    .glow, .ch.pop, body[data-hover] *{ animation:none !important; }
+  }
+
+  /* ===== Tema VS Code Dark+ nos blocos de código ===== */
+  pre.code{
+    background:#1e1e1e; color:#d4d4d4; border:1px solid #3c3c3c; border-radius:8px;
+    font-family:Consolas, "Cascadia Code", "Cascadia Mono", "Courier New", monospace;
+    font-size:clamp(.85rem,1.35vw,1.05rem); line-height:1.55; padding:1rem 1.2rem;
+    box-shadow:0 10px 30px -16px rgba(0,0,0,.6); color-scheme:dark;
+  }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.4rem); }
+  pre.code .t{ color:#569cd6; }
+  pre.code .at{ color:#9cdcfe; }
+  pre.code .v{ color:#ce9178; }
+  pre.code .n{ color:#b5cea8; }
+  pre.code .sel{ color:#d7ba7d; }
+  pre.code .c, pre.code .hint{ color:#6a9955; font-style:italic; font-family:inherit; font-size:inherit; }
+  pre.code .prop{ color:#9cdcfe; border-bottom-color:#9cdcfe; }
+  pre.code .prop:hover, pre.code .prop:focus-visible{ background:rgba(86,156,214,.28); }
+  pre.code .k-seletor{ color:#d7ba7d; } pre.code .k-propriedade{ color:#9cdcfe; } pre.code .k-valor{ color:#ce9178; }
+  pre.code .ln.new{ background:rgba(255,255,255,.1); }
+  pre.code .ign{ opacity:.5; }
+  .fname{ color:#cccccc; background:#2d2d2d; display:inline-block; padding:.2em .8em; border-radius:6px 6px 0 0; margin-bottom:0; border:1px solid #3c3c3c; border-bottom:none; }
+  .fname + pre.code{ border-top-left-radius:0; }
+
+  /* ===== CSS 4: Flexbox ===== */
+  .fxlab{ display:flex; flex-direction:column; gap:.8rem; position:relative; z-index:6; min-width:0; }
+  .fxlab .goal{ background:color-mix(in srgb, var(--amber) 16%, transparent); border-left:4px solid var(--amber); border-radius:0 8px 8px 0; padding:.6rem .9rem; font-size:1.02rem; }
+  .fx-grid{ display:grid; gap:1rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .fx-grid{ grid-template-columns:1fr 1.15fr; align-items:start; } }
+  .fx-l, .fx-r{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .fx-g{ display:flex; flex-direction:column; gap:.3rem; }
+  .fx-gl{ font-family:var(--font-mono); font-size:.78rem; color:var(--ink-dim); width:max-content; }
+  .fx-g .seg .btn{ font-size:.78rem; padding:.35em .7em; }
+  .fx-stage{ background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .fx{
+    border:2px dashed var(--ink-dim); border-radius:10px; background:color-mix(in srgb, var(--accent) 7%, transparent);
+    padding:6px; max-width:100%; min-width:0;
+  }
+  .cube{
+    width:52px; height:52px; flex:none; border-radius:8px; display:grid; place-items:center;
+    font-family:var(--font-mono); font-weight:700; font-size:1.05rem; color:#0c1f2e; user-select:none;
+    box-shadow:0 3px 8px -3px rgba(0,0,0,.5); flex-direction:column; line-height:1.1;
+  }
+  .cube small{ font-size:.55rem; font-weight:500; display:block; }
+  .fx.vary .cube{ height:auto; min-height:0; padding:.35rem 0; }
+  .fx.pick .cube{ cursor:pointer; width:70px; }
+  .fx-axis{ min-height:1.4rem; }
+  .vd{ font-family:var(--font-mono); font-size:.8rem; padding:.15em .7em; border-radius:999px; margin-left:.4rem; white-space:nowrap; }
+  .vd.ok{ background:var(--accent); color:var(--accent-ink); }
+  .vd.no{ background:color-mix(in srgb, #ff6b5e 25%, transparent); color:#ff8f84; }
+
+  /* display: block, inline, inline-block */
+  .dsc{ background:var(--bg-elev); border:2px dashed var(--ink-dim); border-radius:10px; padding:10px; min-height:140px; color:var(--ink); font-family:var(--font-body); line-height:1.9; }
+  .dsb{ width:90px; height:46px; background:#2ec9bd; color:#0c1f2e; font-family:var(--font-mono); font-weight:700; text-align:center; line-height:46px; border-radius:6px; margin:2px 0; }
+  .dsb:nth-child(2){ background:#f4ac4a; } .dsb:nth-child(3){ background:#c4da3c; }
+
+  /* mini site: cards em linha */
+  .msite{ background:#eef1f5; border-radius:12px; overflow:hidden; font-family:Arial,sans-serif; color:#1f2933; box-shadow:var(--shadow); }
+  .msite header{ background:#123f63; color:#fff; padding:14px 18px; }
+  .msite header .logo{ margin:0 0 6px; font-size:1.2rem; font-weight:700; }
+  .msite nav a{ color:#2ec9bd; margin-right:14px; font-size:.95rem; }
+  .msite nav{ transition:all .3s; }
+  .msite main{ padding:14px; }
+  .msite .cartao{ background:#fff; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,.12); padding:14px 16px; margin:8px 0; font-size:.95rem; }
+  .msite .cartao b{ display:block; }
+  .msite.on nav{ display:flex; gap:16px; justify-content:center; }
+  .msite.on nav a{ margin:0; }
+  .msite.on main{ display:flex; gap:14px; }
+  .msite.on .cartao{ margin:0; flex:1; }
+
+  /* controles só do professor (aparecem com N) */
+  .tctl{ display:none !important; }
+  body.notes-open .tctl{ display:block !important; }
+  body.notes-open .seg.tctl{ display:flex !important; }
+  /* o conteúdo precisa ficar acima das zonas invisíveis de avançar/voltar */
+  .slide .demo, .slide .tagtable, .slide .kv, .slide .tgrid{ position:relative; z-index:6; }
+  .fxlab .fname{ display:block; width:max-content; }
+
+  /* alvos do projeto */
+  .tgrid{ display:grid; gap:.7rem; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+  .tgt{ background:var(--bg-elev); border:1px solid var(--line); border-radius:10px; padding:.6rem; display:flex; flex-direction:column; gap:.4rem; }
+  .tgt .tl{ font-family:var(--font-mono); font-size:.75rem; color:var(--accent); }
+  .tgt .tf{ display:flex; height:84px; border:1px dashed var(--ink-dim); border-radius:6px; padding:3px; overflow:hidden; }
+  .tgt .cube{ width:22px; height:22px; font-size:.65rem; border-radius:4px; }
+
+  /* ===== Calculadora: código digitado + resultado ao vivo ===== */
+  .live{ display:grid; gap:1rem; grid-template-columns:1fr; position:relative; z-index:6; }
+  @media (min-width:900px){ .live{ grid-template-columns:1.25fr 1fr; align-items:start; } }
+  .live .pane{ display:flex; flex-direction:column; min-width:0; }
+  .live pre.code{ min-height:18rem; }
+  .live pre.code .ln{ min-height:1.55em; }
+  .live pre.code .ln.new{ background:rgba(255,255,255,.08); }
+  .caret{ display:inline-block; width:.55em; height:1.1em; vertical-align:-.15em; background:#aeafad; animation:blink 1s steps(1) infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+  .browser{ border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); background:#fff; }
+  .browser .bar{ display:flex; align-items:center; gap:.4rem; background:#dfe3e8; padding:.45rem .7rem; font-family:var(--font-mono); font-size:.72rem; color:#56606b; }
+  .browser .bar i{ width:.65rem; height:.65rem; border-radius:50%; background:#c4c9cf; }
+  .browser .bar span{ margin-left:.5rem; background:#fff; border-radius:999px; padding:.1rem .7rem; }
+  .browser .render{ border:none; border-radius:0; box-shadow:none; min-height:18rem; display:block; }
+  pre.code .tg{ color:#569cd6; } pre.code .an{ color:#9cdcfe; } pre.code .av{ color:#ce9178; }
+  .capa{ display:grid; gap:2rem; align-items:center; grid-template-columns:1fr; }
+  @media (min-width:900px){ .capa{ grid-template-columns:1.3fr 1fr; } }
+  .capa > div{ display:flex; flex-direction:column; gap:1rem; }
+  .capa .render{ display:grid; place-items:center; min-height:22rem; background:#eef1f5; }
+
+  /* slides de código: duas "abas" 50/50, tela quase cheia, sem texto */
+  .slide:has(.live){ padding:clamp(.8rem,2vh,1.4rem) clamp(.8rem,1.6vw,1.6rem) clamp(3rem,7vh,4rem); overflow:hidden; }
+  .slide:has(.live) > *{ max-width:none; }
+  .slide .live.wide{ max-width:none; flex:1; min-height:0; grid-template-columns:1fr 1fr; grid-template-rows:minmax(0,1fr); align-items:stretch; gap:clamp(.6rem,1.2vw,1.2rem); }
+  .live .pane{ min-height:0; }
+  .live pre.code{ flex:1; min-height:0; overflow:auto; font-size:clamp(1rem,1.7vw,1.6rem); }
+  .live .browser{ height:100%; display:flex; flex-direction:column; }
+  .live .browser .render{ flex:1; min-height:0; display:grid; place-items:center; background:#eef1f5; overflow:auto; }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="brandbar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="zones" aria-hidden="true">
+      <button class="zone prev" id="zprev" tabindex="-1" aria-label="Slide anterior"></button>
+      <span class="zone spacer"></span>
+      <button class="zone next" id="znext" tabindex="-1" aria-label="Próximo slide"></button>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide" aria-label="Slide 1">
+      <div class="capa wide">
+        <div>
+          <p class="eyebrow">Projeto &middot; Calculadora parte 1</p>
+          <h1>Calculadora: o <em>visual</em></h1>
+          <p class="subtitle">HTML pronto, layout com grid. A lógica fica pra aula de JS.</p>
+        </div>
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i><span>calculadora/index.html</span></div>
+          <div class="render" id="capaCalc"></div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Hoje a gente monta essa calculadora. Só o visual: nas próximas aulas o JS faz ela funcionar.</li>
+          <li>Reparem nos botões <b>+</b> e <b>=</b>, mais altos, e no <b>0</b>, mais largo. É isso que vai pedir uma ferramenta nova.</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>0:00 &rarr; 0:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" aria-label="Slide 2">
+      <div class="live wide" id="liveTable" data-lang="html" data-file="index.html"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: começa sem a table &rarr; ↓ mostra &lt;table&gt; &rarr; ↓ 1ª linha &rarr; todas as linhas sem span (o + e o = ficam fora do lugar, sobra buraco) &rarr; rowspan e colspan (encaixa).</li>
+          <li>O visual das células já está aplicado escondido, igual ao bloco do visor.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Muita calculadora antiga na internet é feita assim. E funciona: <code>rowspan="2"</code> faz a célula ocupar duas linhas.</li>
+          <li>O problema: <code>&lt;table&gt;</code> é pra <b>dados</b> (horários, preços, planilha). Leitor de tela anuncia &ldquo;tabela com 5 linhas&rdquo;, e o layout fica preso no HTML.</li>
+          <li>Guardem a ideia de &ldquo;ocupar duas casas&rdquo;. Ela volta no jeito certo.</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>~1 min.</li></ul>
+      </aside>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" aria-label="Slide 3">
+      <div class="live wide" id="liveHtml" data-lang="html" data-file="index.html"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>↓ digita o próximo pedaço do código; o navegador atualiza quando termina. ↓ durante a digitação completa na hora. ↑ volta.</li>
+          <li>Passos: caixa + visor &rarr; ↓ digita todos os botões de uma vez.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Uma <code>div</code> por fora, o visor, e uma <code>div</code> só com os botões. Esta é a que vai virar grade.</li>
+          <li>Os botões altos e o largo já ganham uma classe agora (<code>alto</code>, <code>largo</code>). Vamos usar já já.</li>
+          <li>Sem CSS fica feio assim mesmo: os botões só vão um do lado do outro, como palavras.</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>0:30 &rarr; 1:30 &middot; no zip o HTML já vem pronto, não precisa digitar junto</li></ul>
+      </aside>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" aria-label="Slide 4">
+      <div class="live wide" id="liveFlex" data-lang="css" data-file="estilo.css"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: display: flex &rarr; ↓ digita todo o resto (wrap + gap, botões com 50px).</li>
+          <li>Todos os botões do mesmo tamanho, 4 por linha, como uma tabela.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Com o que vimos na aula passada: flex + wrap. Quatro por linha, ficou bom!</li>
+          <li>Agora o + alto&hellip; ele cresce, mas a linha cresce junto. O flex pensa em <b>uma fila de cada vez</b>: não sabe que existe uma linha de baixo.</li>
+          <li>Pra um botão ocupar duas linhas, precisamos de algo que enxergue linhas <b>e</b> colunas.</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>~1 min. Não tentar &ldquo;consertar&rdquo; o flex.</li></ul>
+      </aside>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" aria-label="Slide 5">
+      <div class="live wide" id="liveGrid" data-lang="css" data-file="estilo.css"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: display: grid &rarr; 4 colunas de 50px &rarr; troca pra 1fr &rarr; gap &rarr; estilo dos botões &rarr; .alto (span 2) &rarr; .largo (span 2).</li>
+          <li>O visual do visor e da caixa já está aplicado (bloco anterior) e aparece só como comentário.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Flexbox é pra <b>uma fila</b>. Calculadora é um <b>tabuleiro</b>: linhas e colunas ao mesmo tempo. Pra isso existe o <code>grid</code>.</li>
+          <li><code>grid-template-columns</code> = o molde das colunas. Primeiro 4 colunas de 50px: desenhei o tabuleiro.</li>
+          <li>Troca pra <code>1fr</code>: fr = fração, uma fatia. O espaço é cortado em 4 fatias iguais, sem fazer conta.</li>
+          <li><code>span 2</code>: &ldquo;ocupe duas casas&rdquo;. Reparem que os outros botões se encaixam sozinhos.</li>
+          <li><code>height: auto</code> no alto: senão os 52px travam ele.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul><li>Colocar <code>display: grid</code> nos botões em vez da caixa <code>.teclas</code>. Igual ao flex: a regra vai no pai.</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>3:00 &rarr; 5:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" aria-label="Slide 6">
+      <div class="live wide" id="liveGrid5" data-lang="css" data-file="estilo.css"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Um só ↓: muda para 5 colunas, os operadores vão pra 5ª coluna (<code>.op, .alto</code>), e a caixa fica mais larga.</li>
+          <li>O HTML não muda (só as classes <code>op</code> que já estavam lá). A ordem dos números fica diferente, de propósito.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Olha o poder do grid: mudei o layout inteiro só no CSS. Na table eu teria que reescrever o HTML.</li>
+          <li>Cinco <code>1fr</code> +<code>grid-column: 5</code> manda os operadores pro lado. <code>grid-auto-flow: dense</code> preenche os buracos.</li>
+        </ul>
+      </aside>
+    </section>
+
+  </div>
+
+  <div class="chrome">
+    <span class="label" id="partLabel">Calculadora</span>
+    <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
+    <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+    <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
+    <span class="count" id="count">01 / 05</span>
+    <button id="btnTheme" aria-label="Alternar tema">tema</button>
+  </div>
+</div>
+
+<div id="notesPanel" hidden></div>
+
+<script>
+(function(){
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- o projeto ---------- */
+  var HTML_LINES = {
+    abre:  ['<div class="calculadora">', '  <div class="visor">0</div>', '  <div class="teclas">'],
+    l1:    ['    <button>C</button>', '    <button class="op">/</button>', '    <button class="op">*</button>', '    <button class="op">-</button>'],
+    l2:    ['    <button>7</button>', '    <button>8</button>', '    <button>9</button>', '    <button class="alto">+</button>'],
+    l3:    ['    <button>4</button>', '    <button>5</button>', '    <button>6</button>'],
+    l4:    ['    <button>1</button>', '    <button>2</button>', '    <button>3</button>', '    <button class="alto">=</button>'],
+    l5:    ['    <button class="largo">0</button>', '    <button>.</button>'],
+    fecha: ['  </div>', '</div>']
+  };
+  function H(){ var o = []; for (var a = 0; a < arguments.length; a++) o = o.concat(HTML_LINES[arguments[a]]); return o; }
+  var FULL_HTML = H('abre','l1','l2','l3','l4','l5','fecha').join('\n');
+  /* no flexbox só o + é alto: o problema fica claro, sem bagunça */
+  var FLEX_HTML = FULL_HTML.replace('<button class="alto">=</button>', '<button>=</button>');
+
+  /* bloco anterior (visor e caixa): aplicado, mas fora do código mostrado */
+  var BASE_CSS = '.calculadora{ width:260px; background:#1f2933; padding:16px; border-radius:16px; font-family:Arial, sans-serif; }\n'
+    + '.visor{ background:#cfe8d5; color:#1f2933; font-size:32px; text-align:right; padding:8px 12px; border-radius:8px; margin-bottom:12px; font-family:monospace; }';
+  var GRID = {
+    abre:  ['.teclas {'],
+    disp:  ['  display: grid;'],
+    cols50:['  grid-template-columns: 50px 50px 50px 50px;'],
+    cols:  ['  grid-template-columns: 1fr 1fr 1fr 1fr;'],
+    gap:   ['  gap: 8px;'],
+    fecha: ['}'],
+    btn:   ['', 'button {', '  height: 52px;', '  font-size: 20px;', '  border: none;', '  border-radius: 10px;', '}'],
+    alto:  ['', '.alto {', '  grid-row: span 2;', '  height: auto;', '}'],
+    largo: ['', '.largo {', '  grid-column: span 2;', '}']
+  };
+  function G(){ var o = ['/* .calculadora e .visor: bloco anterior */', '']; for (var a = 0; a < arguments.length; a++) o = o.concat(GRID[arguments[a]]); return o; }
+  var FULL_CSS = G('abre','disp','cols','gap','fecha','btn','alto','largo').join('\n')
+    + '\n.teclas button:hover{ background:#2ec9bd; }';
+
+  /* grid em 5 colunas: só CSS, o HTML não muda */
+  var G5 = ['/* .calculadora e .visor: bloco anterior */', '', '.calculadora {', '  width: 330px;', '}', '',
+    '.teclas {', '  display: grid;', '  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;', '  grid-auto-flow: dense;', '  gap: 8px;', '}']
+    .concat(GRID.btn)
+    .concat(['', '.op, .alto {', '  grid-column: 5;', '  grid-row: auto;', '  height: auto;', '}'], GRID.largo);
+
+  /* tentativa 1: table (o visual das células fica escondido, como o bloco anterior) */
+  var TB = {
+    abre:  ['<div class="calculadora">', '  <div class="visor">0</div>', '  <table class="teclas">'],
+    base:  ['<div class="calculadora">', '  <div class="visor">0</div>'],
+    fecha0:['</div>'],
+    tab:   ['  <table class="teclas">', '  </table>'],
+    r1:   ['    <tr>', '      <td>C</td> <td>/</td> <td>*</td> <td>-</td>', '    </tr>'],
+    r2:    ['    <tr>', '      <td>7</td> <td>8</td> <td>9</td> <td>+</td>', '    </tr>'],
+    r2s:   ['    <tr>', '      <td>7</td> <td>8</td> <td>9</td> <td rowspan="2">+</td>', '    </tr>'],
+    r3:    ['    <tr>', '      <td>4</td> <td>5</td> <td>6</td>', '    </tr>'],
+    r4:    ['    <tr>', '      <td>1</td> <td>2</td> <td>3</td> <td>=</td>', '    </tr>'],
+    r4s:   ['    <tr>', '      <td>1</td> <td>2</td> <td>3</td> <td rowspan="2">=</td>', '    </tr>'],
+    r5:    ['    <tr>', '      <td>0</td> <td>.</td>', '    </tr>'],
+    r5s:   ['    <tr>', '      <td colspan="2">0</td> <td>.</td>', '    </tr>'],
+    fecha: ['  </table>', '</div>']
+  };
+  function T(){ var o = []; for (var a = 0; a < arguments.length; a++) o = o.concat(TB[arguments[a]]); return o; }
+  var TABLE_CSS = '.teclas{ table-layout:fixed; border-spacing:8px; margin:-8px; width:calc(100% + 16px); }\n'
+    + '.teclas td{ background:#e4ecf3; height:52px; text-align:center; font-size:20px; border-radius:10px; }';
+
+  /* tentativa 2: flexbox */
+  var FX = {
+    abre:  ['.teclas {'],
+    disp:  ['  display: flex;'],
+    wrap:  ['  flex-wrap: wrap;', '  gap: 8px;'],
+    fecha: ['}'],
+    btn:   ['', 'button {', '  width: 50px;', '  height: 52px;', '  font-size: 20px;', '  border: none;', '  border-radius: 10px;', '}']
+  };
+  function F(){ var o = ['/* .calculadora e .visor: bloco anterior */', '']; for (var a = 0; a < arguments.length; a++) o = o.concat(FX[arguments[a]]); return o; }
+
+  var HIDDEN = { liveTable: BASE_CSS + '\n' + TABLE_CSS };
+
+  /* passos em que aparece uma 2ª calculadora, mais larga (50px x 1fr) */
+  var DUAL = { liveGrid: [3, 4] };
+  var LARGA_HTML = FULL_HTML.replace('class="calculadora"', 'class="calculadora larga"');
+
+  var STEPS = {
+    liveTable: [
+      T('base','fecha0'),
+      T('base','tab','fecha0'),
+      T('abre','r1','fecha'),
+      T('abre','r1','r2','r3','r4','r5','fecha'),
+      T('abre','r1','r2s','r3','r4s','r5s','fecha')
+    ],
+    liveFlex: [
+      F('abre','fecha'),
+      F('abre','disp','fecha'),
+      F('abre','disp','wrap','fecha','btn')
+    ],
+    liveHtml: [
+      H('abre','fecha'),
+      H('abre','l1','l2','l3','l4','l5','fecha')
+    ],
+    liveGrid: [
+      G('abre','fecha'),
+      G('abre','disp','fecha'),
+      G('abre','disp','cols50','fecha'),
+      G('abre','disp','cols50','fecha'), /* mesmo código, agora com a 2ª calculadora */
+      G('abre','disp','cols','fecha'),
+      G('abre','disp','cols','gap','fecha'),
+      G('abre','disp','cols','gap','fecha','btn'),
+      G('abre','disp','cols','gap','fecha','btn','alto'),
+      G('abre','disp','cols','gap','fecha','btn','alto','largo')
+    ],
+    liveGrid5: [
+      G('abre','disp','cols','gap','fecha','btn','alto','largo'),
+      G5
+    ]
+  };
+
+  /* ---------- destaque de sintaxe (VS Code) ---------- */
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function hlHTML(line){
+    return esc(line).replace(/(&lt;\/?)([\w-]+)((?:\s+[\w-]+="[^"]*")*)(&gt;)/g, function(_, a, name, attrs, b){
+      attrs = attrs.replace(/([\w-]+)=("[^"]*")/g, '<span class="an">$1</span>=<span class="av">$2</span>');
+      return '<span class="tg">' + a + name + '</span>' + attrs + '<span class="tg">' + b + '</span>';
+    });
+  }
+  function hlCSS(line){
+    var m;
+    if (/^\s*\/\*/.test(line)) return '<span class="c">' + esc(line) + '</span>';
+    if ((m = line.match(/^(\s*)([^{}:]+?)(\s*\{)$/))) return m[1] + '<span class="sel">' + esc(m[2]) + '</span>' + m[3];
+    if ((m = line.match(/^(\s*)([\w-]+)(:\s*)(.*?)(;?)$/))) {
+      var v = m[4].replace(/(\S+)/g, function(t){ return '<span class="' + (/^[#\d.-]/.test(t) ? 'n' : 'v') + '">' + esc(t) + '</span>'; });
+      return m[1] + '<span class="at">' + m[2] + '</span>' + m[3] + v + m[5];
+    }
+    return esc(line);
+  }
+
+  /* ---------- painel: código digitado à esquerda, navegador à direita ---------- */
+  function scopeCSS(css, id){
+    return css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\})\s*([^{}]+)\{/g, function(_, b, sel){
+      return b + sel.split(',').map(function(s){ return '#' + id + ' ' + s.trim(); }).join(', ') + '{';
+    });
+  }
+  var uid = 0;
+  function mountRender(box, html){
+    var id = 'r' + (++uid);
+    box.innerHTML = '<style></style><div id="' + id + '">' + html + '</div>';
+    return { id:id, style:box.firstChild, root:box.lastChild };
+  }
+
+  function initLive(root){
+    var lang = root.getAttribute('data-lang'), steps = STEPS[root.id], hl = lang === 'html' ? hlHTML : hlCSS;
+    root.innerHTML = '<div class="pane"><span class="fname">' + root.getAttribute('data-file') + '</span><pre class="code"></pre></div>'
+      + '<div class="pane"><div class="browser"><div class="bar"><i></i><i></i><i></i><span>calculadora/index.html</span></div><div class="render"></div></div></div>';
+    var pre = $('pre.code', root), view = mountRender($('.render', root), lang === 'html' ? '' : (root.id === 'liveFlex' ? FLEX_HTML : DUAL[root.id] ? FULL_HTML + LARGA_HTML : FULL_HTML));
+    var k = 0, timer = null, typing = null;
+    if (lang === 'html' && HIDDEN[root.id]) view.style.textContent = scopeCSS(HIDDEN[root.id], view.id);
+
+    function show(lines){
+      if (lang === 'html') view.root.innerHTML = lines.join('\n');
+      else {
+        var extra = '';
+        if (DUAL[root.id]) extra = DUAL[root.id].indexOf(k) > -1
+          ? '\n.larga{ width:400px; margin-top:16px; }'
+          : '\n.larga{ display:none; }';
+        view.style.textContent = scopeCSS(BASE_CSS + '\n' + lines.join('\n') + extra, view.id);
+      }
+    }
+    function paint(lines, fresh){
+      pre.innerHTML = lines.map(function(l, x){ return '<span class="ln' + (fresh[x] ? ' new' : '') + '">' + hl(l) + '</span>'; }).join('');
+    }
+    function finish(){
+      if (!typing) return;
+      clearTimeout(timer); var t = typing; typing = null;
+      paint(t.lines, t.fresh); show(t.lines);
+    }
+    function go(nk, animate){
+      finish();
+      var prev = steps[k] || [], lines = steps[nk]; k = nk;
+      var pool = prev.slice(), fresh = lines.map(function(l){ var p = pool.indexOf(l); if (p > -1){ pool.splice(p, 1); return false; } return true; });
+      if (!animate || REDUCE || !fresh.some(Boolean)){ paint(lines, animate ? fresh : []); show(lines); return; }
+      typing = { lines:lines, fresh:fresh };
+      pre.innerHTML = lines.map(function(l, x){ return '<span class="ln' + (fresh[x] ? ' new' : '') + '">' + (fresh[x] ? '' : hl(l)) + '</span>'; }).join('');
+      var spans = $$('.ln', pre), queue = [];
+      fresh.forEach(function(f, x){ if (f) queue.push(x); });
+      /* duração total fixa (~DUR ms), não importa o tamanho do trecho */
+      var DUR = 1000, FRAME = 16, qi = 0, ci = 0, acc = 0, caret = document.createElement('span'); caret.className = 'caret';
+      var total = 0; queue.forEach(function(x){ total += lines[x].length; });
+      var perTick = total / (DUR / FRAME);
+      (function tick(){
+        if (!typing) return;
+        if (qi >= queue.length){ finish(); return; }
+        acc += perTick; var left = Math.floor(acc); acc -= left;
+        while (left > 0 && qi < queue.length){
+          var x = queue[qi], txt = lines[x], n = Math.min(left, txt.length - ci);
+          ci += n; left -= n;
+          spans[x].textContent = txt.slice(0, ci);
+          if (ci >= txt.length){ spans[x].innerHTML = hl(txt); qi++; ci = 0; }
+          else spans[x].appendChild(caret);
+        }
+        timer = setTimeout(tick, FRAME);
+      })();
+    }
+    root.addEventListener('step', function(e){
+      if (typing && e.detail > 0){ finish(); return; }
+      var nk = Math.max(0, Math.min(steps.length - 1, k + e.detail));
+      if (nk !== k) go(nk, e.detail > 0);
+    });
+    paint(steps[0], []); show(steps[0]);
+  }
+  $$('.live').forEach(initLive);
+
+  /* capa: a calculadora pronta */
+  (function(){
+    var v = mountRender($('#capaCalc'), FULL_HTML);
+    v.style.textContent = scopeCSS(BASE_CSS + '\n' + FULL_CSS, v.id);
+  })();
+
+  /* ---------- navegação + anotações ---------- */
+  var slides = $$('.slide'), total = slides.length;
+  var pfill = $('#pfill'), count = $('#count'), partLabel = $('#partLabel'), panel = $('#notesPanel');
+  var i = 0, pop = null;
+  function pad(n){ return (n<10?'0':'') + n; }
+  function notesHTML(){ var n = slides[i].querySelector('aside.notes'); return n ? n.innerHTML : '<h4>Sem anotações</h4>'; }
+  function updateNotes(){
+    panel.innerHTML = '<div class="np-h">Só você vê &middot; slide ' + (i+1) + ' &middot; N fecha &middot; P abre janela</div>' + notesHTML();
+    if (pop && !pop.closed){ pop.document.body.innerHTML = '<div class="np-h">Slide ' + (i+1) + ' / ' + total + '</div>' + notesHTML(); }
+  }
+  function openPop(){
+    pop = window.open('', 'calc01notas', 'width=520,height=720');
+    if (!pop){ panel.hidden = false; return; }
+    var d = pop.document; d.title = 'Notas do professor';
+    d.head.innerHTML = '<meta charset="utf-8"><style>body{font:16px/1.5 system-ui,sans-serif;background:#0c1f2e;color:#e4ecf3;padding:1rem 1.3rem}h4{font:500 12px monospace;letter-spacing:.1em;text-transform:uppercase;color:#f4ac4a;margin:1.1rem 0 .2rem}ul{margin:0;padding-left:1.2rem}li{margin:.25rem 0}code{background:#123047;padding:.05em .35em;border-radius:4px}.np-h{font:12px monospace;color:#93a6b5}</style>';
+    panel.hidden = true; updateNotes();
+  }
+  function render(){
+    slides.forEach(function(s, x){ s.classList.toggle('active', x === i); s.setAttribute('aria-hidden', x === i ? 'false' : 'true'); });
+    pfill.style.width = ((i+1)/total*100) + '%';
+    count.textContent = pad(i+1) + ' / ' + pad(total);
+    var eb = slides[i].querySelector('.eyebrow');
+    partLabel.textContent = eb ? eb.textContent.replace(/\s+/g,' ').trim() : 'Calculadora';
+    if (history.replaceState) history.replaceState(null, '', '#' + (i+1));
+    updateNotes();
+  }
+  function go(n){ var nx = Math.max(0, Math.min(total-1, n)); if (nx === i) return; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); i = nx; render(); }
+  function next(){ go(i+1); } function prev(){ go(i-1); }
+
+  document.addEventListener('keydown', function(e){
+    var t = e.target, tag = t && t.tagName;
+    if (e.key === 'Escape'){ panel.hidden = true; return; }
+    if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT') return;
+    if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+    if (e.key === 'n' || e.key === 'N'){ panel.hidden = !panel.hidden; return; }
+    if (e.key === 'p' || e.key === 'P'){ openPop(); return; }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      var st = $('.live', slides[i]);
+      if (st){ e.preventDefault(); st.dispatchEvent(new CustomEvent('step', { detail: e.key === 'ArrowDown' ? 1 : -1 })); return; }
+    }
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ' || e.key === 'ArrowDown'){ e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){ e.preventDefault(); prev(); }
+    else if (e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if (e.key === 'End'){ e.preventDefault(); go(total-1); }
+  });
+  $('#btnNext').addEventListener('click', next);
+  $('#btnPrev').addEventListener('click', prev);
+  $('#znext').addEventListener('click', function(){ this.blur(); next(); });
+  $('#zprev').addEventListener('click', function(){ this.blur(); prev(); });
+  var docRoot = document.documentElement;
+  $('#btnTheme').addEventListener('click', function(){
+    var cur = docRoot.getAttribute('data-theme');
+    var isDark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    docRoot.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  if (!isNaN(start) && start >= 1 && start <= total) i = start - 1;
+  render();
+})();
+</script>
+
+</body>
+</html>

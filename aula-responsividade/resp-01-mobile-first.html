@@ -1,0 +1,1280 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>O que é responsividade e mobile-first</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    color-scheme: dark;
+    /* paleta: navy #123f63 / slate #8fa3c4 / teal #16a89c / lime #bcd230 / orange #f2a63b */
+    --navy:#123f63;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+    --font-display:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body:"Barlow", system-ui, -apple-system, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      color-scheme: light;
+      --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+      --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+      --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+    --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+    --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:clamp(15px,1.1vw,18px); line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  .deck{ position:fixed; inset:0; display:grid; grid-template-rows:1fr auto; }
+  .stage{ position:relative; overflow:hidden; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+    padding:clamp(2rem,6vw,5.5rem) clamp(1.6rem,7vw,7rem) clamp(3.2rem,8vh,5rem);
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .34s ease, transform .34s ease, visibility 0s linear .34s;
+    overflow-y:auto;
+  }
+  .slide.active{
+    opacity:1; visibility:visible; transform:none;
+    transition:opacity .38s ease, transform .38s ease;
+  }
+  .slide > *{ max-width:60ch; }
+  .slide .wide{ max-width:min(1080px,92vw); }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0; display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before{ content:""; width:1.8rem; height:2px; background:var(--accent); display:inline-block; }
+
+  h1,h2{ font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.02; text-transform:uppercase; letter-spacing:.005em; }
+  h1{ font-size:clamp(2.9rem,9vw,6.2rem); }
+  h2{ font-size:clamp(2rem,5vw,3.6rem); }
+  h2 em, h1 em{ font-style:normal; color:var(--accent); }
+  h1 code, h2 code{ text-transform:none; font-size:.82em; vertical-align:.04em; }
+
+  .lead{ font-size:clamp(1.15rem,2.1vw,1.7rem); color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+  .slide p{ margin:0; }
+  strong{ font-weight:600; color:var(--ink); }
+  .hl{ color:var(--accent); font-weight:600; }
+  .hl-amber{ color:var(--amber); font-weight:600; }
+
+  code, kbd{
+    font-family:var(--font-mono); font-size:.92em;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:5px;
+    padding:.1em .45em;
+  }
+  kbd{ box-shadow:0 2px 0 var(--line); }
+
+  .subtitle{ font-family:var(--font-mono); color:var(--ink-dim); font-size:clamp(.95rem,1.6vw,1.15rem); letter-spacing:.02em; }
+
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.35rem); }
+  ul.bullets li{ display:flex; gap:.7rem; align-items:baseline; }
+  ul.bullets li::before{ content:"▸"; color:var(--accent); flex:none; }
+
+  .callout{
+    border-left:3px solid var(--amber); background:var(--bg-elev);
+    padding:1rem 1.2rem; border-radius:0 10px 10px 0; font-size:clamp(1.02rem,1.8vw,1.3rem);
+  }
+  .callout.good{ border-color:var(--accent); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:.55rem; }
+  .chips span{
+    font-family:var(--font-mono); font-size:.92rem;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.4em .9em;
+  }
+  .chips.done span{ color:var(--ink-dim); }
+
+  .kv{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.9rem; }
+  .kv > div{ display:flex; flex-direction:column; gap:.3rem; }
+  .kv .k{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .kv .v{ font-size:1.05rem; }
+
+  /* trio de blocos da agenda */
+  .trio{ display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .trio > div{
+    background:var(--bg-elev); border:1px solid var(--line); border-top:4px solid var(--c,var(--accent));
+    border-radius:12px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.5rem;
+  }
+  .trio .k{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:1.6rem; line-height:1; }
+  .trio .tags{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .trio .t1{ --c:var(--accent); } .trio .t2{ --c:var(--amber); } .trio .t3{ --c:var(--lime); }
+
+  /* footer chrome */
+  .chrome{
+    display:flex; align-items:center; gap:1rem;
+    padding:.55rem clamp(1rem,4vw,2.4rem); border-top:1px solid var(--line);
+    background:var(--bg); font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+    z-index:10;
+  }
+  .chrome .label{ letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progress{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; min-width:60px; }
+  .progress__fill{ height:100%; background:var(--accent); width:0; transition:width .35s ease; }
+  .chrome .count{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .chrome button{
+    font:inherit; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line);
+    border-radius:7px; padding:.3em .7em; cursor:pointer;
+  }
+  .chrome button:hover{ color:var(--ink); border-color:var(--accent); }
+  .chrome button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .zones{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+  .zone{ pointer-events:auto; border:none; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; }
+  .zone:focus, .zone:focus-visible{ outline:none; }
+  .zone.prev{ width:28%; }
+  .zone.spacer{ flex:1; cursor:default; pointer-events:none; }
+  .zone.next{ width:40%; }
+
+  /* faixa tricolor no topo */
+  .brandbar{ position:absolute; left:0; right:0; top:0; height:5px; display:flex; z-index:8; }
+  .brandbar i{ flex:1; }
+  .brandbar i:nth-child(1){ background:var(--accent); }
+  .brandbar i:nth-child(2){ background:var(--lime); }
+  .brandbar i:nth-child(3){ background:var(--amber); }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide, .slide.active, .progress__fill{ transition:none; }
+  }
+
+  /* código e demonstração lado a lado */
+  pre.code{
+    font-family:var(--font-mono); font-size:clamp(.78rem,1.3vw,.98rem); line-height:1.6;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; margin:0; overflow-x:auto; color:var(--ink);
+    white-space:pre; tab-size:2;
+  }
+  pre.code .t{ color:var(--accent); }
+  pre.code .at{ color:var(--amber); }
+  pre.code .v{ color:var(--slate); }
+  pre.code .c{ color:var(--ink-dim); font-style:italic; }
+
+  .demo{ display:grid; gap:.9rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .demo{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .demo .pane{ display:flex; flex-direction:column; gap:.45rem; min-width:0; }
+  .demo .pane-label{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-dim);
+  }
+  /* o "navegador": estilos padrão, sem CSS nenhum — e clicável por cima das zonas de navegação */
+  .render{
+    color-scheme:light;
+    position:relative; z-index:6;
+    background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .render :is(h1,h2,h3){ font-family:inherit; text-transform:none; letter-spacing:0; color:inherit; margin:.35em 0; line-height:1.2; }
+  .render h1{ font-size:2em; font-weight:700; }
+  .render h2{ font-size:1.5em; font-weight:700; }
+  .render p{ margin:.7em 0; }
+  .render a{ color:#00e; text-decoration:underline; }
+  .render table{ border-collapse:separate; border-spacing:2px; }
+  .render th, .render td{ padding:1px; text-align:left; }
+  .render th{ font-weight:700; text-align:center; }
+  .render table[border] th, .render table[border] td{ border:1px solid #808080; }
+  .render input, .render button{ font-family:system-ui, sans-serif; font-size:13px; }
+  .render > :first-child{ margin-top:0; }
+  .render > :last-child{ margin-bottom:0; }
+
+  .tagtable{ display:grid; grid-template-columns:auto 1fr; gap:.55rem 1.1rem; align-items:baseline; }
+  .tagtable code{ white-space:nowrap; }
+  .tagtable .grp{
+    grid-column:1/-1; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent); margin-top:.4rem;
+  }
+
+  /* diagrama da página semântica */
+  .layout{ display:grid; gap:.5rem; font-family:var(--font-mono); font-size:.9rem; }
+  .layout > div{
+    border:2px dashed var(--line); border-radius:10px; padding:.8rem 1rem;
+    display:flex; justify-content:space-between; gap:1rem; color:var(--ink-dim);
+  }
+  .layout b{ color:var(--accent); font-weight:500; }
+  .layout .main{ min-height:7rem; align-items:flex-start; }
+  .layout .hd b, .layout .ft b{ color:var(--amber); }
+  .layout .hd, .layout .ft{ border-style:solid; border-color:var(--amber); }
+
+  /* ===== CSS 1: extras ===== */
+  .slide aside.notes{ display:none; }
+  .lab, pre.code, .tabs, .seg, .btns, .swatches{ position:relative; z-index:6; }
+  pre.code .ln{ display:block; }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.5rem); }
+
+  /* dicas ao passar o mouse */
+  .prop{ border-bottom:1px dotted var(--accent); cursor:help; border-radius:2px; transition:background .15s; }
+  .prop:hover, .prop:focus-visible{ background:color-mix(in srgb, var(--accent) 24%, transparent); outline:none; }
+  #tip{
+    position:fixed; z-index:60; max-width:min(330px,86vw); left:0; top:0;
+    background:var(--ink); color:var(--bg); padding:.65rem .85rem; border-radius:10px;
+    font-size:.92rem; line-height:1.4; pointer-events:none; opacity:0; transform:translateY(5px);
+    transition:opacity .15s ease, transform .15s ease; box-shadow:var(--shadow);
+  }
+  #tip.show{ opacity:1; transform:none; }
+  #tip b{ display:block; font-family:var(--font-mono); font-weight:500; font-size:.82rem; letter-spacing:.04em; margin-bottom:.15rem; color:var(--accent-ink); background:var(--accent); width:max-content; padding:.05em .5em; border-radius:4px; }
+
+  @keyframes glow{
+    0%,100%{ box-shadow:0 0 0 0 transparent; }
+    50%{ box-shadow:0 0 0 7px color-mix(in srgb, var(--accent) 55%, transparent); }
+  }
+  @keyframes pop{ 0%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+  .glow{ animation:glow .9s ease-in-out infinite; }
+
+  /* controles */
+  .btn{
+    font-family:var(--font-mono); font-size:.85rem; color:var(--ink); background:var(--bg-elev);
+    border:1px solid var(--line); border-radius:8px; padding:.45em .9em; cursor:pointer;
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .btn:hover{ border-color:var(--accent); }
+  .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn.on{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .btn.big{ font-size:1.05rem; padding:.7em 1.3em; font-weight:500; }
+  .btns, .seg, .tabs{ display:flex; flex-wrap:wrap; gap:.5rem; }
+  .ctl{ display:grid; grid-template-columns:8.5rem 1fr 4rem; align-items:center; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .ctl output{ text-align:right; color:var(--ink); }
+  .ctl select, .ctl input[type=color]{ grid-column:2/4; font:inherit; background:var(--bg-elev); color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.3em .5em; height:2.1rem; }
+  .ctl input[type=text]{ grid-column:2/4; font:inherit; font-size:1rem; background:var(--bg-elev); color:var(--ink); border:1px solid var(--accent); border-radius:7px; padding:.35em .6em; }
+  input[type=range]{ accent-color:var(--accent); width:100%; }
+  .lab{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .hint{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim); }
+  .hint b{ color:var(--amber); font-weight:500; }
+
+  /* a mini-página liga/desliga CSS */
+  .mini{
+    background:#fff; color:#1a1a1a; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem; box-shadow:var(--shadow);
+    transition:background .6s ease, color .6s ease, padding .6s ease, border-radius .6s ease;
+  }
+  .mini h1{ font-family:inherit; text-transform:none; font-size:2em; margin:.3em 0; line-height:1.15; color:inherit; transition:all .6s ease; }
+  .mini p{ margin:.6em 0; transition:all .6s ease; }
+  .mini button{ font-family:inherit; font-size:13px; transition:all .6s ease; }
+  .mini .tag{ display:inline-block; font-family:inherit; font-size:1em; transition:all .6s ease; }
+  .mini.on{ background:#123f63; color:#e4ecf3; font-family:"Barlow", system-ui, sans-serif; padding:1.8rem 1.8rem; border-radius:18px; }
+  .mini.on h1{ font-family:"Barlow Condensed", "Arial Narrow", sans-serif; text-transform:uppercase; color:#2ec9bd; font-size:2.6em; letter-spacing:.01em; }
+  .mini.on p{ color:#c9d6e2; }
+  .mini.on button{ background:#f2a63b; color:#3a2300; border:none; border-radius:999px; padding:.7em 1.4em; font-weight:600; font-size:15px; }
+  .mini.on .tag{ background:#16a89c; color:#fff; border-radius:6px; padding:.1em .6em; font-size:.85em; }
+
+  /* abas de "como o css entra" */
+  .tabs button{ font-family:var(--font-mono); font-size:.9rem; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line); border-radius:8px 8px 0 0; padding:.5em 1em; cursor:pointer; }
+  .tabs button.on{ color:var(--ink); border-color:var(--accent); border-bottom-color:var(--bg-elev); box-shadow:inset 0 3px 0 var(--accent); }
+  .tp{ display:none; }
+  .tp.on{ display:flex; flex-direction:column; gap:.8rem; }
+  .files{ display:grid; gap:.8rem; grid-template-columns:1fr; }
+  @media (min-width:800px){ .files{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .fname{ font-family:var(--font-mono); font-size:.78rem; color:var(--amber); letter-spacing:.06em; margin-bottom:.3rem; display:block; }
+  .verdict{ font-family:var(--font-mono); font-size:.88rem; padding:.45em .9em; border-radius:8px; width:max-content; max-width:100%; }
+  .verdict.bad{ background:color-mix(in srgb, var(--amber) 20%, transparent); color:var(--amber); }
+  .verdict.ok{ background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--accent); }
+
+  /* anatomia de uma regra */
+  .k-seletor{ color:var(--accent); } .k-propriedade{ color:var(--amber); } .k-valor{ color:var(--slate); }
+  .k-seletor, .k-propriedade, .k-valor, .k-fim{ border-radius:4px; }
+  body[data-hover="seletor"] .k-seletor, body[data-hover="propriedade"] .k-propriedade,
+  body[data-hover="valor"] .k-valor, body[data-hover="fim"] .k-fim{ animation:glow .9s ease-in-out infinite; }
+  .legend{ display:flex; flex-wrap:wrap; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; }
+  .legend span{ background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.3em .85em; }
+  .semi.miss::after{ content:"\2190 faltou!"; color:#ff6b5e; font-size:.8em; margin-left:.4rem; }
+  .s-h1{ font-family:"Times New Roman", serif; font-weight:700; margin:0; color:#16a89c; font-size:40px; line-height:1.1; transition:all .35s ease; }
+  .s-h1.broken{ color:#1a1a1a; font-size:32px; }
+
+  /* amostras */
+  .sample{ color-scheme:light; background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px; padding:1.2rem; box-shadow:var(--shadow); font-family:"Times New Roman", serif; min-height:7rem; }
+  .sample p{ margin:0; padding:.6rem .8rem; border-radius:6px; transition:all .25s ease; }
+  .swatches{ display:flex; flex-wrap:wrap; gap:.45rem; }
+  .sw{ font-family:var(--font-mono); font-size:.76rem; border:2px solid var(--line); border-radius:8px; padding:.35em .6em; cursor:pointer; color:#111; }
+  .sw:hover{ border-color:var(--accent); }
+  .sw.dark{ color:#fff; }
+
+  /* caixa: diagrama */
+  .bm{ max-width:560px; }
+  .bm-margin, .bm-border, .bm-padding, .bm-content{ position:relative; border-radius:6px; transition:filter .2s; }
+  .bm-tag{ position:absolute; top:.25rem; left:.55rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#1a1a1a; font-weight:500; pointer-events:none; }
+  .bm-margin{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.38) 8px 16px); padding:2.1rem 1.4rem 1.4rem; border:2px dashed #f2a63b; cursor:help; }
+  .bm-border{ background:#4f7cac; padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-border .bm-tag{ color:#fff; }
+  .bm-padding{ background:rgba(188,210,48,.92); padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-content{ background:#16a89c; color:#fff; padding:1.3rem .6rem; text-align:center; font-family:var(--font-mono); cursor:help; }
+  .bm-content .bm-tag{ display:none; }
+  body[data-hover="margin"] .bm-margin, body[data-hover="border"] .bm-border,
+  body[data-hover="padding"] .bm-padding, body[data-hover="content"] .bm-content{ animation:glow .9s ease-in-out infinite; filter:brightness(1.15); }
+
+  /* caixa: laboratório */
+  .mstage{ min-height:310px; display:grid; place-items:center; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .mwrap{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.35) 8px 16px); outline:1px dashed #f2a63b; transition:padding .12s; }
+  .mbox{ border-style:solid; border-color:#4f7cac; background:rgba(188,210,48,.95); background-clip:padding-box; transition:padding .12s, border-width .12s; }
+  .mcontent{ background:#16a89c; color:#fff; height:70px; display:grid; place-items:center; font-family:var(--font-mono); font-size:.8rem; transition:width .12s; }
+
+  /* padding: 1, 2, 3 ou 4 valores */
+  .sh-grid{ display:grid; grid-template-columns:auto auto auto; grid-template-rows:auto auto auto; gap:.35rem; align-items:center; justify-items:center; justify-content:center; }
+  .sh-b{ font-family:var(--font-mono); font-size:.85rem; color:var(--accent); min-width:4.2rem; text-align:center; }
+  .sh-box{ background:rgba(188,210,48,.95); border:2px solid #4f7cac; transition:padding .2s ease; }
+  .sh-in{ background:#16a89c; color:#fff; font-family:var(--font-mono); font-size:.8rem; padding:.9rem 1rem; }
+
+  /* borda */
+  .bdbox{ width:150px; height:150px; display:grid; place-items:center; text-align:center; font-family:var(--font-mono); font-size:.8rem; background:rgba(22,168,156,.18); transition:all .15s; }
+
+  /* position */
+  .stack{ display:flex; flex-direction:column; gap:.5rem; width:min(100%,300px); padding:1rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; }
+  .blk{ background:var(--slate); color:#0c1f2e; font-family:var(--font-mono); font-weight:500; padding:.8rem 1rem; border-radius:8px; height:3rem; display:flex; align-items:center; }
+  .slot{ border:2px dashed var(--ink-dim); border-radius:8px; height:3rem; }
+  .slot .blk{ background:var(--accent); color:var(--accent-ink); width:calc(100% + 0px); transition:top .15s, left .15s; }
+  .slot .blk.moved{ width:60%; }
+  .ign{ opacity:.55; text-decoration:line-through; }
+  .pg{ position:relative; border:2px dashed var(--ink-dim); border-radius:12px; padding:2.2rem 1.2rem 1.2rem; height:310px; background:var(--bg-elev); }
+  .pg-l, .pr-l{ position:absolute; top:.4rem; left:.7rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); }
+  .pr{ position:static; margin:1.6rem 0 0 auto; width:68%; height:190px; border:2px solid var(--accent); border-radius:10px; background:color-mix(in srgb, var(--accent) 10%, transparent); }
+  .pr.rel{ position:relative; }
+  .pr-l{ position:static; display:block; padding:.4rem .7rem; color:var(--accent); }
+  .ch{ position:absolute; width:38px; height:38px; border-radius:8px; background:var(--amber); color:#3a2300; display:grid; place-items:center; font-size:1.2rem; z-index:2; }
+  .ch.pop{ animation:pop .35s ease; }
+
+  /* card de personagem */
+  .card{ background:#fff; color:#1a1a1a; font-family:"Times New Roman", serif; max-width:280px; transition:all .45s ease; }
+  .card h3{ margin:0 0 .3em; font-size:1.4em; font-family:inherit; text-transform:none; }
+  .card p{ margin:0; }
+  .ln.new{ background:color-mix(in srgb, var(--accent) 26%, transparent); border-radius:4px; }
+  .quiz-opt{ text-align:left; }
+  .quiz-opt.right{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .quiz-opt.wrong{ background:color-mix(in srgb, #ff6b5e 25%, transparent); border-color:#ff6b5e; }
+  .fb{ min-height:3rem; }
+
+  /* anotações do professor (nunca aparecem pro aluno sem apertar N) */
+  #notesPanel{
+    position:fixed; right:12px; bottom:52px; width:min(390px,92vw); max-height:72vh; overflow:auto; z-index:40;
+    background:var(--bg-elev); border:1px solid var(--amber); border-radius:12px; padding:.9rem 1.05rem;
+    box-shadow:var(--shadow); font-size:.9rem; line-height:1.45;
+  }
+  #notesPanel[hidden]{ display:none; }
+  #notesPanel .np-h{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:.4rem; }
+  #notesPanel h4{ margin:.7rem 0 .2rem; font-family:var(--font-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); font-weight:500; }
+  #notesPanel ul{ margin:0; padding-left:1.1rem; } #notesPanel li{ margin:.15rem 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    .glow, .ch.pop, body[data-hover] *{ animation:none !important; }
+  }
+
+  /* ===== Tema VS Code Dark+ nos blocos de código ===== */
+  pre.code{
+    background:#1e1e1e; color:#d4d4d4; border:1px solid #3c3c3c; border-radius:8px;
+    font-family:Consolas, "Cascadia Code", "Cascadia Mono", "Courier New", monospace;
+    font-size:clamp(.85rem,1.35vw,1.05rem); line-height:1.55; padding:1rem 1.2rem;
+    box-shadow:0 10px 30px -16px rgba(0,0,0,.6); color-scheme:dark;
+  }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.4rem); }
+  pre.code .t{ color:#569cd6; }
+  pre.code .at{ color:#9cdcfe; }
+  pre.code .v{ color:#ce9178; }
+  pre.code .n{ color:#b5cea8; }
+  pre.code .sel{ color:#d7ba7d; }
+  pre.code .c, pre.code .hint{ color:#6a9955; font-style:italic; font-family:inherit; font-size:inherit; }
+  pre.code .prop{ color:#9cdcfe; border-bottom-color:#9cdcfe; }
+  pre.code .prop:hover, pre.code .prop:focus-visible{ background:rgba(86,156,214,.28); }
+  pre.code .k-seletor{ color:#d7ba7d; } pre.code .k-propriedade{ color:#9cdcfe; } pre.code .k-valor{ color:#ce9178; }
+  pre.code .ln.new{ background:rgba(255,255,255,.1); }
+  pre.code .ign{ opacity:.5; }
+  .fname{ color:#cccccc; background:#2d2d2d; display:inline-block; padding:.2em .8em; border-radius:6px 6px 0 0; margin-bottom:0; border:1px solid #3c3c3c; border-bottom:none; }
+  .fname + pre.code{ border-top-left-radius:0; }
+
+  /* ===== CSS 4: Flexbox ===== */
+  .fxlab{ display:flex; flex-direction:column; gap:.8rem; position:relative; z-index:6; min-width:0; }
+  .fxlab .goal{ background:color-mix(in srgb, var(--amber) 16%, transparent); border-left:4px solid var(--amber); border-radius:0 8px 8px 0; padding:.6rem .9rem; font-size:1.02rem; }
+  .fx-grid{ display:grid; gap:1rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .fx-grid{ grid-template-columns:1fr 1.15fr; align-items:start; } }
+  .fx-l, .fx-r{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .fx-g{ display:flex; flex-direction:column; gap:.3rem; }
+  .fx-gl{ font-family:var(--font-mono); font-size:.78rem; color:var(--ink-dim); width:max-content; }
+  .fx-g .seg .btn{ font-size:.78rem; padding:.35em .7em; }
+  .fx-stage{ background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .fx{
+    border:2px dashed var(--ink-dim); border-radius:10px; background:color-mix(in srgb, var(--accent) 7%, transparent);
+    padding:6px; max-width:100%; min-width:0;
+  }
+  .cube{
+    width:52px; height:52px; flex:none; border-radius:8px; display:grid; place-items:center;
+    font-family:var(--font-mono); font-weight:700; font-size:1.05rem; color:#0c1f2e; user-select:none;
+    box-shadow:0 3px 8px -3px rgba(0,0,0,.5); flex-direction:column; line-height:1.1;
+  }
+  .cube small{ font-size:.55rem; font-weight:500; display:block; }
+  .fx.vary .cube{ height:auto; min-height:0; padding:.35rem 0; }
+  .fx.pick .cube{ cursor:pointer; width:70px; }
+  .fx-axis{ min-height:1.4rem; }
+  .vd{ font-family:var(--font-mono); font-size:.8rem; padding:.15em .7em; border-radius:999px; margin-left:.4rem; white-space:nowrap; }
+  .vd.ok{ background:var(--accent); color:var(--accent-ink); }
+  .vd.no{ background:color-mix(in srgb, #ff6b5e 25%, transparent); color:#ff8f84; }
+
+  /* display: block, inline, inline-block */
+  .dsc{ background:var(--bg-elev); border:2px dashed var(--ink-dim); border-radius:10px; padding:10px; min-height:140px; color:var(--ink); font-family:var(--font-body); line-height:1.9; }
+  .dsb{ width:90px; height:46px; background:#2ec9bd; color:#0c1f2e; font-family:var(--font-mono); font-weight:700; text-align:center; line-height:46px; border-radius:6px; margin:2px 0; }
+  .dsb:nth-child(2){ background:#f4ac4a; } .dsb:nth-child(3){ background:#c4da3c; }
+
+  /* mini site: cards em linha */
+  .msite{ background:#eef1f5; border-radius:12px; overflow:hidden; font-family:Arial,sans-serif; color:#1f2933; box-shadow:var(--shadow); }
+  .msite header{ background:#123f63; color:#fff; padding:14px 18px; }
+  .msite header .logo{ margin:0 0 6px; font-size:1.2rem; font-weight:700; }
+  .msite nav a{ color:#2ec9bd; margin-right:14px; font-size:.95rem; }
+  .msite nav{ transition:all .3s; }
+  .msite main{ padding:14px; }
+  .msite .cartao{ background:#fff; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,.12); padding:14px 16px; margin:8px 0; font-size:.95rem; }
+  .msite .cartao b{ display:block; }
+  .msite.on nav{ display:flex; gap:16px; justify-content:center; }
+  .msite.on nav a{ margin:0; }
+  .msite.on main{ display:flex; gap:14px; }
+  .msite.on .cartao{ margin:0; flex:1; }
+
+  /* controles só do professor (aparecem com N) */
+  .tctl{ display:none !important; }
+  body.notes-open .tctl{ display:block !important; }
+  body.notes-open .seg.tctl{ display:flex !important; }
+  /* o conteúdo precisa ficar acima das zonas invisíveis de avançar/voltar */
+  .slide .demo, .slide .tagtable, .slide .kv, .slide .tgrid{ position:relative; z-index:6; }
+  .fxlab .fname{ display:block; width:max-content; }
+
+  /* alvos do projeto */
+  .tgrid{ display:grid; gap:.7rem; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+  .tgt{ background:var(--bg-elev); border:1px solid var(--line); border-radius:10px; padding:.6rem; display:flex; flex-direction:column; gap:.4rem; }
+  .tgt .tl{ font-family:var(--font-mono); font-size:.75rem; color:var(--accent); }
+  .tgt .tf{ display:flex; height:84px; border:1px dashed var(--ink-dim); border-radius:6px; padding:3px; overflow:hidden; }
+  .tgt .cube{ width:22px; height:22px; font-size:.65rem; border-radius:4px; }
+
+  /* ===== Calculadora: código digitado + resultado ao vivo ===== */
+  .live{ display:grid; gap:1rem; grid-template-columns:1fr; position:relative; z-index:6; }
+  @media (min-width:900px){ .live{ grid-template-columns:1.25fr 1fr; align-items:start; } }
+  .live .pane{ display:flex; flex-direction:column; min-width:0; }
+  .live pre.code{ min-height:18rem; }
+  .live pre.code .ln{ min-height:1.55em; }
+  .live pre.code .ln.new{ background:rgba(255,255,255,.08); }
+  .caret{ display:inline-block; width:.55em; height:1.1em; vertical-align:-.15em; background:#aeafad; animation:blink 1s steps(1) infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+  .browser{ border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); background:#fff; }
+  .browser .bar{ display:flex; align-items:center; gap:.4rem; background:#dfe3e8; padding:.45rem .7rem; font-family:var(--font-mono); font-size:.72rem; color:#56606b; }
+  .browser .bar i{ width:.65rem; height:.65rem; border-radius:50%; background:#c4c9cf; }
+  .browser .bar span{ margin-left:.5rem; background:#fff; border-radius:999px; padding:.1rem .7rem; }
+  .browser .render{ border:none; border-radius:0; box-shadow:none; min-height:18rem; display:block; }
+  pre.code .tg{ color:#569cd6; } pre.code .an{ color:#9cdcfe; } pre.code .av{ color:#ce9178; }
+  .capa{ display:grid; gap:2rem; align-items:center; grid-template-columns:1fr; }
+  @media (min-width:900px){ .capa{ grid-template-columns:1.3fr 1fr; } }
+  .capa > div{ display:flex; flex-direction:column; gap:1rem; }
+  .capa .render{ display:grid; place-items:center; min-height:22rem; background:#eef1f5; }
+
+  /* slides de código: duas "abas" 50/50, tela quase cheia, sem texto */
+  .slide:has(.live){ padding:clamp(.8rem,2vh,1.4rem) clamp(.8rem,1.6vw,1.6rem) clamp(3rem,7vh,4rem); overflow:hidden; }
+  .slide:has(.live) > *{ max-width:none; }
+  .slide .live.wide{ max-width:none; flex:1; min-height:0; grid-template-columns:1fr 1fr; grid-template-rows:minmax(0,1fr); align-items:stretch; gap:clamp(.6rem,1.2vw,1.2rem); }
+  .live .pane{ min-height:0; }
+  .live pre.code{ flex:1; min-height:0; overflow:auto; font-size:clamp(1rem,1.7vw,1.6rem); }
+  .live .browser{ height:100%; display:flex; flex-direction:column; }
+  .live .browser .render{ flex:1; min-height:0; display:grid; place-items:center; background:#eef1f5; overflow:auto; }
+
+  /* ===== Calculadora parte 2: JS ao vivo ===== */
+  pre.code .kw{ color:#569cd6; } pre.code .fn{ color:#dcdcaa; }
+  .live pre.code{ font-size:clamp(.9rem,1.3vw,1.3rem); }
+  .live .browser .render{ padding:0; display:block; }
+  .live .browser .render iframe, .capa .render iframe{ display:block; width:100%; height:100%; border:0; background:#eef1f5; }
+  .capa .render{ padding:0; height:22rem; }
+  @media (min-width:900px){ .capa{ grid-template-columns:1fr 1.15fr; } }
+  .render.reloading{ animation:reload .45s ease; }
+  @keyframes reload{ 0%{ filter:none; } 30%{ filter:brightness(2.2) blur(2px); opacity:.2; } 100%{ filter:none; opacity:1; } }
+  .cons{ background:#1e1e1e; border-top:1px solid #3c3c3c; font-family:Consolas, "Cascadia Code", monospace; font-size:clamp(.85rem,1.1vw,1.05rem); color:#d4d4d4; flex:none; }
+  .cons-h{ background:#2d2d2d; color:#cccccc; padding:.25rem .8rem; font-size:.78em; letter-spacing:.06em; }
+  .cons-b{ height:6.5em; overflow:auto; padding:.3rem .8rem; }
+  .cons-b div{ border-bottom:1px solid #2a2a2a; padding:.1rem 0; }
+  .cons-b .err{ color:#f48771; background:rgba(244,135,113,.08); }
+  .cons-b .info{ color:#8a8a8a; font-style:italic; }
+  .cons-b .new{ animation:flashln .8s ease; }
+  @keyframes flashln{ from{ background:rgba(46,201,189,.35); } }
+
+  /* gancho: a campainha */
+  .bell{ display:grid; gap:1.2rem; grid-template-columns:1fr; position:relative; z-index:6; }
+  @media (min-width:900px){ .bell{ grid-template-columns:1.4fr 1fr; align-items:center; } }
+  .bell .legend span{ font-size:1rem; border-width:2px; }
+  .bell .legend span:nth-child(1){ border-color:#16a89c; background:rgba(22,168,156,.18); }
+  .bell .legend span:nth-child(2){ border-color:#f2a63b; background:rgba(242,166,59,.2); }
+  .bell .legend span:nth-child(3){ border-color:#8fa3c4; background:rgba(143,163,196,.22); }
+  .bell-box{ display:flex; flex-direction:column; gap:.7rem; align-items:flex-start; }
+  .bell-box .cons{ width:100%; border-radius:8px; overflow:hidden; border:1px solid #3c3c3c; }
+  .k-quem, .k-quando, .k-oque{ border-radius:4px; padding:0 .15em; }
+  .k-quem{ background:rgba(22,168,156,.4); } .k-quando{ background:rgba(242,166,59,.35); } .k-oque{ background:rgba(143,163,196,.3); }
+  .recap{ display:grid; gap:1.4rem; grid-template-columns:1fr; position:relative; z-index:6; }
+  @media (min-width:900px){ .recap{ grid-template-columns:1.2fr 1fr; align-items:start; } }
+  .recap ul.bullets code{ font-size:.85em; }
+
+
+  /* ===== Responsividade ===== */
+  .trio .t4{ --c:var(--slate); }
+  .trio .ex{ font-family:var(--font-mono); font-size:.88rem; color:var(--amber); }
+  .trio p{ font-size:1rem; }
+  .slide .files, .slide .trio{ position:relative; z-index:6; }
+  .files .verdict{ margin-top:.6rem; }
+  pre.code .mark{ background:rgba(244,172,74,.28); border-radius:4px; padding:0 .15em; }
+
+  /* o "navegador" que muda de largura */
+  .slide .live.wide.rs{ grid-template-columns:minmax(0,1fr) minmax(0,1.5fr); }
+  .live .browser .render.rs, .capa .render.rs{
+    display:flex; justify-content:center; align-items:stretch; padding:0; overflow:hidden;
+    background:#cfd6de; min-height:0; height:auto; flex:1;
+  }
+  .vp{ flex:none; width:100%; max-width:100%; background:#fff; box-shadow:0 0 0 1px rgba(0,0,0,.18), 0 10px 26px -10px rgba(0,0,0,.45); }
+  .vp iframe{ display:block; width:100%; height:100%; border:0; background:#fff; }
+  .capa .browser{ height:min(30rem,62vh); display:flex; flex-direction:column; }
+  .tela{
+    flex:none; display:flex; align-items:center; gap:.7rem; padding:.5rem .9rem;
+    background:var(--bg-elev); border-top:1px solid var(--line);
+    font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+  }
+  .tela input{ flex:1; min-width:0; }
+  .tela output{ min-width:4.6rem; text-align:right; color:var(--ink); font-variant-numeric:tabular-nums; }
+
+  /* dois celulares */
+  .live pre.code{ white-space:pre-wrap; }
+
+  /* anatomia da media query: uma peça por vez */
+  .anat{ display:flex; flex-direction:column; gap:1.1rem; position:relative; z-index:6; }
+  .anat pre.code .k{ border-radius:5px; padding:.05em .2em; transition:background .3s; }
+  .anat pre.code .k.on[data-i="1"], .chip.c1{ background:rgba(22,168,156,.45); }
+  .anat pre.code .k.on[data-i="2"], .chip.c2{ background:rgba(242,166,59,.4); }
+  .anat pre.code .k.on[data-i="3"], .chip.c3{ background:rgba(143,163,196,.4); }
+  .lgs{ display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.4rem); }
+  .lg{ margin:0; opacity:0; transform:translateY(6px); transition:opacity .3s, transform .3s; }
+  .lg.on{ opacity:1; transform:none; }
+  .chip{ font-family:var(--font-mono); font-size:.92em; border-radius:6px; padding:.1em .5em; margin-right:.4rem; }
+  .live .pane.phones{ --pw:min(17vw,25vh); flex-direction:row; justify-content:center; align-items:center; gap:clamp(.8rem,3vw,2.6rem); }
+  .phone{ display:flex; flex-direction:column; align-items:center; gap:.55rem; transition:opacity .45s ease; }
+  .phone.b{ opacity:.12; }
+  .phone.b.on{ opacity:1; }
+  .plabel{ font-family:var(--font-mono); font-size:.82rem; color:var(--ink-dim); letter-spacing:.04em; }
+  .phone.b.on .plabel{ color:var(--accent); }
+  .scr{
+    box-sizing:content-box; position:relative; overflow:hidden; background:#fff;
+    width:var(--pw); height:calc(var(--pw) * 1.95); border:6px solid #2b3645; border-radius:24px;
+    box-shadow:var(--shadow);
+  }
+  .scr iframe{ position:absolute; left:0; top:0; border:0; transform-origin:0 0; background:#fff; }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="brandbar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="zones" aria-hidden="true">
+      <button class="zone prev" id="zprev" tabindex="-1" aria-label="Slide anterior"></button>
+      <span class="zone spacer"></span>
+      <button class="zone next" id="znext" tabindex="-1" aria-label="Próximo slide"></button>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide" aria-label="Slide 1" data-part="Responsividade">
+      <div class="capa wide">
+        <div>
+          <p class="eyebrow">Responsividade</p>
+          <h1>O que é <em>responsividade</em> e <em>mobile-first</em></h1>
+          <p class="subtitle">Um site pra qualquer tela</p>
+        </div>
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i><span>Idade de Bicho</span></div>
+          <div class="render rs" id="capaRs"></div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Abrir <code>calculadora-cachorro/index.html</code>. <kbd>F12</kbd> &rarr; botão do celular (<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd>) &rarr; arrastar a borda e ver o site se ajeitando.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>&ldquo;Olhem a tela diminuindo: o site muda sozinho de jeito. Hoje vocês aprendem a fazer isso.&rdquo;</li>
+          <li>Pergunta: &ldquo;Quem aqui usa mais o celular do que o computador?&rdquo; (é por isso que isso importa)</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>0:00 &rarr; 1:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" aria-label="Slide 2" data-part="Responsividade">
+      <p class="eyebrow">O que é</p>
+      <h2>O mesmo site em <em>qualquer tela</em></h2>
+      <div class="trio wide">
+        <div class="t1"><span class="k">Celular</span><span class="tags">≈ 360 px de largura</span><p>Tela estreita, dedo no lugar do mouse.</p></div>
+        <div class="t2"><span class="k">Tablet</span><span class="tags">≈ 768 px de largura</span><p>No meio do caminho.</p></div>
+        <div class="t3"><span class="k">Computador</span><span class="tags">1280 px ou mais</span><p>Muito espaço pros lados.</p></div>
+      </div>
+      <div class="callout good wide">
+        <p><strong>Responsivo</strong> = o <strong>mesmo HTML</strong> se adapta à largura da tela. Nada de fazer um site pro celular e outro pro computador.</p>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Responsivo não é &ldquo;site pequeno&rdquo;. É um site que <b>muda de jeito</b> conforme o espaço que tem.</li>
+          <li>Os números são só uma referência: o que importa é a <b>largura</b>, em pixels.</li>
+          <li>Prometer: &ldquo;Vocês vão aprender 4 coisas: a linha mágica, as unidades, mobile-first e media query.&rdquo;</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>1:30 &rarr; 3:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" aria-label="Slide 3" data-part="Largura fixa">
+      <div class="live wide rs" id="liveFixo"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: <code>width: 600px</code> (a tela diminui: a caixa não cabe, aparece barra de rolagem) &rarr; ↓ <code>width: 100%</code> (cabe, mas no computador fica enorme) &rarr; ↓ <code>max-width: 600px</code> (cabe e para de crescer).</li>
+          <li>Depois de cada ↓ a tela faz a animação sozinha. Dá pra arrastar a barra &ldquo;Tela&rdquo; pra testar.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li><code>px</code> é fixo: 600px é 600px, mesmo que a tela tenha 320. Ela não cabe.</li>
+          <li><code>100%</code> = &ldquo;ocupa tudo que o pai deixar&rdquo;. Resolve o celular, mas estica demais no computador.</li>
+          <li><code>max-width</code> = &ldquo;pode crescer até aqui, mas não passa&rdquo;. Esse par (<code>width: 100%</code> + <code>max-width</code>) a gente usa o tempo todo.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul><li>Achar que <code>max-width</code> e <code>width</code> são a mesma coisa. Um é o desejo, o outro é o limite.</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>3:00 &rarr; 4:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" aria-label="Slide 4" data-part="A linha mágica">
+      <div class="live wide" id="liveMeta" data-mode="phones"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Começa sem a linha: o celular da esquerda mostra a página de computador, <b>espremida</b>. &darr; digita a linha <code>viewport</code> e o celular da direita mostra o site do jeito certo.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Sem essa linha, o celular finge que é um computador de 980px e encolhe tudo pra caber. Resultado: letrinha minúscula.</li>
+          <li>Com ela: &ldquo;use a largura <b>real</b> da tela&rdquo;. Aí o CSS responsivo passa a valer.</li>
+          <li>É uma linha só, no <code>&lt;head&gt;</code>, em <b>todo</b> site. Pode copiar e colar sem medo.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul><li>Esquecer a linha e achar que o CSS não funciona no celular. No computador (F12) parece certo, no celular de verdade não.</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>4:30 &rarr; 6:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" aria-label="Slide 5" data-part="Unidades">
+      <p class="eyebrow">Unidades</p>
+      <h2>Medir em <em>px</em> ou em algo que <em>se adapta</em></h2>
+      <div class="trio wide">
+        <div class="t1"><span class="k">px</span><span class="ex">width: 300px;</span><p>Fixo. Sempre 300, em qualquer tela.</p></div>
+        <div class="t2"><span class="k">%</span><span class="ex">width: 50%;</span><p>Metade do <b>pai</b>.</p></div>
+        <div class="t3"><span class="k">rem</span><span class="ex">font-size: 2rem;</span><p>Vezes o tamanho da letra da página (16px). 2rem = 32px.</p></div>
+        <div class="t4"><span class="k">vw / vh</span><span class="ex">width: 50vw;</span><p>% da <b>tela</b>. 50vw = metade da largura da tela.</p></div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Quatro unidades, uma ideia: <b>fixo</b> (px) ou <b>relativo</b> (todas as outras).</li>
+          <li>Relativo a quê? <code>%</code> = ao pai. <code>rem</code> = à letra da página. <code>vw</code>/<code>vh</code> = à tela (v de <i>viewport</i>).</li>
+          <li><code>vh</code> é igual ao <code>vw</code>, só que pela altura da tela.</li>
+          <li>Não existe a melhor: cada uma serve pra uma coisa. Vamos ver as quatro na prática.</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>6:00 &rarr; 7:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" aria-label="Slide 6" data-part="Unidades: largura">
+      <div class="live wide rs" id="liveUn"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: <code>300px</code> &rarr; ↓ <code>50%</code> &rarr; ↓ <code>50vw</code> &rarr; ↓ <code>20rem</code> &rarr; ↓ <code>html { font-size: 24px }</code> (só a barra do <code>rem</code> cresce).</li>
+          <li>A caixa tracejada é o <b>pai</b>: tem 80% da tela. Por isso 50% e 50vw são diferentes.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Reparem na animação: a barra de <code>px</code> <b>não se mexe</b> e vaza pra fora.</li>
+          <li><code>%</code> acompanha o pai. <code>vw</code> acompanha a tela inteira (ignora o pai).</li>
+          <li><code>rem</code> parece fixo, mas é múltiplo da letra da página. Mudou o <code>html</code>, mudou tudo que usa <code>rem</code>.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul><li>&ldquo;Pausem: qual barra vai ficar maior se o pai for 100% da tela? E qual não muda?&rdquo; (%, vw igual; px e rem não mudam)</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>7:30 &rarr; 9:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" aria-label="Slide 7" data-part="Unidades: letra">
+      <div class="live wide rs" id="liveFonte"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: <code>24px</code> &rarr; ↓ <code>1.5rem</code> (igual, parece o mesmo) &rarr; ↓ <code>4vw</code> (encolhe com a tela) &rarr; ↓ <code>clamp(...)</code> (encolhe, mas tem limites).</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li><code>px</code> e <code>rem</code> ficam iguais: 1.5 &times; 16 = 24. A diferença é que <code>rem</code> respeita quem aumentou a letra do navegador (acessibilidade).</li>
+          <li><code>4vw</code>: no celular a letra fica minúscula, no monitor gigante, enorme. Sozinho é perigoso.</li>
+          <li><code>clamp(mínimo, ideal, máximo)</code> = &ldquo;use o ideal, mas nunca menos que o mínimo nem mais que o máximo&rdquo;.</li>
+        </ul>
+        <h4>Dica do video</h4>
+        <ul><li>Pra iniciante: <code>rem</code> pra letra, <code>%</code> e <code>max-width</code> pras caixas. <code>clamp</code> fica de bônus.</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>9:30 &rarr; 10:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" aria-label="Slide 8" data-part="Mobile-first">
+      <p class="eyebrow">Mobile-first</p>
+      <h2>Comece pelo <em>celular</em>. Depois, <em>acrescente</em></h2>
+      <div class="files wide">
+        <div>
+          <span class="fname">desktop-first</span>
+<pre class="code big"><span class="sel">.menu</span> {
+  <span class="at">display</span>: <span class="v">flex</span>;
+}
+
+<span class="kw">@media</span> (<span class="mark"><span class="at">max-width</span></span>: <span class="n">600px</span>) {
+  <span class="sel">.menu</span> {
+    <span class="at">display</span>: <span class="v">block</span>;
+  }
+}</pre>
+          <p class="verdict bad">começa grande e o celular precisa desfazer</p>
+        </div>
+        <div>
+          <span class="fname">mobile-first</span>
+<pre class="code big"><span class="sel">.menu</span> {
+  <span class="at">display</span>: <span class="v">block</span>;
+}
+
+<span class="kw">@media</span> (<span class="mark"><span class="at">min-width</span></span>: <span class="n">600px</span>) {
+  <span class="sel">.menu</span> {
+    <span class="at">display</span>: <span class="v">flex</span>;
+  }
+}</pre>
+          <p class="verdict ok">começa simples e só acrescenta</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Os dois funcionam. Mas no mobile-first o <b>CSS de cima é o do celular</b> e a tela grande só <b>acrescenta</b>.</li>
+          <li><code>min-width: 600px</code> = &ldquo;a partir de 600px pra cima&rdquo;. <code>max-width: 600px</code> = &ldquo;de 600px pra baixo&rdquo;.</li>
+          <li>Por que começar pelo celular? Celular é o mais apertado: se funciona ali, no resto sobra espaço. E o código fica mais curto.</li>
+          <li>Macete: mobile-first usa sempre <code>min-width</code>.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul><li>&ldquo;No mobile-first, o que vale entre 0 e 600px?&rdquo; (só o CSS de cima, sem media query)</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>10:30 &rarr; 12:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 9a: a ideia -->
+    <section class="slide" aria-label="Slide 9" data-part="Media query">
+      <p class="eyebrow">Media query</p>
+      <h2>Uma <em>pergunta</em> que o CSS faz pra tela</h2>
+      <p class="lead wide">&ldquo;A tela tem <b class="hl">500px ou mais</b> de largura?&rdquo;</p>
+      <div class="trio wide">
+        <div class="t2"><span class="k">Sim</span><p>O navegador <b>usa</b> o CSS que está dentro da media query.</p></div>
+        <div class="t4"><span class="k">Não</span><p>O navegador <b>ignora</b> esse pedaço, como se não existisse.</p></div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Esquecer o nome difícil. Media query é <b>uma pergunta com SE</b>: &ldquo;se a tela for assim, usa esse CSS&rdquo;.</li>
+          <li>Analogia: &ldquo;Se estiver chovendo, leva guarda-chuva. Se não, ignora.&rdquo; O navegador faz isso com a largura da tela.</li>
+          <li>Ainda sem código. Só a ideia: sim = usa, não = ignora.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul><li>&ldquo;Num celular de 360px, a resposta é sim ou não?&rdquo; (não)</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>12:00 &rarr; 12:45</li></ul>
+      </aside>
+    </section>
+
+    <!-- 9b: a sintaxe, uma peça por vez -->
+    <section class="slide" aria-label="Slide 10" data-part="Media query: a escrita">
+      <p class="eyebrow">Como se escreve</p>
+      <h2>A pergunta tem <em>3 pedaços</em></h2>
+      <div class="anat wide" id="anat" data-steps>
+<pre class="code big"><span class="k" data-i="1">@media</span> <span class="k" data-i="2">(min-width: 500px)</span> <span class="k" data-i="3">{</span>
+  <span class="sel">body</span> { <span class="at">background</span>: <span class="v">blue</span>; }
+<span class="k" data-i="3">}</span></pre>
+        <div class="lgs">
+          <p class="lg" data-i="1"><span class="chip c1">@media</span> &ldquo;olha como é a tela&rdquo;</p>
+          <p class="lg" data-i="2"><span class="chip c2">(min-width: 500px)</span> &ldquo;ela tem 500px de largura <b>ou mais</b>?&rdquo;</p>
+          <p class="lg" data-i="3"><span class="chip c3">{ }</span> &ldquo;se sim, usa o que está aqui dentro&rdquo;</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul><li>Cada ↓ acende uma peça do código e a explicação dela: <code>@media</code> &rarr; <code>(min-width: 500px)</code> &rarr; as chaves.</li></ul>
+        <h4>Falar</h4>
+        <ul>
+          <li><code>@media</code>: a palavra que avisa &ldquo;vou fazer uma pergunta sobre a tela&rdquo;.</li>
+          <li><code>min-width</code>: <b>min</b> = mínimo. &ldquo;A tela tem <b>no mínimo</b> 500px?&rdquo; 500px ou mais = sim.</li>
+          <li>As chaves: o que fica dentro só vale se a resposta for sim. Dentro cabe CSS normal (<code>body { ... }</code>).</li>
+          <li>Reparar: tem <b>duas</b> chaves de fora (a pergunta) e <b>duas</b> de dentro (<code>body</code>).</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul><li>Esquecer a chave que fecha a media query (a última <code>}</code>).</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>12:45 &rarr; 14:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 9c: cores, um conceito por vez -->
+    <section class="slide" aria-label="Slide 11" data-part="Media query: cores">
+      <div class="live wide rs" id="liveCor" data-sweep="grow"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: <code>body</code> vermelho (em qualquer tela) &rarr; ↓ só a pergunta, <b>vazia</b> (nada muda) &rarr; ↓ dentro dela, fundo azul &rarr; ↓ uma <b>segunda</b> pergunta (700px), fundo verde.</li>
+          <li>A tela <b>cresce</b> sozinha: vermelho, vira azul em 500px, vira verde em 700px. O número no meio mostra a largura. Arraste a barra &ldquo;Tela&rdquo; pra frente e pra trás.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>1: sem media query, vermelho sempre. É o CSS &ldquo;de base&rdquo;.</li>
+          <li>2: a pergunta ainda está vazia. Nada acontece, não tem o que aplicar.</li>
+          <li>3: agora tem o que aplicar. Menos de 500px = ignora = vermelho. 500px ou mais = azul.</li>
+          <li>4: cada media query reconhece <b>uma largura diferente</b>. A de 700px vence a de 500px quando as duas são sim, porque vem depois.</li>
+        </ul>
+        <h4>Pausa e pratica</h4>
+        <ul><li>&ldquo;Pausem: se eu mudar o 500px pra 300px, em que largura o fundo vira azul?&rdquo;</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>14:00 &rarr; 16:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 9d: aplicando no site -->
+    <section class="slide" aria-label="Slide 12" data-part="Media query no site">
+      <div class="live wide rs" id="liveMQ" data-sweep="grow"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: o básico (2 colunas, serve pro celular) &rarr; ↓ a pergunta <code>(min-width: 600px)</code> com 3 colunas dentro.</li>
+          <li>Aqui a tela <b>cresce</b>: começa no celular e vai aumentando. Reparar em quando a grade vira 3 colunas (600px).</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>O CSS de fora vale pra <b>todas</b> as telas. A media query só entra quando a condição é verdadeira.</li>
+          <li>Lê-se: &ldquo;se a tela tiver 600px <b>ou mais</b>, aplique isso aqui&rdquo;.</li>
+          <li>Arrastar a barra &ldquo;Tela&rdquo; pra frente e pra trás em cima de 600px: a grade muda na hora.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul><li>No <code>calculadora-cachorro</code>: modo celular do F12, arrastar a largura. Em <b>Elements</b> &rarr; <b>Styles</b> a regra da media query acende/apaga.</li></ul>
+        <h4>Erro comum</h4>
+        <ul><li>Esquecer o <code>{ }</code> de fora ou o de dentro. A media query tem dois níveis de chave.</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>16:00 &rarr; 17:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" aria-label="Slide 10" data-part="Recap">
+      <p class="eyebrow">Recap</p>
+      <h2>Um site que <em>se encaixa</em></h2>
+      <div class="recap wide">
+        <ul class="bullets">
+          <li><span><code>&lt;meta name="viewport"&gt;</code>: a linha mágica do <code>head</code></span></li>
+          <li><span><code>%</code>, <code>rem</code>, <code>vw</code>: se adaptam. <code>px</code> é fixo</span></li>
+          <li><span><code>width: 100%</code> + <code>max-width</code>: cabe e para de crescer</span></li>
+          <li><span><b>Mobile-first</b>: o CSS base é o do celular</span></li>
+          <li><span><code>@media (min-width: ...)</code>: acrescenta nas telas maiores</span></li>
+        </ul>
+        <div class="callout">
+          <p><strong>Mini-desafio</strong></p>
+          <p>Quando a tela passar de <b>900px</b>, o fundo da página vira azul-marinho.</p>
+          <p class="dim">Dica: um <code>@media (min-width: 900px)</code> com <code>body</code> dentro.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Passar rápido pelas 5 linhas: cada uma é um slide de hoje.</li>
+          <li>Desafio: não dar a resposta. (<code>@media (min-width: 900px) { body { background: #123f63; } }</code>)</li>
+          <li>Bônus: trocar o <code>3</code> colunas por <code>repeat(auto-fit, minmax(100px, 1fr))</code> e ver o que acontece sem media query.</li>
+          <li>Pedir pra testarem no celular de verdade (ou no modo celular do F12) o site que já fizeram.</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>17:30 &rarr; 19:00</li></ul>
+      </aside>
+    </section>
+
+  </div>
+
+  <div class="chrome">
+    <span class="label" id="partLabel">Responsividade</span>
+    <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
+    <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+    <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
+    <span class="count" id="count">01 / 10</span>
+    <button id="btnTheme" aria-label="Alternar tema">tema</button>
+  </div>
+</div>
+
+<div id="notesPanel" hidden></div>
+
+<script>
+(function(){
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var MINW = 320;
+
+  /* ---------- os sites: o CSS "de fundo" fica escondido, só o que se ensina aparece no código ---------- */
+  var BICHO_CSS = '*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#ffe9c7;margin:0;padding:14px}'
+    + '.caixa{background:#fff;padding:18px;border-radius:20px;text-align:center;box-shadow:0 6px 16px rgba(0,0,0,.15);margin:0 auto}'
+    + 'h1{color:#b35900;font-size:22px;margin:.2em 0 .5em}p{margin:.5em 0}'
+    + 'input{font-size:20px;padding:8px;width:120px;text-align:center;border:3px solid #ff8c1a;border-radius:12px;outline:none}'
+    + '.botoes{display:grid;gap:10px;margin-top:8px;grid-template-columns:repeat(3,1fr)}'
+    + 'button{font-size:24px;padding:10px 4px;background:#ff8c1a;color:#fff;border:none;border-radius:14px;box-shadow:0 4px 0 #b35900}'
+    + '#resultado{font-size:18px;font-weight:bold;margin-top:14px;padding:10px;background:#fff3df;border-radius:12px;color:#b35900}';
+  var BICHO_HTML = '<div class="caixa"><h1>🐾 Qual a sua idade de bicho?</h1><p>Quantos anos você tem?</p><input type="number" value="12">'
+    + '<p>Escolha um animal:</p><div class="botoes"><button>🐕</button><button>🐈</button><button>🐇</button><button>🐹</button><button>🐎</button><button>🐢</button></div>'
+    + '<p id="resultado">Você tem 84 anos de cachorro! 🐕</p></div>';
+  var UN_CSS = 'body{margin:0;padding:14px;font-family:Consolas,monospace;background:#fff}'
+    + '.pai{width:80%;background:#e3ecf5;border:2px dashed #8fa3c4;padding:8px 8px 10px}.lb{display:block;font-size:12px;color:#5a6b7a;margin-bottom:6px}'
+    + '.bar{width:0;height:36px;margin:6px 0;color:#fff;font:700 13px/36px Consolas,monospace;padding-left:8px;white-space:nowrap;overflow:visible;border-radius:0 6px 6px 0}'
+    + '.bar:nth-child(2){background:#16a89c}.bar:nth-child(3){background:#e08a1b}.bar:nth-child(4){background:#7d8f16}.bar:nth-child(5){background:#5f7292}';
+  var UN_HTML = '<div class="pai"><span class="lb">pai = 80% da tela</span><div class="bar px">300px</div><div class="bar porcento">50%</div><div class="bar vw">50vw</div><div class="bar rem">20rem</div></div>';
+  var FONTE_CSS = 'body{margin:0;padding:14px;font-family:Arial,sans-serif;background:#fff;color:#123049}'
+    + 'p{font-size:0;margin:.35em 0;white-space:nowrap;font-weight:700;line-height:1.2}.px{color:#16a89c}.rem{color:#c97a12}.vw{color:#7d8f16}.clamp{color:#5f7292}';
+  var FONTE_HTML = '<p class="px">Idade de Bicho · px</p><p class="rem">Idade de Bicho · rem</p><p class="vw">Idade de Bicho · vw</p><p class="clamp">Idade de Bicho · clamp</p>';
+  var SITES = {
+    bicho: { css:BICHO_CSS, html:BICHO_HTML, title:'Idade de Bicho' },
+    un:    { css:UN_CSS, html:UN_HTML, title:'Unidades' },
+    fonte: { css:FONTE_CSS, html:FONTE_HTML, title:'Unidades' },
+    cor:   { css:'body{margin:0;min-height:100vh;display:grid;place-items:center;font:700 30px Consolas,monospace;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.45)}',
+             html:'<div id="w"></div>', title:'Cores',
+             js:'function m(){document.getElementById("w").textContent=innerWidth+" px"}m();addEventListener("resize",m);' }
+  };
+  var MQ_FINAL = '.botoes{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media (min-width:600px){.botoes{grid-template-columns:1fr 1fr 1fr}.caixa{max-width:520px}}';
+
+  /* ---------- o que é digitado, por passos ---------- */
+  var L = {
+    px:   ['.px { width: 300px; }'],
+    pct:  ['.porcento { width: 50%; }'],
+    vw:   ['.vw { width: 50vw; }'],
+    rem:  ['.rem { width: 20rem; }'],
+    html: ['', 'html { font-size: 24px; }'],
+    fpx:  ['.px { font-size: 24px; }'],
+    frem: ['.rem { font-size: 1.5rem; }'],
+    fvw:  ['.vw { font-size: 4vw; }'],
+    fcl:  ['.clamp { font-size: clamp(1.2rem, 4vw, 2rem); }'],
+    base: ['.botoes {', '  display: grid;', '  grid-template-columns: 1fr 1fr;', '  gap: 10px;', '}'],
+    mq:   ['', '@media (min-width: 600px) {', '  .botoes {', '    grid-template-columns: 1fr 1fr 1fr;', '  }'],
+    mq2:  ['', '  .caixa {', '    max-width: 520px;', '  }'],
+    fim:  ['}']
+  };
+  function J(){ var o = []; for (var a = 0; a < arguments.length; a++) o = o.concat(L[arguments[a]]); return o; }
+  function C(site, code){ return { f:'css', site:site, code:code }; }
+  var HEAD0 = ['<head>', '  <meta charset="utf-8">', '  <title>Idade de Bicho</title>', '  <link rel="stylesheet" href="style.css">', '</head>'];
+  var HEAD1 = ['<head>', '  <meta charset="utf-8">', '  <meta name="viewport" content="width=device-width, initial-scale=1">', '  <title>Idade de Bicho</title>', '  <link rel="stylesheet" href="style.css">', '</head>'];
+
+  var STEPS = {
+    liveFixo: [
+      C('bicho', ['.caixa {', '  width: 600px;', '}']),
+      C('bicho', ['.caixa {', '  width: 100%;', '}']),
+      C('bicho', ['.caixa {', '  width: 100%;', '  max-width: 600px;', '}'])
+    ],
+    liveMeta: [
+      { f:'html', site:'bicho', code:HEAD0, meta:false },
+      { f:'html', site:'bicho', code:HEAD1, meta:true }
+    ],
+    liveUn: [
+      C('un', J('px')),
+      C('un', J('px','pct')),
+      C('un', J('px','pct','vw')),
+      C('un', J('px','pct','vw','rem')),
+      C('un', J('px','pct','vw','rem','html'))
+    ],
+    liveFonte: [
+      C('fonte', J('fpx')),
+      C('fonte', J('fpx','frem')),
+      C('fonte', J('fpx','frem','fvw')),
+      C('fonte', J('fpx','frem','fvw','fcl'))
+    ],
+    liveMQ: [
+      C('bicho', J('base')),
+      C('bicho', J('base','mq','fim'))
+    ],
+    liveCor: [
+      C('cor', ['body {', '  background: red;', '}']),
+      C('cor', ['body {', '  background: red;', '}', '', '@media (min-width: 500px) {', '}']),
+      C('cor', ['body {', '  background: red;', '}', '', '@media (min-width: 500px) {', '  body {', '    background: blue;', '  }', '}']),
+      C('cor', ['body {', '  background: red;', '}', '', '@media (min-width: 500px) {', '  body {', '    background: blue;', '  }', '}', '', '@media (min-width: 700px) {', '  body {', '    background: green;', '  }', '}'])
+    ]
+  };
+
+  /* ---------- destaque de sintaxe (VS Code) ---------- */
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function hlHTML(line){
+    return esc(line).replace(/(&lt;\/?)([\w-]+)((?:\s+[\w-]+(?:="[^"]*")?)*)(&gt;)/g, function(_, a, name, attrs, b){
+      attrs = attrs.replace(/([\w-]+)=("[^"]*")/g, '<span class="an">$1</span>=<span class="av">$2</span>');
+      return '<span class="tg">' + a + name + '</span>' + attrs + '<span class="tg">' + b + '</span>';
+    });
+  }
+  function hlVal(v){
+    return v.replace(/(#[0-9a-fA-F]{3,8})|(-?\d*\.?\d+(?:px|rem|em|vw|vh|fr|%|s)?)|([a-zA-Z-]+)(?=\()|([a-zA-Z-]+)/g, function(m, h, n, f){
+      return '<span class="' + (h || n ? 'n' : f ? 'fn' : 'v') + '">' + m + '</span>';
+    });
+  }
+  function hlDecl(s){
+    return s.replace(/([\w-]+)(\s*:\s*)([^;}]+)/g, function(_, p, c, v){ return '<span class="at">' + p + '</span>' + c + hlVal(v); });
+  }
+  function hlCSS(line){
+    var e = esc(line), m;
+    if (/^\s*\/\*/.test(line)) return '<span class="c">' + e + '</span>';
+    if (/^\s*@/.test(line)){
+      return e.replace(/@(\w+)/, '<span class="kw">@$1</span>')
+              .replace(/\(([\w-]+):\s*([^)]+)\)/, '(<span class="at">$1</span>: <span class="n">$2</span>)');
+    }
+    m = e.match(/^(\s*)([^{}:;]+?)(\s*\{)(.*)$/);
+    if (m) return m[1] + '<span class="sel">' + m[2] + '</span>' + m[3] + hlDecl(m[4]);
+    return hlDecl(e);
+  }
+
+  /* ---------- o "navegador": um iframe que roda o site de verdade ---------- */
+  var SHIM = '(function(){ document.addEventListener("keydown", function(e){ var t = e.target.tagName; if (t === "INPUT") return;'
+    + ' if (/^(Arrow|Page|Home|End|n|N|p|P| )/.test(e.key)){ e.preventDefault(); parent.postMessage({ rs:1, key:e.key }, "*"); } }); })();';
+  function pageDoc(site, css){
+    var s = SITES[site];
+    return '<!doctype html><html><head><meta charset="utf-8"><title>' + s.title + '</title><style>' + s.css + (css || '') + '</style></head><body>'
+      + s.html + '<script>' + SHIM + (s.js || '') + '<\/script></body></html>';
+  }
+  window.addEventListener('message', function(e){ var d = e.data; if (d && d.rs) onKey(d.key); });
+
+  var RS_HTML = '<div class="pane"><div class="browser"><div class="bar"><i></i><i></i><i></i><span></span></div>'
+    + '<div class="render rs"><div class="vp"><iframe title="Resultado no navegador"></iframe></div></div>'
+    + '<div class="tela"><span>Tela</span><input type="range" min="280" max="900" value="900" aria-label="Largura da tela"><output>900 px</output></div></div></div>';
+  var PHONES_HTML = '<div class="pane phones">'
+    + '<div class="phone a"><div class="plabel">Sem a linha</div><div class="scr"><iframe title="Celular sem a linha"></iframe></div></div>'
+    + '<div class="phone b"><div class="plabel">Com a linha</div><div class="scr"><iframe title="Celular com a linha"></iframe></div></div></div>';
+
+  function initLive(root){
+    var steps = STEPS[root.id];
+    var phones = root.getAttribute('data-mode') === 'phones', grow = root.getAttribute('data-sweep') === 'grow';
+    root.innerHTML = '<div class="pane"><span class="fname"></span><pre class="code"></pre></div>' + (phones ? PHONES_HTML : RS_HTML);
+    var pre = $('pre.code', root), fname = $('.fname', root);
+    var k = 0, timer = null, typing = null, raf = 0, ready = false;
+    var box, vp, fr, slider, out, phoneB, ia, ib;
+
+    if (phones){
+      ia = $('.phone.a iframe', root); ib = $('.phone.b iframe', root); phoneB = $('.phone.b', root);
+      var doc = pageDoc('bicho', MQ_FINAL);
+      ia.srcdoc = doc; ib.srcdoc = doc;
+    } else {
+      box = $('.render', root); vp = $('.vp', root); fr = $('iframe', root);
+      slider = $('input[type=range]', root); out = $('output', root);
+      $('.bar span', root).textContent = SITES[steps[0].site].title;
+      slider.addEventListener('input', function(){ cancelAnimationFrame(raf); setW(+slider.value); });
+    }
+
+    function setW(w){ vp.style.width = w + 'px'; slider.value = w; out.textContent = Math.round(w) + ' px'; }
+    function fullW(){ return Math.max(MINW + 60, box.clientWidth || 640); }
+    function sweep(){
+      cancelAnimationFrame(raf);
+      var full = fullW(); slider.max = full;
+      var a = grow ? MINW : full, b = grow ? full : MINW;
+      setW(a);
+      if (REDUCE){ setW(b); return; }
+      var t0 = null, dur = 1900;
+      raf = requestAnimationFrame(function f(ts){
+        if (t0 === null) t0 = ts;
+        var p = Math.min(1, (ts - t0) / dur), e = p < .5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2;
+        setW(a + (b - a) * e);
+        if (p < 1) raf = requestAnimationFrame(f);
+      });
+    }
+    function layout(){
+      var sa = $('.phone.a .scr', root), W = sa.clientWidth, H = sa.clientHeight; if (!W) return;
+      var s = W / 980;
+      ia.style.width = '980px'; ia.style.height = Math.ceil(H / s) + 'px'; ia.style.transform = 'scale(' + s + ')';
+      ib.style.width = W + 'px'; ib.style.height = H + 'px';
+    }
+    function show(){
+      var st = steps[k];
+      if (phones){ phoneB.classList.toggle('on', !!st.meta); layout(); return; }
+      fr.srcdoc = pageDoc(st.site, st.f === 'css' ? st.code.join('\n') : '');
+      if (ready) sweep(); else setW(fullW());
+    }
+    function hl(st){ return st.f === 'html' ? hlHTML : hlCSS; }
+    function paint(st, fresh){
+      fname.textContent = st.f === 'html' ? 'index.html' : 'style.css';
+      var h = hl(st);
+      pre.innerHTML = st.code.map(function(l, x){ return '<span class="ln' + (fresh[x] ? ' new' : '') + '">' + h(l) + '</span>'; }).join('');
+    }
+    function finish(){
+      if (!typing) return;
+      clearTimeout(timer); var t = typing; typing = null;
+      paint(steps[k], t.fresh); show();
+    }
+    function go(nk, animate){
+      finish();
+      var prevSt = steps[k], st = steps[nk]; k = nk;
+      var prev = prevSt.f === st.f ? prevSt.code.slice() : [], ls = st.code;
+      var fresh = ls.map(function(l){ var p = prev.indexOf(l); if (p > -1){ prev.splice(p, 1); return false; } return true; });
+      if (!animate || REDUCE || !fresh.some(Boolean)){ paint(st, animate ? fresh : []); show(); return; }
+      typing = { fresh:fresh };
+      var h = hl(st);
+      fname.textContent = st.f === 'html' ? 'index.html' : 'style.css';
+      pre.innerHTML = ls.map(function(l, x){ return '<span class="ln' + (fresh[x] ? ' new' : '') + '">' + (fresh[x] ? '' : h(l)) + '</span>'; }).join('');
+      var spans = $$('.ln', pre), queue = [];
+      fresh.forEach(function(f, x){ if (f) queue.push(x); });
+      if (spans[queue[0]]) spans[queue[0]].scrollIntoView({ block:'nearest' });
+      /* duração total fixa (~1s), não importa o tamanho do trecho */
+      var DUR = 1000, FRAME = 16, qi = 0, ci = 0, acc = 0, caret = document.createElement('span'); caret.className = 'caret';
+      var total = 0; queue.forEach(function(x){ total += ls[x].length; });
+      var perTick = Math.max(total, 1) / (DUR / FRAME);
+      (function tick(){
+        if (!typing) return;
+        if (qi >= queue.length){ finish(); return; }
+        acc += perTick; var left = Math.floor(acc); acc -= left;
+        while (left > 0 && qi < queue.length){
+          var x = queue[qi], txt = ls[x], n = Math.min(left, txt.length - ci);
+          ci += n; left -= n;
+          spans[x].textContent = txt.slice(0, ci);
+          if (ci >= txt.length){ spans[x].innerHTML = h(txt); qi++; ci = 0; }
+          else spans[x].appendChild(caret);
+        }
+        while (qi < queue.length && !ls[queue[qi]].length) qi++;
+        timer = setTimeout(tick, FRAME);
+      })();
+    }
+    root.addEventListener('step', function(e){
+      if (typing && e.detail > 0){ finish(); return; }
+      var nk = Math.max(0, Math.min(steps.length - 1, k + e.detail));
+      if (nk !== k) go(nk, e.detail > 0);
+    });
+    root.addEventListener('enter', function(){ if (phones) layout(); else sweep(); });
+    window.addEventListener('resize', function(){ if (phones) layout(); });
+    paint(steps[0], []); show(); ready = true;
+  }
+  $$('.live').forEach(initLive);
+
+  /* capa: o site pronto, a tela encolhendo e crescendo sozinha */
+  var i = 0;
+  (function(){
+    var box = $('#capaRs');
+    box.innerHTML = '<div class="vp"><iframe title="Resultado no navegador"></iframe></div>';
+    var vp = $('.vp', box);
+    $('iframe', box).srcdoc = pageDoc('bicho', MQ_FINAL);
+    (function loop(ts){
+      if (i === 0 && !REDUCE){
+        var full = Math.max(MINW + 60, box.clientWidth), p = (Math.sin(ts / 1900) + 1) / 2;
+        vp.style.width = (MINW + (full - MINW) * p) + 'px';
+      }
+      requestAnimationFrame(loop);
+    })(0);
+  })();
+
+  /* anatomia: cada ↓ acende uma peça */
+  (function(){
+    var root = $('#anat'), k = 0, max = 3;
+    function paint(){ $$('[data-i]', root).forEach(function(n){ var d = +n.getAttribute('data-i'); n.classList.toggle('on', d <= k); }); }
+    root.addEventListener('step', function(e){ k = Math.max(0, Math.min(max, k + e.detail)); paint(); });
+    paint();
+  })();
+
+  /* ---------- navegação + anotações ---------- */
+  var slides = $$('.slide'), total = slides.length;
+  var pfill = $('#pfill'), count = $('#count'), partLabel = $('#partLabel'), panel = $('#notesPanel');
+  var pop = null;
+  function pad(n){ return (n<10?'0':'') + n; }
+  function notesHTML(){ var n = slides[i].querySelector('aside.notes'); return n ? n.innerHTML : '<h4>Sem anotações</h4>'; }
+  function updateNotes(){
+    panel.innerHTML = '<div class="np-h">Só você vê &middot; slide ' + (i+1) + ' &middot; N fecha &middot; P abre janela</div>' + notesHTML();
+    if (pop && !pop.closed){ pop.document.body.innerHTML = '<div class="np-h">Slide ' + (i+1) + ' / ' + total + '</div>' + notesHTML(); }
+  }
+  function openPop(){
+    pop = window.open('', 'respnotas', 'width=520,height=720');
+    if (!pop){ panel.hidden = false; return; }
+    var d = pop.document; d.title = 'Notas do professor';
+    d.head.innerHTML = '<meta charset="utf-8"><style>body{font:16px/1.5 system-ui,sans-serif;background:#0c1f2e;color:#e4ecf3;padding:1rem 1.3rem}h4{font:500 12px monospace;letter-spacing:.1em;text-transform:uppercase;color:#f4ac4a;margin:1.1rem 0 .2rem}ul{margin:0;padding-left:1.2rem}li{margin:.25rem 0}code,kbd{background:#123047;padding:.05em .35em;border-radius:4px}.np-h{font:12px monospace;color:#93a6b5}</style>';
+    panel.hidden = true; updateNotes();
+  }
+  function render(){
+    slides.forEach(function(s, x){ s.classList.toggle('active', x === i); s.setAttribute('aria-hidden', x === i ? 'false' : 'true'); });
+    pfill.style.width = ((i+1)/total*100) + '%';
+    count.textContent = pad(i+1) + ' / ' + pad(total);
+    var eb = slides[i].querySelector('.eyebrow');
+    partLabel.textContent = slides[i].getAttribute('data-part') || (eb ? eb.textContent.replace(/\s+/g,' ').trim() : 'Responsividade');
+    if (history.replaceState) history.replaceState(null, '', '#' + (i+1));
+    updateNotes();
+    var lv = $('.live', slides[i]);
+    if (lv) setTimeout(function(){ lv.dispatchEvent(new CustomEvent('enter')); }, 380);
+  }
+  function go(n){ var nx = Math.max(0, Math.min(total-1, n)); if (nx === i) return; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); i = nx; render(); }
+  function next(){ go(i+1); } function prev(){ go(i-1); }
+
+  /* teclas: vêm do documento ou do iframe (quando o foco está dentro do site) */
+  function onKey(key){
+    if (key === 'Escape'){ panel.hidden = true; return; }
+    if (key === 'n' || key === 'N'){ panel.hidden = !panel.hidden; return; }
+    if (key === 'p' || key === 'P'){ openPop(); return; }
+    if (key === 'ArrowDown' || key === 'ArrowUp'){
+      var st = $('.live, [data-steps]', slides[i]);
+      if (st){ st.dispatchEvent(new CustomEvent('step', { detail: key === 'ArrowDown' ? 1 : -1 })); return; }
+    }
+    if (key === 'ArrowRight' || key === 'PageDown' || key === ' ' || key === 'ArrowDown') next();
+    else if (key === 'ArrowLeft' || key === 'PageUp' || key === 'ArrowUp') prev();
+    else if (key === 'Home') go(0);
+    else if (key === 'End') go(total-1);
+  }
+  document.addEventListener('keydown', function(e){
+    var t = e.target, tag = t && t.tagName;
+    if (e.key === 'Escape'){ onKey('Escape'); return; }
+    if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT') return;
+    if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) e.preventDefault();
+    onKey(e.key);
+  });
+  $('#btnNext').addEventListener('click', next);
+  $('#btnPrev').addEventListener('click', prev);
+  $('#znext').addEventListener('click', function(){ this.blur(); next(); });
+  $('#zprev').addEventListener('click', function(){ this.blur(); prev(); });
+  var docRoot = document.documentElement;
+  $('#btnTheme').addEventListener('click', function(){
+    var cur = docRoot.getAttribute('data-theme');
+    var isDark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    docRoot.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  if (!isNaN(start) && start >= 1 && start <= total) i = start - 1;
+  render();
+})();
+</script>
+
+</body>
+</html>

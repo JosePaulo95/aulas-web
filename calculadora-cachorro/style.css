@@ -1,0 +1,126 @@
+/* as cores do site moram aqui: troca uma vez, muda em todo lugar */
+:root {
+  --fundo: #ffe9c7;
+  --caixa: white;
+  --texto: #1f2933;
+  --destaque: #b35900;
+  --botao: #ff8c1a;
+  --botao-hover: #ffa133;
+  --resultado: #fff3df;
+}
+
+/* tema escuro: as mesmas variáveis, outros valores */
+body.escuro {
+  --fundo: #1d2633;
+  --caixa: #2b3645;
+  --texto: #e4ecf3;
+  --destaque: #7fe3d8;
+  --botao: #e07b10;
+  --botao-hover: #f2a63b;
+  --resultado: #3a4656;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+body, .caixa {
+  transition: background 0.4s, color 0.4s;
+}
+
+.caixa {
+  background: var(--caixa);
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  width: 420px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+h1 {
+  color: var(--destaque);
+  font-size: 26px;
+}
+
+input {
+  font-size: 24px;
+  padding: 10px;
+  width: 140px;
+  text-align: center;
+  background: var(--caixa);
+  color: var(--texto);
+  border: 3px solid var(--botao);
+  border-radius: 12px;
+  outline: none;
+}
+
+.botoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+button {
+  font-size: 18px;
+  padding: 14px 8px;
+  background: var(--botao);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--destaque);
+}
+
+button:hover {
+  background: var(--botao-hover);
+}
+
+button:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+/* botão de trocar o tema, no canto */
+.tema {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  font-size: 15px;
+  padding: 8px 14px;
+}
+
+#resultado {
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 24px;
+  padding: 14px;
+  background: var(--resultado);
+  border-radius: 12px;
+  color: var(--destaque);
+}
+
+#resultado:empty {
+  display: none;
+}
+
+/* aula de DOM */
+input.erro {
+  border-color: red;
+  background: #ffe1dd;
+}
+
+#historico {
+  text-align: left;
+  margin-top: 16px;
+  font-size: 18px;
+}
+
+#historico:empty {
+  display: none;
+}

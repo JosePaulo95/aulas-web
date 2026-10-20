@@ -1,0 +1,1419 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manipulando o DOM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    color-scheme: dark;
+    /* paleta: navy #123f63 / slate #8fa3c4 / teal #16a89c / lime #bcd230 / orange #f2a63b */
+    --navy:#123f63;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+    --font-display:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body:"Barlow", system-ui, -apple-system, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      color-scheme: light;
+      --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+      --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+      --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+    --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+    --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:clamp(15px,1.1vw,18px); line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  .deck{ position:fixed; inset:0; display:grid; grid-template-rows:1fr auto; }
+  .stage{ position:relative; overflow:hidden; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+    padding:clamp(2rem,6vw,5.5rem) clamp(1.6rem,7vw,7rem) clamp(3.2rem,8vh,5rem);
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .34s ease, transform .34s ease, visibility 0s linear .34s;
+    overflow-y:auto;
+  }
+  .slide.active{
+    opacity:1; visibility:visible; transform:none;
+    transition:opacity .38s ease, transform .38s ease;
+  }
+  .slide > *{ max-width:60ch; }
+  .slide .wide{ max-width:min(1080px,92vw); }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0; display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before{ content:""; width:1.8rem; height:2px; background:var(--accent); display:inline-block; }
+
+  h1,h2{ font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.02; text-transform:uppercase; letter-spacing:.005em; }
+  h1{ font-size:clamp(2.9rem,9vw,6.2rem); }
+  h2{ font-size:clamp(2rem,5vw,3.6rem); }
+  h2 em, h1 em{ font-style:normal; color:var(--accent); }
+  h1 code, h2 code{ text-transform:none; font-size:.82em; vertical-align:.04em; }
+
+  .lead{ font-size:clamp(1.15rem,2.1vw,1.7rem); color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+  .slide p{ margin:0; }
+  strong{ font-weight:600; color:var(--ink); }
+  .hl{ color:var(--accent); font-weight:600; }
+  .hl-amber{ color:var(--amber); font-weight:600; }
+
+  code, kbd{
+    font-family:var(--font-mono); font-size:.92em;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:5px;
+    padding:.1em .45em;
+  }
+  kbd{ box-shadow:0 2px 0 var(--line); }
+
+  .subtitle{ font-family:var(--font-mono); color:var(--ink-dim); font-size:clamp(.95rem,1.6vw,1.15rem); letter-spacing:.02em; }
+
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.35rem); }
+  ul.bullets li{ display:flex; gap:.7rem; align-items:baseline; }
+  ul.bullets li::before{ content:"▸"; color:var(--accent); flex:none; }
+
+  .callout{
+    border-left:3px solid var(--amber); background:var(--bg-elev);
+    padding:1rem 1.2rem; border-radius:0 10px 10px 0; font-size:clamp(1.02rem,1.8vw,1.3rem);
+  }
+  .callout.good{ border-color:var(--accent); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:.55rem; }
+  .chips span{
+    font-family:var(--font-mono); font-size:.92rem;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.4em .9em;
+  }
+  .chips.done span{ color:var(--ink-dim); }
+
+  .kv{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:.9rem; }
+  .kv > div{ display:flex; flex-direction:column; gap:.3rem; }
+  .kv .k{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .kv .v{ font-size:1.05rem; }
+
+  /* trio de blocos da agenda */
+  .trio{ display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .trio > div{
+    background:var(--bg-elev); border:1px solid var(--line); border-top:4px solid var(--c,var(--accent));
+    border-radius:12px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.5rem;
+  }
+  .trio .k{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:1.6rem; line-height:1; }
+  .trio .tags{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .trio .t1{ --c:var(--accent); } .trio .t2{ --c:var(--amber); } .trio .t3{ --c:var(--lime); }
+
+  /* footer chrome */
+  .chrome{
+    display:flex; align-items:center; gap:1rem;
+    padding:.55rem clamp(1rem,4vw,2.4rem); border-top:1px solid var(--line);
+    background:var(--bg); font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+    z-index:10;
+  }
+  .chrome .label{ letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progress{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; min-width:60px; }
+  .progress__fill{ height:100%; background:var(--accent); width:0; transition:width .35s ease; }
+  .chrome .count{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .chrome button{
+    font:inherit; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line);
+    border-radius:7px; padding:.3em .7em; cursor:pointer;
+  }
+  .chrome button:hover{ color:var(--ink); border-color:var(--accent); }
+  .chrome button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .zones{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+  .zone{ pointer-events:auto; border:none; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; }
+  .zone:focus, .zone:focus-visible{ outline:none; }
+  .zone.prev{ width:28%; }
+  .zone.spacer{ flex:1; cursor:default; pointer-events:none; }
+  .zone.next{ width:40%; }
+
+  /* faixa tricolor no topo */
+  .brandbar{ position:absolute; left:0; right:0; top:0; height:5px; display:flex; z-index:8; }
+  .brandbar i{ flex:1; }
+  .brandbar i:nth-child(1){ background:var(--accent); }
+  .brandbar i:nth-child(2){ background:var(--lime); }
+  .brandbar i:nth-child(3){ background:var(--amber); }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide, .slide.active, .progress__fill{ transition:none; }
+  }
+
+  /* código e demonstração lado a lado */
+  pre.code{
+    font-family:var(--font-mono); font-size:clamp(.78rem,1.3vw,.98rem); line-height:1.6;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; margin:0; overflow-x:auto; color:var(--ink);
+    white-space:pre; tab-size:2;
+  }
+  pre.code .t{ color:var(--accent); }
+  pre.code .at{ color:var(--amber); }
+  pre.code .v{ color:var(--slate); }
+  pre.code .c{ color:var(--ink-dim); font-style:italic; }
+
+  .demo{ display:grid; gap:.9rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .demo{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .demo .pane{ display:flex; flex-direction:column; gap:.45rem; min-width:0; }
+  .demo .pane-label{
+    font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-dim);
+  }
+  /* o "navegador": estilos padrão, sem CSS nenhum — e clicável por cima das zonas de navegação */
+  .render{
+    color-scheme:light;
+    position:relative; z-index:6;
+    background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px;
+    padding:1rem 1.15rem; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    box-shadow:var(--shadow); overflow-x:auto;
+  }
+  .render :is(h1,h2,h3){ font-family:inherit; text-transform:none; letter-spacing:0; color:inherit; margin:.35em 0; line-height:1.2; }
+  .render h1{ font-size:2em; font-weight:700; }
+  .render h2{ font-size:1.5em; font-weight:700; }
+  .render p{ margin:.7em 0; }
+  .render a{ color:#00e; text-decoration:underline; }
+  .render table{ border-collapse:separate; border-spacing:2px; }
+  .render th, .render td{ padding:1px; text-align:left; }
+  .render th{ font-weight:700; text-align:center; }
+  .render table[border] th, .render table[border] td{ border:1px solid #808080; }
+  .render input, .render button{ font-family:system-ui, sans-serif; font-size:13px; }
+  .render > :first-child{ margin-top:0; }
+  .render > :last-child{ margin-bottom:0; }
+
+  .tagtable{ display:grid; grid-template-columns:auto 1fr; gap:.55rem 1.1rem; align-items:baseline; }
+  .tagtable code{ white-space:nowrap; }
+  .tagtable .grp{
+    grid-column:1/-1; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent); margin-top:.4rem;
+  }
+
+  /* diagrama da página semântica */
+  .layout{ display:grid; gap:.5rem; font-family:var(--font-mono); font-size:.9rem; }
+  .layout > div{
+    border:2px dashed var(--line); border-radius:10px; padding:.8rem 1rem;
+    display:flex; justify-content:space-between; gap:1rem; color:var(--ink-dim);
+  }
+  .layout b{ color:var(--accent); font-weight:500; }
+  .layout .main{ min-height:7rem; align-items:flex-start; }
+  .layout .hd b, .layout .ft b{ color:var(--amber); }
+  .layout .hd, .layout .ft{ border-style:solid; border-color:var(--amber); }
+
+  /* ===== CSS 1: extras ===== */
+  .slide aside.notes{ display:none; }
+  .lab, pre.code, .tabs, .seg, .btns, .swatches{ position:relative; z-index:6; }
+  pre.code .ln{ display:block; }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.5rem); }
+
+  /* dicas ao passar o mouse */
+  .prop{ border-bottom:1px dotted var(--accent); cursor:help; border-radius:2px; transition:background .15s; }
+  .prop:hover, .prop:focus-visible{ background:color-mix(in srgb, var(--accent) 24%, transparent); outline:none; }
+  #tip{
+    position:fixed; z-index:60; max-width:min(330px,86vw); left:0; top:0;
+    background:var(--ink); color:var(--bg); padding:.65rem .85rem; border-radius:10px;
+    font-size:.92rem; line-height:1.4; pointer-events:none; opacity:0; transform:translateY(5px);
+    transition:opacity .15s ease, transform .15s ease; box-shadow:var(--shadow);
+  }
+  #tip.show{ opacity:1; transform:none; }
+  #tip b{ display:block; font-family:var(--font-mono); font-weight:500; font-size:.82rem; letter-spacing:.04em; margin-bottom:.15rem; color:var(--accent-ink); background:var(--accent); width:max-content; padding:.05em .5em; border-radius:4px; }
+
+  @keyframes glow{
+    0%,100%{ box-shadow:0 0 0 0 transparent; }
+    50%{ box-shadow:0 0 0 7px color-mix(in srgb, var(--accent) 55%, transparent); }
+  }
+  @keyframes pop{ 0%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+  .glow{ animation:glow .9s ease-in-out infinite; }
+
+  /* controles */
+  .btn{
+    font-family:var(--font-mono); font-size:.85rem; color:var(--ink); background:var(--bg-elev);
+    border:1px solid var(--line); border-radius:8px; padding:.45em .9em; cursor:pointer;
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .btn:hover{ border-color:var(--accent); }
+  .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn.on{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .btn.big{ font-size:1.05rem; padding:.7em 1.3em; font-weight:500; }
+  .btns, .seg, .tabs{ display:flex; flex-wrap:wrap; gap:.5rem; }
+  .ctl{ display:grid; grid-template-columns:8.5rem 1fr 4rem; align-items:center; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .ctl output{ text-align:right; color:var(--ink); }
+  .ctl select, .ctl input[type=color]{ grid-column:2/4; font:inherit; background:var(--bg-elev); color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.3em .5em; height:2.1rem; }
+  .ctl input[type=text]{ grid-column:2/4; font:inherit; font-size:1rem; background:var(--bg-elev); color:var(--ink); border:1px solid var(--accent); border-radius:7px; padding:.35em .6em; }
+  input[type=range]{ accent-color:var(--accent); width:100%; }
+  .lab{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .hint{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim); }
+  .hint b{ color:var(--amber); font-weight:500; }
+
+  /* a mini-página liga/desliga CSS */
+  .mini{
+    background:#fff; color:#1a1a1a; font-family:"Times New Roman", Times, serif; line-height:1.4;
+    border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem; box-shadow:var(--shadow);
+    transition:background .6s ease, color .6s ease, padding .6s ease, border-radius .6s ease;
+  }
+  .mini h1{ font-family:inherit; text-transform:none; font-size:2em; margin:.3em 0; line-height:1.15; color:inherit; transition:all .6s ease; }
+  .mini p{ margin:.6em 0; transition:all .6s ease; }
+  .mini button{ font-family:inherit; font-size:13px; transition:all .6s ease; }
+  .mini .tag{ display:inline-block; font-family:inherit; font-size:1em; transition:all .6s ease; }
+  .mini.on{ background:#123f63; color:#e4ecf3; font-family:"Barlow", system-ui, sans-serif; padding:1.8rem 1.8rem; border-radius:18px; }
+  .mini.on h1{ font-family:"Barlow Condensed", "Arial Narrow", sans-serif; text-transform:uppercase; color:#2ec9bd; font-size:2.6em; letter-spacing:.01em; }
+  .mini.on p{ color:#c9d6e2; }
+  .mini.on button{ background:#f2a63b; color:#3a2300; border:none; border-radius:999px; padding:.7em 1.4em; font-weight:600; font-size:15px; }
+  .mini.on .tag{ background:#16a89c; color:#fff; border-radius:6px; padding:.1em .6em; font-size:.85em; }
+
+  /* abas de "como o css entra" */
+  .tabs button{ font-family:var(--font-mono); font-size:.9rem; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line); border-radius:8px 8px 0 0; padding:.5em 1em; cursor:pointer; }
+  .tabs button.on{ color:var(--ink); border-color:var(--accent); border-bottom-color:var(--bg-elev); box-shadow:inset 0 3px 0 var(--accent); }
+  .tp{ display:none; }
+  .tp.on{ display:flex; flex-direction:column; gap:.8rem; }
+  .files{ display:grid; gap:.8rem; grid-template-columns:1fr; }
+  @media (min-width:800px){ .files{ grid-template-columns:1fr 1fr; align-items:start; } }
+  .fname{ font-family:var(--font-mono); font-size:.78rem; color:var(--amber); letter-spacing:.06em; margin-bottom:.3rem; display:block; }
+  .verdict{ font-family:var(--font-mono); font-size:.88rem; padding:.45em .9em; border-radius:8px; width:max-content; max-width:100%; }
+  .verdict.bad{ background:color-mix(in srgb, var(--amber) 20%, transparent); color:var(--amber); }
+  .verdict.ok{ background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--accent); }
+
+  /* anatomia de uma regra */
+  .k-seletor{ color:var(--accent); } .k-propriedade{ color:var(--amber); } .k-valor{ color:var(--slate); }
+  .k-seletor, .k-propriedade, .k-valor, .k-fim{ border-radius:4px; }
+  body[data-hover="seletor"] .k-seletor, body[data-hover="propriedade"] .k-propriedade,
+  body[data-hover="valor"] .k-valor, body[data-hover="fim"] .k-fim{ animation:glow .9s ease-in-out infinite; }
+  .legend{ display:flex; flex-wrap:wrap; gap:.6rem; font-family:var(--font-mono); font-size:.85rem; }
+  .legend span{ background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.3em .85em; }
+  .semi.miss::after{ content:"\2190 faltou!"; color:#ff6b5e; font-size:.8em; margin-left:.4rem; }
+  .s-h1{ font-family:"Times New Roman", serif; font-weight:700; margin:0; color:#16a89c; font-size:40px; line-height:1.1; transition:all .35s ease; }
+  .s-h1.broken{ color:#1a1a1a; font-size:32px; }
+
+  /* amostras */
+  .sample{ color-scheme:light; background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:12px; padding:1.2rem; box-shadow:var(--shadow); font-family:"Times New Roman", serif; min-height:7rem; }
+  .sample p{ margin:0; padding:.6rem .8rem; border-radius:6px; transition:all .25s ease; }
+  .swatches{ display:flex; flex-wrap:wrap; gap:.45rem; }
+  .sw{ font-family:var(--font-mono); font-size:.76rem; border:2px solid var(--line); border-radius:8px; padding:.35em .6em; cursor:pointer; color:#111; }
+  .sw:hover{ border-color:var(--accent); }
+  .sw.dark{ color:#fff; }
+
+  /* caixa: diagrama */
+  .bm{ max-width:560px; }
+  .bm-margin, .bm-border, .bm-padding, .bm-content{ position:relative; border-radius:6px; transition:filter .2s; }
+  .bm-tag{ position:absolute; top:.25rem; left:.55rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#1a1a1a; font-weight:500; pointer-events:none; }
+  .bm-margin{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.38) 8px 16px); padding:2.1rem 1.4rem 1.4rem; border:2px dashed #f2a63b; cursor:help; }
+  .bm-border{ background:#4f7cac; padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-border .bm-tag{ color:#fff; }
+  .bm-padding{ background:rgba(188,210,48,.92); padding:2.1rem 1rem 1rem; cursor:help; }
+  .bm-content{ background:#16a89c; color:#fff; padding:1.3rem .6rem; text-align:center; font-family:var(--font-mono); cursor:help; }
+  .bm-content .bm-tag{ display:none; }
+  body[data-hover="margin"] .bm-margin, body[data-hover="border"] .bm-border,
+  body[data-hover="padding"] .bm-padding, body[data-hover="content"] .bm-content{ animation:glow .9s ease-in-out infinite; filter:brightness(1.15); }
+
+  /* caixa: laboratório */
+  .mstage{ min-height:310px; display:grid; place-items:center; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .mwrap{ background:repeating-linear-gradient(45deg, rgba(242,166,59,.55) 0 8px, rgba(242,166,59,.35) 8px 16px); outline:1px dashed #f2a63b; transition:padding .12s; }
+  .mbox{ border-style:solid; border-color:#4f7cac; background:rgba(188,210,48,.95); background-clip:padding-box; transition:padding .12s, border-width .12s; }
+  .mcontent{ background:#16a89c; color:#fff; height:70px; display:grid; place-items:center; font-family:var(--font-mono); font-size:.8rem; transition:width .12s; }
+
+  /* padding: 1, 2, 3 ou 4 valores */
+  .sh-grid{ display:grid; grid-template-columns:auto auto auto; grid-template-rows:auto auto auto; gap:.35rem; align-items:center; justify-items:center; justify-content:center; }
+  .sh-b{ font-family:var(--font-mono); font-size:.85rem; color:var(--accent); min-width:4.2rem; text-align:center; }
+  .sh-box{ background:rgba(188,210,48,.95); border:2px solid #4f7cac; transition:padding .2s ease; }
+  .sh-in{ background:#16a89c; color:#fff; font-family:var(--font-mono); font-size:.8rem; padding:.9rem 1rem; }
+
+  /* borda */
+  .bdbox{ width:150px; height:150px; display:grid; place-items:center; text-align:center; font-family:var(--font-mono); font-size:.8rem; background:rgba(22,168,156,.18); transition:all .15s; }
+
+  /* position */
+  .stack{ display:flex; flex-direction:column; gap:.5rem; width:min(100%,300px); padding:1rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; }
+  .blk{ background:var(--slate); color:#0c1f2e; font-family:var(--font-mono); font-weight:500; padding:.8rem 1rem; border-radius:8px; height:3rem; display:flex; align-items:center; }
+  .slot{ border:2px dashed var(--ink-dim); border-radius:8px; height:3rem; }
+  .slot .blk{ background:var(--accent); color:var(--accent-ink); width:calc(100% + 0px); transition:top .15s, left .15s; }
+  .slot .blk.moved{ width:60%; }
+  .ign{ opacity:.55; text-decoration:line-through; }
+  .pg{ position:relative; border:2px dashed var(--ink-dim); border-radius:12px; padding:2.2rem 1.2rem 1.2rem; height:310px; background:var(--bg-elev); }
+  .pg-l, .pr-l{ position:absolute; top:.4rem; left:.7rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); }
+  .pr{ position:static; margin:1.6rem 0 0 auto; width:68%; height:190px; border:2px solid var(--accent); border-radius:10px; background:color-mix(in srgb, var(--accent) 10%, transparent); }
+  .pr.rel{ position:relative; }
+  .pr-l{ position:static; display:block; padding:.4rem .7rem; color:var(--accent); }
+  .ch{ position:absolute; width:38px; height:38px; border-radius:8px; background:var(--amber); color:#3a2300; display:grid; place-items:center; font-size:1.2rem; z-index:2; }
+  .ch.pop{ animation:pop .35s ease; }
+
+  /* card de personagem */
+  .card{ background:#fff; color:#1a1a1a; font-family:"Times New Roman", serif; max-width:280px; transition:all .45s ease; }
+  .card h3{ margin:0 0 .3em; font-size:1.4em; font-family:inherit; text-transform:none; }
+  .card p{ margin:0; }
+  .ln.new{ background:color-mix(in srgb, var(--accent) 26%, transparent); border-radius:4px; }
+  .quiz-opt{ text-align:left; }
+  .quiz-opt.right{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .quiz-opt.wrong{ background:color-mix(in srgb, #ff6b5e 25%, transparent); border-color:#ff6b5e; }
+  .fb{ min-height:3rem; }
+
+  /* anotações do professor (nunca aparecem pro aluno sem apertar N) */
+  #notesPanel{
+    position:fixed; right:12px; bottom:52px; width:min(390px,92vw); max-height:72vh; overflow:auto; z-index:40;
+    background:var(--bg-elev); border:1px solid var(--amber); border-radius:12px; padding:.9rem 1.05rem;
+    box-shadow:var(--shadow); font-size:.9rem; line-height:1.45;
+  }
+  #notesPanel[hidden]{ display:none; }
+  #notesPanel .np-h{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:.4rem; }
+  #notesPanel h4{ margin:.7rem 0 .2rem; font-family:var(--font-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); font-weight:500; }
+  #notesPanel ul{ margin:0; padding-left:1.1rem; } #notesPanel li{ margin:.15rem 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    .glow, .ch.pop, body[data-hover] *{ animation:none !important; }
+  }
+
+  /* ===== Tema VS Code Dark+ nos blocos de código ===== */
+  pre.code{
+    background:#1e1e1e; color:#d4d4d4; border:1px solid #3c3c3c; border-radius:8px;
+    font-family:Consolas, "Cascadia Code", "Cascadia Mono", "Courier New", monospace;
+    font-size:clamp(.85rem,1.35vw,1.05rem); line-height:1.55; padding:1rem 1.2rem;
+    box-shadow:0 10px 30px -16px rgba(0,0,0,.6); color-scheme:dark;
+  }
+  pre.code.big{ font-size:clamp(1rem,2vw,1.4rem); }
+  pre.code .t{ color:#569cd6; }
+  pre.code .at{ color:#9cdcfe; }
+  pre.code .v{ color:#ce9178; }
+  pre.code .n{ color:#b5cea8; }
+  pre.code .sel{ color:#d7ba7d; }
+  pre.code .c, pre.code .hint{ color:#6a9955; font-style:italic; font-family:inherit; font-size:inherit; }
+  pre.code .prop{ color:#9cdcfe; border-bottom-color:#9cdcfe; }
+  pre.code .prop:hover, pre.code .prop:focus-visible{ background:rgba(86,156,214,.28); }
+  pre.code .k-seletor{ color:#d7ba7d; } pre.code .k-propriedade{ color:#9cdcfe; } pre.code .k-valor{ color:#ce9178; }
+  pre.code .ln.new{ background:rgba(255,255,255,.1); }
+  pre.code .ign{ opacity:.5; }
+  .fname{ color:#cccccc; background:#2d2d2d; display:inline-block; padding:.2em .8em; border-radius:6px 6px 0 0; margin-bottom:0; border:1px solid #3c3c3c; border-bottom:none; }
+  .fname + pre.code{ border-top-left-radius:0; }
+
+  /* ===== CSS 4: Flexbox ===== */
+  .fxlab{ display:flex; flex-direction:column; gap:.8rem; position:relative; z-index:6; min-width:0; }
+  .fxlab .goal{ background:color-mix(in srgb, var(--amber) 16%, transparent); border-left:4px solid var(--amber); border-radius:0 8px 8px 0; padding:.6rem .9rem; font-size:1.02rem; }
+  .fx-grid{ display:grid; gap:1rem; grid-template-columns:1fr; }
+  @media (min-width:900px){ .fx-grid{ grid-template-columns:1fr 1.15fr; align-items:start; } }
+  .fx-l, .fx-r{ display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+  .fx-g{ display:flex; flex-direction:column; gap:.3rem; }
+  .fx-gl{ font-family:var(--font-mono); font-size:.78rem; color:var(--ink-dim); width:max-content; }
+  .fx-g .seg .btn{ font-size:.78rem; padding:.35em .7em; }
+  .fx-stage{ background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:.8rem; overflow:hidden; }
+  .fx{
+    border:2px dashed var(--ink-dim); border-radius:10px; background:color-mix(in srgb, var(--accent) 7%, transparent);
+    padding:6px; max-width:100%; min-width:0;
+  }
+  .cube{
+    width:52px; height:52px; flex:none; border-radius:8px; display:grid; place-items:center;
+    font-family:var(--font-mono); font-weight:700; font-size:1.05rem; color:#0c1f2e; user-select:none;
+    box-shadow:0 3px 8px -3px rgba(0,0,0,.5); flex-direction:column; line-height:1.1;
+  }
+  .cube small{ font-size:.55rem; font-weight:500; display:block; }
+  .fx.vary .cube{ height:auto; min-height:0; padding:.35rem 0; }
+  .fx.pick .cube{ cursor:pointer; width:70px; }
+  .fx-axis{ min-height:1.4rem; }
+  .vd{ font-family:var(--font-mono); font-size:.8rem; padding:.15em .7em; border-radius:999px; margin-left:.4rem; white-space:nowrap; }
+  .vd.ok{ background:var(--accent); color:var(--accent-ink); }
+  .vd.no{ background:color-mix(in srgb, #ff6b5e 25%, transparent); color:#ff8f84; }
+
+  /* display: block, inline, inline-block */
+  .dsc{ background:var(--bg-elev); border:2px dashed var(--ink-dim); border-radius:10px; padding:10px; min-height:140px; color:var(--ink); font-family:var(--font-body); line-height:1.9; }
+  .dsb{ width:90px; height:46px; background:#2ec9bd; color:#0c1f2e; font-family:var(--font-mono); font-weight:700; text-align:center; line-height:46px; border-radius:6px; margin:2px 0; }
+  .dsb:nth-child(2){ background:#f4ac4a; } .dsb:nth-child(3){ background:#c4da3c; }
+
+  /* mini site: cards em linha */
+  .msite{ background:#eef1f5; border-radius:12px; overflow:hidden; font-family:Arial,sans-serif; color:#1f2933; box-shadow:var(--shadow); }
+  .msite header{ background:#123f63; color:#fff; padding:14px 18px; }
+  .msite header .logo{ margin:0 0 6px; font-size:1.2rem; font-weight:700; }
+  .msite nav a{ color:#2ec9bd; margin-right:14px; font-size:.95rem; }
+  .msite nav{ transition:all .3s; }
+  .msite main{ padding:14px; }
+  .msite .cartao{ background:#fff; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,.12); padding:14px 16px; margin:8px 0; font-size:.95rem; }
+  .msite .cartao b{ display:block; }
+  .msite.on nav{ display:flex; gap:16px; justify-content:center; }
+  .msite.on nav a{ margin:0; }
+  .msite.on main{ display:flex; gap:14px; }
+  .msite.on .cartao{ margin:0; flex:1; }
+
+  /* controles só do professor (aparecem com N) */
+  .tctl{ display:none !important; }
+  body.notes-open .tctl{ display:block !important; }
+  body.notes-open .seg.tctl{ display:flex !important; }
+  /* o conteúdo precisa ficar acima das zonas invisíveis de avançar/voltar */
+  .slide .demo, .slide .tagtable, .slide .kv, .slide .tgrid{ position:relative; z-index:6; }
+  .fxlab .fname{ display:block; width:max-content; }
+
+  /* alvos do projeto */
+  .tgrid{ display:grid; gap:.7rem; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+  .tgt{ background:var(--bg-elev); border:1px solid var(--line); border-radius:10px; padding:.6rem; display:flex; flex-direction:column; gap:.4rem; }
+  .tgt .tl{ font-family:var(--font-mono); font-size:.75rem; color:var(--accent); }
+  .tgt .tf{ display:flex; height:84px; border:1px dashed var(--ink-dim); border-radius:6px; padding:3px; overflow:hidden; }
+  .tgt .cube{ width:22px; height:22px; font-size:.65rem; border-radius:4px; }
+
+  /* ===== Calculadora: código digitado + resultado ao vivo ===== */
+  .live{ display:grid; gap:1rem; grid-template-columns:1fr; position:relative; z-index:6; }
+  @media (min-width:900px){ .live{ grid-template-columns:1.25fr 1fr; align-items:start; } }
+  .live .pane{ display:flex; flex-direction:column; min-width:0; }
+  .live pre.code{ min-height:18rem; }
+  .live pre.code .ln{ min-height:1.55em; }
+  .live pre.code .ln.new{ background:rgba(255,255,255,.08); }
+  .caret{ display:inline-block; width:.55em; height:1.1em; vertical-align:-.15em; background:#aeafad; animation:blink 1s steps(1) infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+  .browser{ border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); background:#fff; }
+  .browser .bar{ display:flex; align-items:center; gap:.4rem; background:#dfe3e8; padding:.45rem .7rem; font-family:var(--font-mono); font-size:.72rem; color:#56606b; }
+  .browser .bar i{ width:.65rem; height:.65rem; border-radius:50%; background:#c4c9cf; }
+  .browser .bar span{ margin-left:.5rem; background:#fff; border-radius:999px; padding:.1rem .7rem; }
+  .browser .render{ border:none; border-radius:0; box-shadow:none; min-height:18rem; display:block; }
+  pre.code .tg{ color:#569cd6; } pre.code .an{ color:#9cdcfe; } pre.code .av{ color:#ce9178; }
+  .capa{ display:grid; gap:2rem; align-items:center; grid-template-columns:1fr; }
+  @media (min-width:900px){ .capa{ grid-template-columns:1.3fr 1fr; } }
+  .capa > div{ display:flex; flex-direction:column; gap:1rem; }
+  .capa .render{ display:grid; place-items:center; min-height:22rem; background:#eef1f5; }
+
+  /* slides de código: duas "abas" 50/50, tela quase cheia, sem texto */
+  .slide:has(.live){ padding:clamp(.8rem,2vh,1.4rem) clamp(.8rem,1.6vw,1.6rem) clamp(3rem,7vh,4rem); overflow:hidden; }
+  .slide:has(.live) > *{ max-width:none; }
+  .slide .live.wide{ max-width:none; flex:1; min-height:0; grid-template-columns:1fr 1fr; grid-template-rows:minmax(0,1fr); align-items:stretch; gap:clamp(.6rem,1.2vw,1.2rem); }
+  .live .pane{ min-height:0; }
+  .live pre.code{ flex:1; min-height:0; overflow:auto; font-size:clamp(1rem,1.7vw,1.6rem); }
+  .live .browser{ height:100%; display:flex; flex-direction:column; }
+  .live .browser .render{ flex:1; min-height:0; display:grid; place-items:center; background:#eef1f5; overflow:auto; }
+
+  /* ===== Calculadora parte 2: JS ao vivo ===== */
+  pre.code .kw{ color:#569cd6; } pre.code .fn{ color:#dcdcaa; }
+  .live pre.code{ font-size:clamp(.9rem,1.3vw,1.3rem); }
+  .live .browser .render{ padding:0; display:block; }
+  .live .browser .render iframe, .capa .render iframe{ display:block; width:100%; height:100%; border:0; background:#eef1f5; }
+  .capa .render{ padding:0; height:22rem; }
+  @media (min-width:900px){ .capa{ grid-template-columns:1fr 1.15fr; } }
+  .render.reloading{ animation:reload .45s ease; }
+  @keyframes reload{ 0%{ filter:none; } 30%{ filter:brightness(2.2) blur(2px); opacity:.2; } 100%{ filter:none; opacity:1; } }
+  .cons{ background:#1e1e1e; border-top:1px solid #3c3c3c; font-family:Consolas, "Cascadia Code", monospace; font-size:clamp(.85rem,1.1vw,1.05rem); color:#d4d4d4; flex:none; }
+  .cons-h{ background:#2d2d2d; color:#cccccc; padding:.25rem .8rem; font-size:.78em; letter-spacing:.06em; }
+  .cons-b{ height:6.5em; overflow:auto; padding:.3rem .8rem; }
+  .cons-b div{ border-bottom:1px solid #2a2a2a; padding:.1rem 0; }
+  .cons-b .err{ color:#f48771; background:rgba(244,135,113,.08); }
+  .cons-b .info{ color:#8a8a8a; font-style:italic; }
+  .cons-b .new{ animation:flashln .8s ease; }
+  @keyframes flashln{ from{ background:rgba(46,201,189,.35); } }
+
+  /* gancho: a campainha */
+  .bell{ display:grid; gap:1.2rem; grid-template-columns:1fr; position:relative; z-index:6; }
+  @media (min-width:900px){ .bell{ grid-template-columns:1.4fr 1fr; align-items:center; } }
+  .bell .legend span{ font-size:1rem; border-width:2px; }
+  .bell .legend span:nth-child(1){ border-color:#16a89c; background:rgba(22,168,156,.18); }
+  .bell .legend span:nth-child(2){ border-color:#f2a63b; background:rgba(242,166,59,.2); }
+  .bell .legend span:nth-child(3){ border-color:#8fa3c4; background:rgba(143,163,196,.22); }
+  .bell-box{ display:flex; flex-direction:column; gap:.7rem; align-items:flex-start; }
+  .bell-box .cons{ width:100%; border-radius:8px; overflow:hidden; border:1px solid #3c3c3c; }
+  .k-quem, .k-quando, .k-oque{ border-radius:4px; padding:0 .15em; }
+  .k-quem{ background:rgba(22,168,156,.4); } .k-quando{ background:rgba(242,166,59,.35); } .k-oque{ background:rgba(143,163,196,.3); }
+  .recap{ display:grid; gap:1.4rem; grid-template-columns:1fr; position:relative; z-index:6; }
+  @media (min-width:900px){ .recap{ grid-template-columns:1.2fr 1fr; align-items:start; } }
+  .recap ul.bullets code{ font-size:.85em; }
+
+  /* ===== DOM: árvore montada com ↓ ===== */
+  .tree{ position:relative; z-index:6; overflow-x:auto; overflow-y:hidden; padding:.4rem 0 .2rem; flex:none; }
+  .tree ul{ margin:0; padding:20px 0 0; position:relative; display:flex; justify-content:center; transition:opacity .35s ease; }
+  .tree > ul{ padding-top:0; width:max-content; margin:0 auto; }
+  .tree ul[data-l]{ opacity:0; }
+  .tree ul[data-l].on{ opacity:1; }
+  .tree li{ list-style:none; position:relative; padding:20px 6px 0; display:flex; flex-direction:column; align-items:center; }
+  .tree li::before, .tree li::after{ content:""; position:absolute; top:0; right:50%; width:50%; height:20px; border-top:2px solid var(--line); }
+  .tree li::after{ right:auto; left:50%; border-left:2px solid var(--line); }
+  .tree li:only-child::before, .tree li:only-child::after{ display:none; }
+  .tree li:only-child{ padding-top:0; }
+  .tree li:first-child::before, .tree li:last-child::after{ border:0 none; }
+  .tree li:last-child::before{ border-right:2px solid var(--line); border-radius:0 6px 0 0; }
+  .tree li:first-child::after{ border-radius:6px 0 0 0; }
+  .tree ul ul::before{ content:""; position:absolute; top:0; left:50%; height:20px; border-left:2px solid var(--line); }
+
+  /* roteiro: sumario vertical, cada seta pra baixo marca um item */
+  .roteiro{ list-style:none; margin:.6rem auto 0; padding:0; display:flex; flex-direction:column; gap:.55rem; width:min(48rem,100%); position:relative; z-index:6; counter-reset:r; }
+  .roteiro li{ counter-increment:r; display:flex; align-items:center; gap:1rem; padding:.65rem 1rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; opacity:.55; transition:opacity .3s, border-color .3s, transform .3s, box-shadow .3s; }
+  .roteiro li.now{ opacity:1; border-color:var(--accent); transform:translateX(.5rem); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); }
+  .roteiro li.done{ opacity:.85; }
+  .roteiro .chk{ flex:none; width:2.1rem; height:2.1rem; border-radius:50%; border:2px solid var(--ink-dim); display:grid; place-items:center; font-family:var(--font-mono); font-size:.95rem; color:var(--ink-dim); }
+  .roteiro .chk::before{ content:counter(r); }
+  .roteiro li.now .chk{ border-color:var(--accent); color:var(--accent); }
+  .roteiro li.done .chk{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .roteiro li.done .chk::before{ content:"\2713"; font-weight:700; }
+  .roteiro b{ display:block; font-size:clamp(1.05rem,2vw,1.35rem); }
+  .roteiro li.done b{ text-decoration:line-through; text-decoration-color:var(--accent); text-decoration-thickness:2px; }
+  .roteiro small{ display:block; color:var(--ink-dim); font-size:.92rem; margin-top:.1rem; }
+  /* sem rolagem: tudo se ajusta a altura da janela */
+  .slide:has(.roteiro){ padding:clamp(.8rem,3vh,2rem) clamp(1.6rem,7vw,7rem) clamp(2.6rem,6vh,3.6rem); gap:clamp(.4rem,1.4vh,1rem); overflow:hidden; }
+  .slide:has(.roteiro) h2{ font-size:clamp(1.5rem,4.4vh,3rem); }
+  .roteiro{ margin:0 auto; gap:clamp(.25rem,.9vh,.55rem); }
+  .roteiro li{ padding:clamp(.3rem,1.1vh,.65rem) 1rem; gap:clamp(.6rem,1.5vh,1rem); }
+  .roteiro .chk{ width:clamp(1.6rem,3.8vh,2.1rem); height:clamp(1.6rem,3.8vh,2.1rem); font-size:clamp(.75rem,1.8vh,.95rem); }
+  .roteiro b{ font-size:clamp(.95rem,2.7vh,1.35rem); }
+  .roteiro small{ font-size:clamp(.72rem,1.7vh,.92rem); margin-top:0; }
+  /* roteiro: lista a esquerda, cola a direita */
+  .slide:has(.roteiro) > .rot-grid{ max-width:min(1500px,96vw); width:100%; display:grid; grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr); gap:clamp(1rem,2.6vw,2.6rem); align-items:center; margin:0 auto; position:relative; z-index:6; }
+  .rot-grid .roteiro{ width:100%; margin:0; }
+  .pn-wrap{ position:relative; }
+  .pn{ display:none; flex-direction:column; gap:clamp(.4rem,1.5vh,.9rem); background:var(--bg-elev); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:14px; padding:clamp(.8rem,2.6vh,1.6rem) clamp(1rem,2vw,1.8rem); box-shadow:var(--shadow); }
+  .pn.on{ display:flex; animation:pnin .35s ease; }
+  @keyframes pnin{ from{ opacity:0; transform:translateX(14px); } to{ opacity:1; transform:none; } }
+  .pn-k{ font-family:var(--font-mono); font-size:clamp(.7rem,1.7vh,.85rem); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0; }
+  .pn h3{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; line-height:1.05; margin:0; font-size:clamp(1.3rem,4vh,2.3rem); }
+  .pn-l{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:clamp(.3rem,1.2vh,.7rem); }
+  .pn-l li{ display:grid; grid-template-columns:minmax(0,max-content) minmax(0,1fr); gap:.4rem clamp(.7rem,1.4vw,1.3rem); align-items:center; }
+  .pn-l code{ font-family:var(--font-mono); font-size:clamp(.82rem,2.1vh,1.15rem); color:var(--amber); background:color-mix(in srgb, var(--amber) 12%, transparent); border:1px solid color-mix(in srgb, var(--amber) 30%, transparent); border-radius:8px; padding:.15em .6em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pn-l span{ font-size:clamp(.88rem,2.2vh,1.2rem); line-height:1.3; }
+  .pn-l span b{ color:var(--accent); font-weight:600; }
+  .pn-f{ margin:0; padding-top:clamp(.3rem,1.2vh,.7rem); border-top:1px dashed var(--line); color:var(--ink-dim); font-size:clamp(.8rem,2vh,1.05rem); line-height:1.35; }
+  .pn-f b{ color:var(--lime); font-weight:600; }
+  @media (max-width:900px){ .slide:has(.roteiro) > .rot-grid{ grid-template-columns:1fr; } .pn-wrap{ display:none; } }
+  @media (max-height:640px){ .roteiro small{ display:none; } .roteiro li{ padding-top:.25rem; padding-bottom:.25rem; } }
+  .tree .nd{
+    font-family:var(--font-mono); font-size:clamp(.78rem,1.15vw,1rem); white-space:nowrap;
+    background:var(--bg-elev); border:1.5px solid var(--line); border-radius:8px; padding:.3em .7em;
+  }
+  .tree .nd b{ color:var(--accent); font-weight:500; }
+  .tree .nd.root{ border-color:var(--amber); color:var(--amber); }
+  .capa .render{ height:31rem; display:block; }
+  .capa > .browser{ gap:0; }
+  #liveFeito pre.code{ font-size:clamp(.75rem,1.05vw,1.1rem); }
+  .live pre.code{ white-space:pre-wrap; }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="brandbar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="zones" aria-hidden="true">
+      <button class="zone prev" id="zprev" tabindex="-1" aria-label="Slide anterior"></button>
+      <span class="zone spacer"></span>
+      <button class="zone next" id="znext" tabindex="-1" aria-label="Próximo slide"></button>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide" aria-label="Slide 1">
+      <div class="capa wide">
+        <div>
+          <p class="eyebrow">JavaScript na página</p>
+          <h1>Mexendo no <em>DOM</em></h1>
+          <p class="subtitle">O JS pegando, mudando e criando pedaços da página.</p>
+        </div>
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i><span>Idade de Bicho</span></div>
+          <div class="render" id="capaBicho"></div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li><b>Antes</b> de seguir pros slides: abrir o site pronto no navegador (<code>calculadora-cachorro/index.html</code>). Digitar uma idade e clicar em vários bichos. O console fica pro código do zero.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>&ldquo;Pra esse site ficar interativo, a gente precisa dominar algumas técnicas do JavaScript. Vamos ver como isso foi feito.&rdquo;</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>0:00 &rarr; 2:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" aria-label="Slide 2">
+      <p class="eyebrow">O que é o DOM</p>
+      <h2>O navegador transforma o HTML numa <em>árvore</em></h2>
+      <div class="tree wide" id="tree" data-steps>
+        <ul><li><span class="nd root">document</span>
+          <ul data-l="1"><li><span class="nd">html</span>
+            <ul data-l="2">
+              <li><span class="nd">head</span>
+                <ul data-l="3"><li><span class="nd">title</span></li></ul>
+              </li>
+              <li><span class="nd">body</span>
+                <ul data-l="3"><li><span class="nd">div<b>.caixa</b></span>
+                  <ul data-l="4">
+                    <li><span class="nd">h1</span></li>
+                    <li><span class="nd">p &times;2</span></li>
+                    <li><span class="nd">input<b>#idade</b></span></li>
+                    <li><span class="nd">div<b>.botoes</b></span>
+                      <ul data-l="5"><li><span class="nd">button &times;6</span></li></ul>
+                    </li>
+                    <li><span class="nd">p<b>#resultado</b></span></li>
+                    <li><span class="nd">ul<b>#historico</b></span></li>
+                  </ul>
+                </li></ul>
+              </li>
+            </ul>
+          </li></ul>
+        </li></ul>
+      </div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul><li>Cada ↓ desce um nível: <code>html</code> &rarr; <code>head</code> e <code>body</code> &rarr; <code>title</code> e <code>.caixa</code> &rarr; o que tem na caixa &rarr; os botões.</li></ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Quando o navegador lê o HTML, ele não guarda o texto: monta uma <b>árvore</b>. Cada tag vira um galho.</li>
+          <li>Isso tem nome: <b>DOM</b>, Document Object Model. &ldquo;Modelo de objetos do documento.&rdquo;</li>
+          <li>Pai e filho: quem está dentro é filho. O <code>h1</code> é filho da <code>.caixa</code>, que é filha do <code>body</code>.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>No site: <kbd>F12</kbd> &rarr; aba <b>Elements</b>. Abrir e fechar os triângulos: &ldquo;é a mesma árvore, só que deitada&rdquo;.</li>
+          <li>Passar o mouse num nó do Elements: o navegador pinta o elemento na página.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul><li>&ldquo;Quem é o pai dos botões?&rdquo; (a <code>div.botoes</code>)</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>2:00 &rarr; 3:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" aria-label="Slide 3">
+      <div class="live wide" id="liveDoc"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: vazio &rarr; ↓ <code>console.log(document.title)</code> &rarr; ↓ <code>document.title = ...</code> (a aba em cima do navegador muda) &rarr; ↓ fundo rosa.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li><code>document</code> é a raiz da árvore. Tudo começa nele.</li>
+          <li>O ponto (<code>.</code>) é &ldquo;de dentro de&rdquo;: <code>document.title</code> é o título de dentro do documento.</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>3:30 &rarr; 4:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- roteiro -->
+    <section class="slide" aria-label="Roteiro">
+      <p class="eyebrow">Roteiro da aula</p>
+      <h2>O que a gente vai <em>fazer</em></h2>
+      <div class="rot-grid">
+        <ol class="roteiro" id="roteiro" data-steps>
+          <li><span class="chk"></span><div><b>document</b><small>a porta de entrada da página</small></div></li>
+          <li><span class="chk"></span><div><b>Como rodar JavaScript</b><small>numa tag &lt;script&gt; no HTML, ou num arquivo .js separado</small></div></li>
+          <li><span class="chk"></span><div><b>Ver o que o código faz</b><small>alert e console.log</small></div></li>
+          <li><span class="chk"></span><div><b>querySelector</b><small>pegar um elemento da página (o mesmo seletor do CSS)</small></div></li>
+          <li><span class="chk"></span><div><b>Funções</b><small>function nome(parâmetro) { ... }</small></div></li>
+          <li><span class="chk"></span><div><b>onclick</b><small>o botão chama a função quando é clicado</small></div></li>
+          <li><span class="chk"></span><div><b>Alterando valores</b><small>.value lê o campo, .textContent escreve na página</small></div></li>
+        </ol>
+        <div class="pn-wrap">
+          <div class="pn" data-i="0">
+            <p class="pn-k">document</p>
+            <h3>A raiz da árvore</h3>
+            <ul class="pn-l">
+            <li><code>document.title</code><span>o título da aba</span></li>
+            <li><code>document.body</code><span>o &lt;body&gt; inteiro</span></li>
+            <li><code>document.querySelector(…)</code><span>procura um elemento lá dentro</span></li>
+            </ul>
+            <p class="pn-f">O ponto (<b>.</b>) quer dizer &ldquo;de dentro de&rdquo;.</p>
+          </div>
+          <div class="pn" data-i="1">
+            <p class="pn-k">rodar JavaScript</p>
+            <h3>Dois jeitos de ligar o JS</h3>
+            <ul class="pn-l">
+            <li><code>&lt;script&gt; … &lt;/script&gt;</code><span>o código fica <b>direto no HTML</b>, no fim do body</span></li>
+            <li><code>&lt;script src="aula.js"&gt;</code><span>o código fica num <b>arquivo .js separado</b></span></li>
+            </ul>
+            <p class="pn-f">Salvou? Recarregue a página para ver.</p>
+          </div>
+          <div class="pn" data-i="2">
+            <p class="pn-k">ver o que acontece</p>
+            <h3>Pra espiar o código funcionando</h3>
+            <ul class="pn-l">
+            <li><code>alert('oi')</code><span>abre uma janelinha e <b>pausa</b> a página</span></li>
+            <li><code>console.log('oi')</code><span>escreve no <b>Console</b> (F12 ou Ctrl+Shift+J)</span></li>
+            </ul>
+            <p class="pn-f">O console é o seu melhor amigo pra entender o que o código faz.</p>
+          </div>
+          <div class="pn" data-i="3">
+            <p class="pn-k">querySelector</p>
+            <h3>Seletores: os mesmos do CSS</h3>
+            <ul class="pn-l">
+            <li><code>'h1'</code><span>por <b>tag</b></span></li>
+            <li><code>'.botoes'</code><span>por <b>classe</b> (com ponto)</span></li>
+            <li><code>'#idade'</code><span>por <b>id</b> (com #)</span></li>
+            <li><code>'.caixa p'</code><span>um <b>dentro</b> do outro</span></li>
+            </ul>
+            <p class="pn-f"><b>querySelector</b>: o primeiro que achar (ou <b>null</b>) &nbsp;&middot;&nbsp; <b>querySelectorAll</b>: todos, numa lista</p>
+          </div>
+          <div class="pn" data-i="4">
+            <p class="pn-k">funções</p>
+            <h3>Um bloco de código com nome</h3>
+            <ul class="pn-l">
+            <li><code>function cumprimenta(nome) { … }</code><span><b>declarar</b>: ensina o que fazer</span></li>
+            <li><code>cumprimenta('Maria')</code><span><b>chamar</b>: manda fazer, passando o nome</span></li>
+            <li><code>nome</code><span>o <b>parâmetro</b>: muda a cada chamada</span></li>
+            </ul>
+            <p class="pn-f">Declarar não executa nada. Quem executa é a chamada.</p>
+          </div>
+          <div class="pn" data-i="5">
+            <p class="pn-k">onclick</p>
+            <h3>O botão chama a função</h3>
+            <ul class="pn-l">
+            <li><code>&lt;button onclick="cumprimenta('Maria')"&gt;</code><span>ao <b>clicar</b>, o botão chama a função</span></li>
+            <li><code>calcular('cachorro', 7, '🐕')</code><span>cada botão manda <b>parâmetros</b> diferentes</span></li>
+            </ul>
+            <p class="pn-f">A mesma função serve pra todos os botões. Só mudam os parâmetros.</p>
+          </div>
+          <div class="pn" data-i="6">
+            <p class="pn-k">alterando valores</p>
+            <h3>Ler e escrever na página</h3>
+            <ul class="pn-l">
+            <li><code>campo.value</code><span>o que a pessoa <b>digitou</b> (sempre texto)</span></li>
+            <li><code>elemento.textContent</code><span>o <b>texto</b> de dentro do elemento</span></li>
+            <li><code>resultado.textContent = '…'</code><span><b>escreve</b> na página</span></li>
+            </ul>
+            <p class="pn-f">Sem o <b>=</b> lê. Com o <b>=</b> escreve.</p>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Slide fixo: fica aberto enquanto você grava (alt+tab pro editor). Faz o passo, volta e aperta ↓: o item atual vira ✓ e o próximo acende. ↑ desmarca.</li>
+          <li>Pra sair do slide use → (ou espaço). O ↓ aqui só marca, não troca de slide.</li>
+          <li>À direita fica a &ldquo;cola&rdquo; do item atual (ex.: os tipos de seletor no <code>querySelector</code>). Ela troca sozinha a cada ↓ ou ↑.</li>
+          <li>Se recarregar a página, as marcas zeram.</li>
+        </ul>
+        <h4>Ordem</h4>
+        <ul>
+          <li><code>document</code> já abre marcado (✓): você falou dele nos dois slides anteriores. O resto segue a ordem do vídeo: script &rarr; alert/console.log &rarr; querySelector &rarr; função &rarr; onclick &rarr; .value e textContent. Pra mudar, é só reordenar os <code>&lt;li&gt;</code>.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>&ldquo;Hoje a gente vai construir esse site do zero, nesta ordem. Eu vou marcando aqui o que a gente já fez.&rdquo;</li>
+          <li>No 1º item: o JS pode ficar <b>direto na tag script</b> ou num <b>arquivo separado</b> (e aí a tag aponta pra ele com <code>src</code>).</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" aria-label="Slide 4">
+      <div class="live wide" id="liveSel"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: pega o <code>h1</code> e mostra no console &rarr; ↓ pega o <code>#idade</code> &rarr; ↓ <code>.sumiu</code> (dá <code>null</code>).</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Lembram do CSS? <code>h1</code> é tag, <code>.botoes</code> é classe, <code>#idade</code> é id. <b>É o mesmo seletor.</b></li>
+          <li><code>querySelector</code> = &ldquo;vai na árvore e me traz <b>o primeiro</b> que bate com isso&rdquo;.</li>
+          <li><code>null</code> = não achei nada. Guardem essa palavra: é o erro mais comum.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul><li>No console do site: <code>document.querySelector('#idade')</code>. Passar o mouse no resultado: o campo acende na página.</li></ul>
+        <h4>Erro comum</h4>
+        <ul><li>Esquecer o <code>#</code> ou o ponto: <code>querySelector('idade')</code> procura uma tag <code>&lt;idade&gt;</code> e dá <code>null</code>.</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>4:30 &rarr; 6:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" aria-label="Slide 5">
+      <div class="live wide" id="liveAll"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: pega todos os botões &rarr; ↓ <code>.length</code> (6) &rarr; ↓ mostra a lista &rarr; ↓ <code>forEach</code> pinta todos de roxo.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Lembram do 6 do começo? Era isso. Com <code>All</code> volta uma <b>lista</b> (NodeList).</li>
+          <li>Lista não tem <code>textContent</code>. Pra mexer em cada um, <code>forEach</code>: passa de um em um.</li>
+          <li>Se não acha nada, não dá <code>null</code>: dá uma lista vazia, <code>length</code> 0.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul><li><code>botoes.style.background = 'purple'</code> sem o <code>forEach</code>: dá erro, a lista não tem <code>style</code>.</li></ul>
+        <h4>Pausa e pratica</h4>
+        <ul><li>&ldquo;Pausem e descubram no console quantos <code>p</code> a página tem.&rdquo; (3, contando o resultado)</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>6:00 &rarr; 7:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" aria-label="Slide 6">
+      <div class="live wide" id="liveTxt"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: lê o texto do <code>h1</code> &rarr; ↓ troca pra dragão &rarr; ↓ escreve no <code>#resultado</code> sem ninguém clicar.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Sem o <code>=</code>, <b>lê</b>. Com o <code>=</code>, <b>escreve</b>. É igual à variável.</li>
+          <li>É exatamente o que o site faz quando aparece &ldquo;Você tem 84 anos de cachorro!&rdquo;: escreve no <code>#resultado</code>.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul><li>No site: escrever no resultado pelo console e ver o texto aparecer na página.</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>7:30 &rarr; 8:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" aria-label="Slide 7">
+      <div class="live wide" id="liveVal"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>O campo já vem com <b>12</b>.</li>
+          <li>Passos: pega o campo &rarr; ↓ <code>campo.value</code> &rarr; ↓ vezes 7 (84) &rarr; ↓ mais 7 (<b>127</b>!) &rarr; ↓ <code>Number()</code> (19).</li>
+          <li>Depois: trocar o número no campo do slide não muda o console (o código já rodou). Isso é assunto de eventos.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li><code>input</code> é diferente: o que a pessoa digitou fica no <code>.value</code>, não no <code>textContent</code>.</li>
+          <li>Vezes funciona. Mais&hellip; 127?! Deixar eles tentarem explicar antes.</li>
+          <li>O <code>.value</code> é sempre <b>texto</b>, mesmo com <code>type="number"</code>. Texto + número = juntar.</li>
+          <li><code>Number()</code> transforma o texto em número de verdade.</li>
+        </ul>
+        <h4>Erro comum</h4>
+        <ul><li>Usar <code>textContent</code> num <code>input</code> (vem vazio) ou <code>.value</code> num <code>p</code> (vem <code>undefined</code>).</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>8:30 &rarr; 10:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" aria-label="Slide 8">
+      <div class="live wide" id="liveHtml"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: <code>textContent</code> com <code>&lt;b&gt;</code> (as tags aparecem escritas) &rarr; ↓ troca pra <code>innerHTML</code> (o 84 fica em negrito).</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li><code>textContent</code> põe o texto do jeito que está. <code>innerHTML</code> lê como HTML e cria tags de verdade.</li>
+          <li>Imagina o campo do usuário indo direto pro <code>innerHTML</code>: ele escreveria HTML na sua página.</li>
+          <li>Regra de bolso: <b>texto</b> &rarr; <code>textContent</code>. <code>innerHTML</code> só quando <b>você</b> escreveu o HTML.</li>
+          <li><code>innerHTML = ''</code> é útil: apaga tudo de dentro.</li>
+        </ul>
+        <h4>Pergunta</h4>
+        <ul><li>&ldquo;Pra mostrar o nome que a pessoa digitou, qual dos dois?&rdquo; (textContent)</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>10:00 &rarr; 11:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" aria-label="Slide 9">
+      <div class="live wide" id="liveCls"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: pega o campo &rarr; ↓ <code>add('erro')</code> (borda vermelha) &rarr; ↓ <code>body.classList.add('noite')</code> (página escura).</li>
+          <li>As classes <code>.erro</code> e <code>.noite</code> já estão no <code>style.css</code>.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>O CSS já sabe pintar de vermelho. O JS só decide <b>quando</b>: põe ou tira a classe.</li>
+          <li><code>add</code> põe, <code>remove</code> tira, <code>toggle</code> alterna (tem? tira. não tem? põe).</li>
+          <li>Dá pra fazer <code>campo.style.borderColor = 'red'</code>, mas aí o visual mora no JS. Com classe, o CSS continua no CSS.</li>
+          <li>A noite: <b>uma linha</b> de JS e a página toda muda. Guardem isso, é a aula de tema claro/escuro.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul><li>Elements aberto do lado do Console. Rodar <code>document.querySelector('#idade').classList.toggle('erro')</code> várias vezes e ver o <code>class="erro"</code> piscar na árvore.</li></ul>
+        <h4>Erro comum</h4>
+        <ul><li><code>classList.add('.erro')</code> com ponto. O ponto é só no CSS.</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>11:00 &rarr; 12:30</li></ul>
+      </aside>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" aria-label="Slide 10">
+      <div class="live wide" id="liveCria"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Passos: pega o <code>#historico</code> &rarr; ↓ <b>criar</b> (console mostra <code>&lt;li&gt;&lt;/li&gt;</code>, a página não muda) &rarr; ↓ <b>preencher</b> &rarr; ↓ <b>pendurar</b> com <code>append</code> (aparece!).</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>Até agora só mudamos o que já existia. Agora vamos <b>criar</b>: um histórico com os bichos testados.</li>
+          <li><b>1. criar</b>: o <code>li</code> nasce, mas fica na memória. Ninguém vê.</li>
+          <li><b>2. preencher</b>: coloca o texto nele.</li>
+          <li><b>3. pendurar</b>: <code>append</code> põe ele dentro do histórico. Só agora aparece.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul><li>Olhar o Elements no site: depois do <code>append</code> o <code>&lt;li&gt;</code> novo está lá dentro do <code>ul</code>.</li></ul>
+        <h4>Erro comum</h4>
+        <ul><li>Esquecer o passo 3. Criou, preencheu e &ldquo;não aparece nada&rdquo;: faltou o <code>append</code>.</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>12:30 &rarr; 14:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" aria-label="Slide 11">
+      <div class="live wide" id="liveFeito"></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul>
+          <li>Começa no <code>index.html</code>: clicar num bicho &rarr; erro no console (<code>calcular is not defined</code>).</li>
+          <li>Passos: ↓ <code>script.js</code> com a função vazia (clicar: nada) &rarr; ↓ pega campo e resultado &rarr; ↓ a conta (funciona!) &rarr; ↓ erro com campo vazio &rarr; ↓ histórico.</li>
+          <li>Depois de cada passo, digitar uma idade e clicar num bicho.</li>
+        </ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>&ldquo;Agora sim: como esse site foi feito.&rdquo; Cada botão chama <code>calcular('cachorro', 7, '🐕')</code>: o nome, o multiplicador e o emoji.</li>
+          <li>Como o botão sabe que foi clicado (<code>onclick</code>)? Isso é a <b>próxima aula</b>. Hoje é o que acontece <b>depois</b> do clique.</li>
+          <li>É tudo o que vimos hoje: <code>querySelector</code>, <code>.value</code>, <code>textContent</code>, <code>classList</code>, <code>createElement</code>.</li>
+          <li>No erro: <code>return</code> = para aqui, não faz a conta.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul><li>Opcional: abrir o <code>calculadora-cachorro/script.js</code> no VS Code (vai até a conta) e digitar o erro e o histórico ao vivo. O gabarito está em <code>script-final.js</code>.</li></ul>
+        <h4>Tempo</h4>
+        <ul><li>14:00 &rarr; 17:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide" aria-label="Slide 12">
+      <p class="eyebrow">Recap</p>
+      <h2>O JS <em>pega</em>, <em>muda</em> e <em>cria</em></h2>
+      <div class="recap wide">
+        <ul class="bullets">
+          <li><span><code>querySelector</code> / <code>querySelectorAll</code>: pegar</span></li>
+          <li><span><code>.textContent</code>: o texto do elemento</span></li>
+          <li><span><code>.value</code>: o que foi digitado (é texto!)</span></li>
+          <li><span><code>innerHTML</code>: só quando você escreveu o HTML</span></li>
+          <li><span><code>classList.add / remove / toggle</code></span></li>
+          <li><span><code>createElement</code> + <code>append</code>: criar</span></li>
+        </ul>
+        <div class="callout">
+          <p><strong>Mini-desafio</strong></p>
+          <p>Se der <b>mais de 100 anos</b>, o resultado fica destacado.</p>
+          <p class="dim">Dica: uma classe <code>.velhinho</code> no CSS e um <code>if</code>.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Passar rápido pelos 6 pontos, cada um é um slide de hoje.</li>
+          <li>Desafio: não dar a resposta. (<code>if (anos &gt; 100) resultado.classList.add('velhinho')</code>, e <code>remove</code> no <code>else</code>.)</li>
+          <li>Bônus pra quem quiser: histórico com só os últimos 5 (<code>historico.children.length</code> e <code>historico.firstElementChild.remove()</code>).</li>
+          <li>Gancho: &ldquo;E o <code>onclick</code> lá no HTML? Tem um jeito melhor, e é com ele que a calculadora vai funcionar. Próxima aula: eventos.&rdquo;</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>17:00 &rarr; 18:30</li></ul>
+      </aside>
+    </section>
+
+  </div>
+
+  <div class="chrome">
+    <span class="label" id="partLabel">DOM</span>
+    <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
+    <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+    <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
+    <span class="count" id="count">01 / 12</span>
+    <button id="btnTheme" aria-label="Alternar tema">tema</button>
+  </div>
+</div>
+
+<div id="notesPanel" hidden></div>
+
+<script>
+(function(){
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- o projeto: Idade de Bicho ---------- */
+  var BICHOS = [['cachorro',7,'🐕','Cachorro'],['gato',6,'🐈','Gato'],['coelho',8,'🐇','Coelho'],['hamster',30,'🐹','Hamster'],['cavalo',3,'🐎','Cavalo'],['tartaruga',0.5,'🐢','Tartaruga']];
+  var HTML_FULL = [
+    '<div class="caixa">',
+    '  <h1>🐾 Qual a sua idade de bicho?</h1>',
+    '  <p>Quantos anos você tem?</p>',
+    '  <input id="idade" type="number">',
+    '',
+    '  <p>Escolha um animal:</p>',
+    '  <div class="botoes">'
+  ].concat(BICHOS.map(function(b){
+    return '    <button onclick="calcular(\'' + b[0] + '\', ' + b[1] + ', \'' + b[2] + '\')">' + b[2] + ' ' + b[3] + '</button>';
+  }), [
+    '  </div>',
+    '',
+    '  <p id="resultado"></p>',
+    '  <ul id="historico"></ul>',
+    '</div>',
+    '',
+    '<script src="script.js"><\/script>'
+  ]);
+
+  /* style.css do site: aplicado, mas fora do código mostrado */
+  var BICHO_CSS = 'body{font-family:Arial,sans-serif;background:#ffe9c7;display:flex;justify-content:center;align-items:flex-start;margin:0;padding:24px 12px;min-height:100vh;box-sizing:border-box}'
+    + '.caixa{background:#fff;padding:22px 26px;border-radius:20px;text-align:center;width:400px;max-width:100%;box-shadow:0 6px 16px rgba(0,0,0,.15);transition:background .4s,color .4s}'
+    + 'h1{color:#b35900;font-size:24px;margin:.2em 0 .5em}'
+    + 'input{font-size:22px;padding:8px;width:130px;text-align:center;border:3px solid #ff8c1a;border-radius:12px;outline:none}'
+    + '.botoes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:8px}'
+    + 'button{font-size:16px;padding:12px 6px;background:#ff8c1a;color:#fff;border:none;border-radius:14px;cursor:pointer;box-shadow:0 4px 0 #b35900}'
+    + 'button:hover{background:#ffa133}button:active{transform:translateY(4px);box-shadow:none}'
+    + '#resultado{font-size:20px;font-weight:bold;margin-top:20px;padding:12px;background:#fff3df;border-radius:12px;color:#b35900}'
+    + '#resultado:empty{display:none}'
+    + '#historico{text-align:left;margin-top:14px;font-size:18px}#historico:empty{display:none}'
+    + 'input.erro{border-color:red;background:#ffe1dd}'
+    + 'body.noite{background:#1d2633}body.noite .caixa{background:#2b3645;color:#e4ecf3}body.noite h1{color:#ffb15c}';
+
+  /* script.js do site (como está no zip): roda escondido nos slides de console, pra os botões funcionarem */
+  var BASE_JS = "const campo0 = document.querySelector('#idade'), resultado0 = document.querySelector('#resultado');"
+    + "function calcular(animal, multiplicador, emoji){ resultado0.textContent = 'Você tem ' + (campo0.value * multiplicador) + ' anos de ' + animal + '! ' + emoji; }";
+
+  /* script.js, por pedaços */
+  var JS = {
+    br:      [''],
+    /* document */
+    logTit:  ['console.log(document.title);'],
+    setTit:  ["document.title = 'Idade de Dragão';"],
+    rosa:    ["document.body.style.background = 'pink';"],
+    /* querySelector */
+    pegaH1:  ["const titulo = document.querySelector('h1');"],
+    logH1:   ['console.log(titulo);'],
+    logId:   ["console.log(document.querySelector('#idade'));"],
+    logNull: ["console.log(document.querySelector('.sumiu'));"],
+    /* querySelectorAll */
+    pegaBts: ["const botoes = document.querySelectorAll('button');"],
+    logLen:  ['console.log(botoes.length);'],
+    logBts:  ['console.log(botoes);'],
+    roxo:    ['botoes.forEach(function (botao) {', "  botao.style.background = 'purple';", '});'],
+    /* textContent */
+    lerTxt:  ['console.log(titulo.textContent);'],
+    dragao:  ["titulo.textContent = '🐉 Qual a sua idade de dragão?';"],
+    vampiro: ["const resultado = document.querySelector('#resultado');", "resultado.textContent = 'Você tem 1000 anos de vampiro! 🧛';"],
+    /* value */
+    pegaCampo: ["const campo = document.querySelector('#idade');"],
+    v1:      ['console.log(campo.value);'],
+    v2:      ['console.log(campo.value * 7);'],
+    v3:      ['console.log(campo.value + 7);'],
+    v4:      ['console.log(Number(campo.value) + 7);'],
+    /* innerHTML */
+    pegaRes: ["const resultado = document.querySelector('#resultado');"],
+    txtB:    ["resultado.textContent = 'Você tem <b>84</b> anos de cachorro!';"],
+    htmlB:   ["resultado.innerHTML = 'Você tem <b>84</b> anos de cachorro!';"],
+    /* classList */
+    erro:    ["campo.classList.add('erro');"],
+    noite:   ["document.body.classList.add('noite');"],
+    /* createElement */
+    pegaHist:["const historico = document.querySelector('#historico');"],
+    cria:    ["const item = document.createElement('li');"],
+    enche:   ["item.textContent = '🐕 84 anos';"],
+    logItem: ['console.log(item);'],
+    pendura: ['historico.append(item);'],
+    /* como foi feito */
+    topo:    ["// cada botão do HTML chama calcular('cachorro', 7, '🐕')", '// (como o clique funciona: próxima aula!)', ''],
+    pega2:   ["const campo = document.querySelector('#idade');", "const resultado = document.querySelector('#resultado');"],
+    pegaH2:  ["const historico = document.querySelector('#historico');"],
+    abre:    ['function calcular(animal, multiplicador, emoji) {'],
+    se:      ["  if (campo.value === '') {", "    campo.classList.add('erro');", '    return;', '  }', "  campo.classList.remove('erro');", ''],
+    conta:   ['  const anos = campo.value * multiplicador;', '  resultado.textContent =', "    'Você tem ' + anos + ' anos de ' + animal + '! ' + emoji;"],
+    li:      ['', "  const item = document.createElement('li');", "  item.textContent = emoji + ' ' + anos + ' anos';", '  historico.append(item);'],
+    fecha:   ['}']
+  };
+  function J(){ var o = []; for (var a = 0; a < arguments.length; a++) o = o.concat(JS[arguments[a]]); return o; }
+  var JS_FINAL = J('topo','pega2','pegaH2','br','abre','se','conta','li','fecha');
+
+  /* cada passo: qual arquivo aparece (f) + o código; base = o script.js do site roda escondido antes; pre = estado inicial */
+  function S(f, js, o){ o = o || {}; return { f:f, js:js || [], base:o.base !== false, pre:o.pre || '' }; }
+  function C(js, o){ return S('js', js, o); }
+  var DOZE = "document.querySelector('#idade').value = 12;";
+
+  var STEPS = {
+    liveDoc: [
+      C([]),
+      C(J('logTit')),
+      C(J('logTit','br','setTit')),
+      C(J('logTit','br','setTit','rosa'))
+    ],
+    liveSel: [
+      C([]),
+      C(J('pegaH1','logH1')),
+      C(J('pegaH1','logH1','br','logId')),
+      C(J('pegaH1','logH1','br','logId','logNull'))
+    ],
+    liveAll: [
+      C(J('pegaBts')),
+      C(J('pegaBts','logLen')),
+      C(J('pegaBts','logLen','logBts')),
+      C(J('pegaBts','logLen','logBts','br','roxo'))
+    ],
+    liveTxt: [
+      C(J('pegaH1','lerTxt')),
+      C(J('pegaH1','lerTxt','br','dragao')),
+      C(J('pegaH1','lerTxt','br','dragao','br','vampiro'))
+    ],
+    liveVal: [
+      C(J('pegaCampo'), { pre:DOZE }),
+      C(J('pegaCampo','br','v1'), { pre:DOZE }),
+      C(J('pegaCampo','br','v1','v2'), { pre:DOZE }),
+      C(J('pegaCampo','br','v1','v2','v3'), { pre:DOZE }),
+      C(J('pegaCampo','br','v1','v2','v3','v4'), { pre:DOZE })
+    ],
+    liveHtml: [
+      C(J('pegaRes','br','txtB')),
+      C(J('pegaRes','br','htmlB'))
+    ],
+    liveCls: [
+      C(J('pegaCampo')),
+      C(J('pegaCampo','br','erro')),
+      C(J('pegaCampo','br','erro','noite'))
+    ],
+    liveCria: [
+      C(J('pegaHist')),
+      C(J('pegaHist','br','cria','logItem')),
+      C(J('pegaHist','br','cria','enche','logItem')),
+      C(J('pegaHist','br','cria','enche','logItem','br','pendura'))
+    ],
+    liveFeito: [
+      S('html', [], { base:false }),
+      S('js', J('topo','abre','fecha'), { base:false }),
+      S('js', J('topo','pega2','br','abre','fecha'), { base:false }),
+      S('js', J('topo','pega2','br','abre','conta','fecha'), { base:false }),
+      S('js', J('topo','pega2','br','abre','se','conta','fecha'), { base:false }),
+      S('js', JS_FINAL, { base:false })
+    ]
+  };
+
+  /* ---------- destaque de sintaxe (VS Code) ---------- */
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function hlHTML(line){
+    if (/^\s*<\!--/.test(line)) return '<span class="c">' + esc(line) + '</span>';
+    return esc(line).replace(/(&lt;\/?)([\w-]+)((?:\s+[\w-]+(?:="[^"]*")?)*)(&gt;)/g, function(_, a, name, attrs, b){
+      attrs = attrs.replace(/([\w-]+)=("[^"]*")/g, '<span class="an">$1</span>=<span class="av">$2</span>');
+      return '<span class="tg">' + a + name + '</span>' + attrs + '<span class="tg">' + b + '</span>';
+    });
+  }
+  function hlJS(line){
+    var re = /(\/\/.*$)|('[^']*'|"[^"]*")|\b(const|let|function|if|else|return)\b|\b(\d+)\b|([A-Za-z_$][\w$]*)(?=\s*\()/g, out = '', last = 0, m;
+    while ((m = re.exec(line))){
+      out += esc(line.slice(last, m.index));
+      var cls = m[1] ? 'c' : m[2] ? 'v' : m[3] ? 'kw' : m[4] ? 'n' : 'fn';
+      out += '<span class="' + cls + '">' + esc(m[0]) + '</span>';
+      last = re.lastIndex;
+    }
+    return out + esc(line.slice(last));
+  }
+
+  /* ---------- o "navegador": um iframe que roda o projeto de verdade ---------- */
+  /* console.log e erros voltam pra cá (elementos aparecem como tag, igual ao console do navegador) */
+  var SHIM = '(function(){'
+    + 'function send(t,m){ parent.postMessage({ calc:1, t:t, m:m }, "*"); }'
+    + 'function fmt(v){ if (v === null) return "null"; if (v === undefined) return "undefined";'
+    + '  if (v instanceof Element){ var h = v.outerHTML; return h.length > 70 ? h.slice(0, 67) + "…" : h; }'
+    + '  if (v instanceof NodeList){ return "NodeList(" + v.length + ") [" + Array.prototype.slice.call(v, 0, 2).map(function(e){ return "<" + e.tagName.toLowerCase() + ">"; }).join(", ") + (v.length > 2 ? ", …" : "") + "]"; }'
+    + '  return String(v); }'
+    + 'console.log = function(){ send("log", Array.prototype.map.call(arguments, fmt).join(" ")); };'
+    + 'window.onerror = function(msg){ send("err", String(msg).replace(/^Uncaught /, "")); };'
+    + 'document.addEventListener("keydown", function(e){ var t = e.target.tagName; if (t === "INPUT" || t === "SELECT") return;'
+    + '  if (/^(Arrow|Page|Home|End|n|N|p|P)/.test(e.key)){ e.preventDefault(); send("key", e.key); } });'
+    + '})();';
+  function pageDoc(st){
+    var body = HTML_FULL.join('\n').replace(/<script[\s\S]*?<\/script>/g, '');
+    var tag = function(code){ return code ? '<script>' + code + '<\/script>' : ''; };
+    return '<!doctype html><html><head><meta charset="utf-8"><title>Idade de Bicho</title><style>' + BICHO_CSS + '</style></head><body>'
+      + body + tag(SHIM) + tag(st.pre) + tag(st.base ? BASE_JS : '')
+      + tag(st.f === 'js' || !st.base ? st.js.join('\n') : '')
+      + tag('parent.postMessage({ calc:1, t:"title", m:document.title }, "*");')
+      + '</body></html>';
+  }
+  var frames = [];
+  window.addEventListener('message', function(e){
+    var d = e.data; if (!d || !d.calc) return;
+    if (d.t === 'key'){ onKey(d.m); return; }
+    frames.forEach(function(f){ if (f.frame.contentWindow === e.source) f.onMsg(d); });
+  });
+  function mountFrame(box, onMsg){
+    var fr = document.createElement('iframe');
+    fr.title = 'Resultado no navegador';
+    box.innerHTML = ''; box.appendChild(fr);
+    frames.push({ frame:fr, onMsg:onMsg || function(){} });
+    return fr;
+  }
+
+  function initLive(root){
+    var steps = STEPS[root.id];
+    root.innerHTML = '<div class="pane"><span class="fname"></span><pre class="code"></pre></div>'
+      + '<div class="pane"><div class="browser"><div class="bar"><i></i><i></i><i></i><span>Idade de Bicho</span></div>'
+      + '<div class="render"></div><div class="cons"><div class="cons-h">Console</div><div class="cons-b"></div></div></div></div>';
+    var pre = $('pre.code', root), fname = $('.fname', root), box = $('.render', root), cons = $('.cons-b', root), tab = $('.bar span', root);
+    var k = 0, timer = null, typing = null;
+    var fr = mountFrame(box, function(d){
+      if (d.t === 'log') logLine(d.m, '');
+      else if (d.t === 'err') logLine(d.m, 'err');
+      else if (d.t === 'title') tab.textContent = d.m;
+    });
+
+    function logLine(txt, cls){
+      var d = document.createElement('div'); d.className = (cls ? cls + ' ' : '') + 'new'; d.textContent = txt;
+      cons.appendChild(d); cons.scrollTop = cons.scrollHeight;
+    }
+    function lines(st){ return st.f === 'html' ? HTML_FULL : st.js; }
+    function hl(st){ return st.f === 'html' ? hlHTML : hlJS; }
+    function show(){ cons.innerHTML = ''; fr.srcdoc = pageDoc(steps[k]); }
+    function paint(st, fresh){
+      fname.textContent = st.f === 'html' ? 'index.html' : 'script.js';
+      var h = hl(st);
+      pre.innerHTML = lines(st).map(function(l, x){ return '<span class="ln' + (fresh[x] ? ' new' : '') + '">' + h(l) + '</span>'; }).join('');
+    }
+    function finish(){
+      if (!typing) return;
+      clearTimeout(timer); var t = typing; typing = null;
+      paint(steps[k], t.fresh); show();
+    }
+    function go(nk, animate){
+      finish();
+      var prevSt = steps[k], st = steps[nk]; k = nk;
+      var prev = prevSt.f === st.f ? lines(prevSt).slice() : [], ls = lines(st);
+      var fresh = ls.map(function(l){ var p = prev.indexOf(l); if (p > -1){ prev.splice(p, 1); return false; } return true; });
+      if (!animate || REDUCE || !fresh.some(Boolean)){ paint(st, animate ? fresh : []); show(); return; }
+      typing = { fresh:fresh };
+      var h = hl(st);
+      fname.textContent = st.f === 'html' ? 'index.html' : 'script.js';
+      pre.innerHTML = ls.map(function(l, x){ return '<span class="ln' + (fresh[x] ? ' new' : '') + '">' + (fresh[x] ? '' : h(l)) + '</span>'; }).join('');
+      var spans = $$('.ln', pre), queue = [];
+      fresh.forEach(function(f, x){ if (f) queue.push(x); });
+      if (spans[queue[0]]) spans[queue[0]].scrollIntoView({ block:'nearest' });
+      /* duração total fixa (~DUR ms), não importa o tamanho do trecho */
+      var DUR = 1000, FRAME = 16, qi = 0, ci = 0, acc = 0, caret = document.createElement('span'); caret.className = 'caret';
+      var total = 0; queue.forEach(function(x){ total += ls[x].length; });
+      var perTick = Math.max(total, 1) / (DUR / FRAME);
+      (function tick(){
+        if (!typing) return;
+        if (qi >= queue.length){ finish(); return; }
+        acc += perTick; var left = Math.floor(acc); acc -= left;
+        while (left > 0 && qi < queue.length){
+          var x = queue[qi], txt = ls[x], n = Math.min(left, txt.length - ci);
+          ci += n; left -= n;
+          spans[x].textContent = txt.slice(0, ci);
+          if (ci >= txt.length){ spans[x].innerHTML = h(txt); qi++; ci = 0; }
+          else spans[x].appendChild(caret);
+        }
+        /* linha em branco: não tem o que digitar */
+        while (qi < queue.length && !ls[queue[qi]].length) qi++;
+        timer = setTimeout(tick, FRAME);
+      })();
+    }
+    root.addEventListener('step', function(e){
+      if (typing && e.detail > 0){ finish(); return; }
+      var nk = Math.max(0, Math.min(steps.length - 1, k + e.detail));
+      if (nk !== k) go(nk, e.detail > 0);
+    });
+    paint(steps[0], []); show();
+  }
+  $$('.live').forEach(initLive);
+
+  /* capa: o site pronto */
+  mountFrame($('#capaBicho')).srcdoc = pageDoc(S('js', JS_FINAL, { base:false }));
+
+  /* árvore: cada ↓ desce um nível */
+  (function(){
+    var tree = $('#tree'), max = 5, k = 1;
+    function paint(){ $$('ul[data-l]', tree).forEach(function(u){ u.classList.toggle('on', +u.getAttribute('data-l') <= k); }); }
+    tree.addEventListener('step', function(e){ k = Math.max(1, Math.min(max, k + e.detail)); paint(); });
+    paint();
+  })();
+
+  /* roteiro: cada seta pra baixo marca um item */
+  (function(){
+    var lis = $$('#roteiro li'), n = lis.length, k = 1;  /* document: ja visto nos slides anteriores */
+    var pn = $$('#roteiro ~ .pn-wrap .pn, .rot-grid .pn');
+    function paint(){
+      lis.forEach(function(li, x){ li.classList.toggle('done', x < k); li.classList.toggle('now', x === k); });
+      var cur = Math.min(k, n - 1);
+      pn.forEach(function(p, x){ p.classList.toggle('on', x === cur); });
+    }
+    $('#roteiro').addEventListener('step', function(e){ k = Math.max(0, Math.min(n, k + e.detail)); paint(); });
+    paint();
+  })();
+
+  /* ---------- navegação + anotações ---------- */
+  var slides = $$('.slide'), total = slides.length;
+  var pfill = $('#pfill'), count = $('#count'), partLabel = $('#partLabel'), panel = $('#notesPanel');
+  var i = 0, pop = null;
+  function pad(n){ return (n<10?'0':'') + n; }
+  function notesHTML(){ var n = slides[i].querySelector('aside.notes'); return n ? n.innerHTML : '<h4>Sem anotações</h4>'; }
+  function updateNotes(){
+    panel.innerHTML = '<div class="np-h">Só você vê &middot; slide ' + (i+1) + ' &middot; N fecha &middot; P abre janela</div>' + notesHTML();
+    if (pop && !pop.closed){ pop.document.body.innerHTML = '<div class="np-h">Slide ' + (i+1) + ' / ' + total + '</div>' + notesHTML(); }
+  }
+  function openPop(){
+    pop = window.open('', 'domnotas', 'width=520,height=720');
+    if (!pop){ panel.hidden = false; return; }
+    var d = pop.document; d.title = 'Notas do professor';
+    d.head.innerHTML = '<meta charset="utf-8"><style>body{font:16px/1.5 system-ui,sans-serif;background:#0c1f2e;color:#e4ecf3;padding:1rem 1.3rem}h4{font:500 12px monospace;letter-spacing:.1em;text-transform:uppercase;color:#f4ac4a;margin:1.1rem 0 .2rem}ul{margin:0;padding-left:1.2rem}li{margin:.25rem 0}code,kbd{background:#123047;padding:.05em .35em;border-radius:4px}.np-h{font:12px monospace;color:#93a6b5}</style>';
+    panel.hidden = true; updateNotes();
+  }
+  function render(){
+    slides.forEach(function(s, x){ s.classList.toggle('active', x === i); s.setAttribute('aria-hidden', x === i ? 'false' : 'true'); });
+    pfill.style.width = ((i+1)/total*100) + '%';
+    count.textContent = pad(i+1) + ' / ' + pad(total);
+    var eb = slides[i].querySelector('.eyebrow');
+    partLabel.textContent = eb ? eb.textContent.replace(/\s+/g,' ').trim() : 'DOM';
+    if (history.replaceState) history.replaceState(null, '', '#' + (i+1));
+    updateNotes();
+  }
+  function go(n){ var nx = Math.max(0, Math.min(total-1, n)); if (nx === i) return; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); i = nx; render(); }
+  function next(){ go(i+1); } function prev(){ go(i-1); }
+
+  /* teclas: vêm do documento ou do iframe (quando o foco está dentro do site) */
+  function onKey(key){
+    if (key === 'Escape'){ panel.hidden = true; return; }
+    if (key === 'n' || key === 'N'){ panel.hidden = !panel.hidden; return; }
+    if (key === 'p' || key === 'P'){ openPop(); return; }
+    if (key === 'ArrowDown' || key === 'ArrowUp'){
+      var st = $('.live, [data-steps]', slides[i]);
+      if (st){ st.dispatchEvent(new CustomEvent('step', { detail: key === 'ArrowDown' ? 1 : -1 })); return; }
+    }
+    if (key === 'ArrowRight' || key === 'PageDown' || key === ' ' || key === 'ArrowDown') next();
+    else if (key === 'ArrowLeft' || key === 'PageUp' || key === 'ArrowUp') prev();
+    else if (key === 'Home') go(0);
+    else if (key === 'End') go(total-1);
+  }
+  document.addEventListener('keydown', function(e){
+    var t = e.target, tag = t && t.tagName;
+    if (e.key === 'Escape'){ onKey('Escape'); return; }
+    if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT') return;
+    if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) e.preventDefault();
+    onKey(e.key);
+  });
+  $('#btnNext').addEventListener('click', next);
+  $('#btnPrev').addEventListener('click', prev);
+  $('#znext').addEventListener('click', function(){ this.blur(); next(); });
+  $('#zprev').addEventListener('click', function(){ this.blur(); prev(); });
+  var docRoot = document.documentElement;
+  $('#btnTheme').addEventListener('click', function(){
+    var cur = docRoot.getAttribute('data-theme');
+    var isDark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    docRoot.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  if (!isNaN(start) && start >= 1 && start <= total) i = start - 1;
+  render();
+})();
+</script>
+
+</body>
+</html>

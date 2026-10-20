@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            td {
+                width: 100px;
+                height: 100px;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div id="game" class="cena">
+            <table border="1">
+
+            </table>
+        </div>
+        <div id="menu" class="cena">
+            menu
+        </div>
+    </body>
+    <script>
+      const ALTURA = 8
+      const LARGURA = 8
+
+      function mostrarCena (id) {
+        const cenas = document.querySelectorAll(".cena")
+        for (let i=0; i< cenas.length; i++){
+          cenas[i].style.display = "none"
+        }
+        document.getElementById(id).style.display = "block"
+      }
+
+      function montarTabuleiro(altura, largura){
+        const table = document.querySelector("table")
+        let row = ""
+        for (let i=0; i<altura; i++){
+          row += "<tr>"
+          for (let j=0; j<largura; j++){
+            row = row+"<td></td>"
+          }
+          row = row+"</tr>"
+        }
+        table.innerHTML = row;
+      }
+
+      montarTabuleiro(ALTURA, LARGURA)
+      mostrarCena("game")
+    </script>
+</html>

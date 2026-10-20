@@ -431,10 +431,10 @@
 
   /* demos com CSS de verdade */
   #dorSample p{ margin:.3em 0; transition:all .3s; }
-  #dorSample.on p{ color:#e0452e; font-weight:700; }
+  #dorSample.on p{ color:red; font-weight:700; }
   #mcDiv{ font-family:"Times New Roman",serif; color:#1a1a1a; transition:all .3s; padding:.4rem 0; }
-  #mcDiv.card{ border:3px solid #16a89c; padding:14px; border-radius:12px; }
-  #mcDiv.destaque{ background:#fff3a8; }
+  #mcDiv.caixa{ border:3px solid blue; padding:14px; border-radius:12px; }
+  #mcDiv.destaque{ background:pink; }
   #mcDiv.grande{ font-size:1.7em; }
   .chk{ display:flex; flex-wrap:wrap; gap:.6rem; }
   .chk label{ font-family:var(--font-mono); font-size:.88rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:8px; padding:.4em .8em; cursor:pointer; display:flex; gap:.5rem; align-items:center; }
@@ -445,12 +445,14 @@
   .rule.off{ opacity:.35; }
   .rule .pts.w{ background:var(--accent); color:var(--accent-ink); }
   .hv-btn, .tr-btn{
-    background:#123f63; color:#fff; padding:.8em 1.7em; border:none; border-radius:8px; font:600 1rem "Barlow",system-ui,sans-serif; cursor:pointer;
+    background:blue; color:#fff; padding:.8em 1.7em; border:none; border-radius:8px; font:600 1rem "Barlow",system-ui,sans-serif; cursor:pointer;
   }
-  .hv-btn:hover{ background:#f2a63b; color:#3a2300; }
+  .hv-btn:hover{ background:red; color:#fff; }
   .tr-btn{ transition:all var(--dur,0s) ease; }
-  .tr-btn:hover{ transform:var(--tf,none); background:#f2a63b; color:#3a2300; }
+  .tr-btn:hover{ transform:var(--tf,none); background:red; color:#fff; }
   .btnarea{ display:grid; place-items:center; min-height:9rem; }
+  /* as zonas invisíveis de avançar (z-index 5) cobrem 28% à esquerda e 40% à direita: o conteúdo precisa ficar acima delas pro hover/clique funcionar */
+  .slide .demo, .slide .tagtable, .slide .bullets{ position:relative; z-index:6; }
   pre.code .dim{ color:#808080; }
 
   .radar .goal{ grid-column:1/-1; background:color-mix(in srgb, var(--amber) 16%, transparent); border-left:4px solid var(--amber); border-radius:0 8px 8px 0; padding:.6rem .9rem; font-size:1.02rem; }
@@ -462,6 +464,20 @@
   .page ul, .page ol{ padding-left:1.4rem; } .page li ul{ margin:.1em 0; }
 
   .radar[data-compact]{ grid-template-columns:1fr !important; }
+  /* controles só do professor (aparecem com N) */
+  .tctl{ display:none !important; }
+  body.notes-open .tctl{ display:flex !important; }
+  body.notes-open .ctl.tctl{ display:grid !important; }
+
+  /* modo gravação: só CSS + HTML. Controles e página renderizada aparecem com N (professor) */
+  .radar .rb-bar, .radar .count-wrap{ display:none; }
+  .radar.tog .count-wrap{ display:block; }
+  body.notes-open .radar .rb-bar{ display:flex; }
+  body.notes-open .radar .count-wrap{ display:block; }
+  .radar .fname{ display:block; width:max-content; }
+  .radar pre.csspane{ font-size:clamp(1.1rem,2vw,1.6rem); line-height:1.6; padding:1rem 1.2rem; min-height:7rem; }
+  .radar pre.htmlpane{ font-size:clamp(.85rem,1.4vw,1.15rem); line-height:1.6; padding:1rem 1.2rem; }
+  @media (min-width:900px){ .radar:not([data-compact]){ grid-template-columns:.8fr 1.2fr; } }
 </style>
 </head>
 <body>
@@ -481,10 +497,18 @@
       <h1>Seletores e <em>classes</em></h1>
       <p class="subtitle">como escolher exatamente quem recebe cada estilo</p>
       <aside class="notes">
-        <h4>Falar</h4>
+        <h4>Abertura (fala)</h4>
         <ul>
-          <li>Última aula: cor, texto, caixa e posição.</li>
-          <li>Ficou uma dor no ar: <code>p { }</code> muda <b>todos</b> os parágrafos. Hoje a gente resolve isso.</li>
+          <li>Fala, pessoal! Na última aula a gente viu algumas propriedades do CSS: mudar cor, tamanho, mover as coisas de lugar.</li>
+          <li>Só que tem um detalhe: quando eu mudo um parágrafo, eu estou mudando <b>todos</b> os parágrafos da página.</li>
+          <li>E numa página web é assim mesmo: o mesmo elemento aparece várias vezes. Vários botões, vários textos... e cada um precisa ficar de um jeito.</li>
+          <li>Então, como é que a gente faz pra mudar <b>só um</b>? <i>(pausa)</i></li>
+          <li>A resposta são os <b>seletores</b>. Com eles a gente escolhe quem recebe cada regra.</li>
+          <li>Bora ver isso.</li>
+        </ul>
+        <h4>Dica</h4>
+        <ul>
+          <li>Pode passar pro slide 2 no 2º parágrafo e apertar ↓ em &ldquo;todos&rdquo;: os três ficam vermelhos junto com a fala.</li>
           <li>Reforçar o combinado: pausar e testar no computador.</li>
         </ul>
         <h4>Pausa e pratica</h4>
@@ -495,16 +519,16 @@
     </section>
 
     <!-- 2 -->
-    <section class="slide" aria-label="Slide 2">
+    <section class="slide" data-stepper aria-label="Slide 2">
       <p class="eyebrow">O problema</p>
       <h2>Todos ficaram <em>iguais</em></h2>
       <div class="demo wide">
         <div class="pane lab">
           <pre class="code big"><span class="ln"><span class="sel">p</span> {</span>
-<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">tomato</span>;</span>
+<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">red</span>;</span>
 <span class="ln">  <span class="prop" data-p="font-weight">font-weight</span>: <span class="n">700</span>;</span>
 <span class="ln">}</span></pre>
-          <div class="btns"><button class="btn big" id="dorBtn">Aplicar a regra</button></div>
+          <div class="btns tctl"><button class="btn big" id="dorBtn">Aplicar a regra</button></div>
           <p class="hint" id="dorMsg">Queremos destacar só o aviso, o primeiro parágrafo.</p>
         </div>
         <div class="pane">
@@ -518,13 +542,13 @@
       <aside class="notes">
         <h4>Falar</h4>
         <ul>
-          <li>Pedir pra turma adivinhar antes de clicar: o que vai acontecer?</li>
+          <li>Pedir pra turma adivinhar antes de apertar: o que vai acontecer?</li>
           <li>Seletor <code>p</code> = &ldquo;todo parágrafo da página&rdquo;. Sem exceção.</li>
           <li>Hoje a pergunta é: como eu aponto <b>um</b> parágrafo específico?</li>
         </ul>
         <h4>Ilustrar no navegador</h4>
         <ul>
-          <li>Apertar o botão e deixar o silêncio: os três ficaram vermelhos.</li>
+          <li><b>↓ aplica a regra</b> (↑ desfaz). Deixar o silêncio: os três ficaram vermelhos.</li>
           <li>Depois: &ldquo;e se eu quisesse só o primeiro?&rdquo; Deixar a dúvida pairar.</li>
         </ul>
       </aside>
@@ -534,16 +558,17 @@
     <section class="slide" aria-label="Slide 3">
       <p class="eyebrow">Seletores &middot; Tag</p>
       <h2>O radar de <em>seletores</em></h2>
-      <div class="radar wide" data-page="tag" data-presets="p|h1|li|ul" data-start="h1" data-target="p" data-goal="pegar <b>os dois parágrafos</b>. Teste os botões e veja o que acende." data-free="1"></div>
+      <div class="radar wide" data-page="tag" data-presets="p|h1|li|ul" data-blank="1" data-start="h1" data-target="p" data-goal="pegar <b>os dois parágrafos</b>." data-free="1"></div>
       <aside class="notes">
         <h4>Falar</h4>
         <ul>
-          <li>Essa ferramenta vai aparecer várias vezes. À esquerda o HTML, à direita a página. O seletor escolhido acende quem é atingido.</li>
+          <li>Essa ferramenta vai aparecer várias vezes. À esquerda o CSS (só o seletor), à direita o HTML. O seletor escolhido acende no HTML quem é atingido.</li>
           <li>Cada slide tem uma missão: achar o seletor que pega exatamente o que a missão pede.</li>
           <li>Seletor de tag = o nome da tag. Pega <b>todos</b> os elementos daquele tipo. Já conhecem do css-01.</li>
         </ul>
         <h4>Ilustrar no navegador</h4>
         <ul>
+          <li><b>Setas ↑ ↓ trocam o seletor</b> (nos slides com radar, elas não passam de slide; use → ← ou espaço). Aperte N pra ver campo, botões e a página renderizada; feche o N antes de gravar.</li>
           <li>Clicar em <code>h1</code>: pega o título. Clicar em <code>p</code>: missão cumprida.</li>
           <li>Digitar um seletor qualquer no campo (<code>ul</code>, <code>li</code>). Notar que <code>li</code> pega os dois itens da lista.</li>
         </ul>
@@ -560,18 +585,19 @@
       <h2>Dê um nome com a <em>classe</em></h2>
       <div class="demo wide">
         <div class="pane lab">
-          <span class="fname">index.html</span>
-          <pre class="code"><span class="ln"><span class="t">&lt;p</span> <span class="at">class</span>=<span class="v">"aviso"</span><span class="t">&gt;</span>Atraso = eliminação!<span class="t">&lt;/p&gt;</span></span></pre>
           <span class="fname">estilo.css</span>
           <pre class="code"><span class="ln"><span class="sel">.aviso</span> {</span>
-<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">tomato</span>;</span>
+<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">red</span>;</span>
 <span class="ln">}</span></pre>
-          <div class="chips"><span>HTML: <b>sem</b> ponto</span><span>CSS: <b>com</b> ponto</span></div>
-          <p class="hint"><code>p</code> pega <b>todos</b> os parágrafos. <code>.aviso</code> pega só quem tem o crachá.</p>
         </div>
         <div class="pane lab">
-          <div class="radar tog" data-page="classe" data-presets="p|.aviso" data-start=".aviso" data-toggle="1" data-compact="1" data-free="1"></div>
+          <span class="fname">index.html</span>
+          <pre class="code"><span class="ln"><span class="t">&lt;p</span> <span class="at">class</span>=<span class="v">"aviso"</span><span class="t">&gt;</span>Atraso = eliminação!<span class="t">&lt;/p&gt;</span></span></pre>
         </div>
+      </div>
+      <div class="wide">
+        <div class="chips"><span>HTML: <b>sem</b> ponto</span><span>CSS: <b>com</b> ponto</span></div>
+        <p class="hint"><code>p</code> pega <b>todos</b> os parágrafos. <code>.aviso</code> pega só quem tem o crachá.</p>
       </div>
       <aside class="notes">
         <h4>Falar</h4>
@@ -580,11 +606,6 @@
           <li>Solução em dois passos: 1) no HTML, dar um nome com <code>class=&quot;aviso&quot;</code>; 2) no CSS, usar <code>.aviso</code>.</li>
           <li>O ponto é só do CSS. No HTML não leva ponto.</li>
           <li>Classe é um crachá: quem tem o crachá recebe o estilo, mesmo que seja do mesmo tipo de tag.</li>
-        </ul>
-        <h4>Ilustrar no navegador</h4>
-        <ul>
-          <li>Começar com <code>p</code>: acende os quatro. Trocar para <code>.aviso</code>: só dois.</li>
-          <li><b>Clicar num parágrafo da página</b> dá ou tira a classe. O HTML ao lado muda e o seletor reage.</li>
         </ul>
         <h4>Dica do video</h4>
         <ul>
@@ -605,34 +626,54 @@
     <!-- 5 -->
     <section class="slide" aria-label="Slide 5">
       <p class="eyebrow">Seletores &middot; Classe</p>
+      <h2>Tag <em>ou</em> classe?</h2>
+      <div class="radar wide" data-page="classe" data-presets="p|.aviso" data-blank="1" data-start="p" data-target=".aviso" data-free="1"></div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Mesmo HTML da tela anterior: quatro parágrafos, dois com a classe <code>aviso</code>.</li>
+          <li>Mostrar a diferença: o seletor de tag pega todos, o de classe só quem tem o crachá.</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li><b>↓ troca o seletor</b>. Começar em <code>p</code>: acendem os quatro. Descer para <code>.aviso</code>: só dois.</li>
+          <li>N mostra campo e botões, caso queira digitar outro seletor.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" data-stepper aria-label="Slide 6">
+      <p class="eyebrow">Seletores &middot; Classe</p>
       <h2>Um elemento, <em>várias</em> classes</h2>
       <div class="demo wide">
         <div class="pane lab">
-          <pre class="code"><span class="ln"><span class="sel">.card</span> { <span class="prop" data-p="border">border</span>: <span class="n">3px</span> <span class="v">solid</span> <span class="n">#16a89c</span>; <span class="prop" data-p="padding">padding</span>: <span class="n">14px</span>; }</span>
-<span class="ln"><span class="sel">.destaque</span> { <span class="prop" data-p="background-color">background-color</span>: <span class="v">khaki</span>; }</span>
-<span class="ln"><span class="sel">.grande</span> { <span class="prop" data-p="font-size">font-size</span>: <span class="n">1.7em</span>; }</span></pre>
-          <div class="chk" id="mcChk">
-            <label><input type="checkbox" data-c="card" checked> card</label>
+          <span class="fname">index.html</span>
+          <pre class="code big" id="mcCode"></pre>
+          <span class="fname">estilo.css</span>
+          <pre class="code" id="mcCss"></pre>
+          <div class="chk tctl" id="mcChk">
+            <label><input type="checkbox" data-c="caixa"> caixa</label>
             <label><input type="checkbox" data-c="destaque"> destaque</label>
             <label><input type="checkbox" data-c="grande"> grande</label>
           </div>
-          <pre class="code" id="mcCode"></pre>
         </div>
         <div class="pane">
-          <div class="sample"><div id="mcDiv" class="card">Rodada final no sábado!</div></div>
+          <div class="sample"><div id="mcDiv">Rodada final no sábado!</div></div>
           <p class="hint">As classes se somam. Separe com <b>espaço</b>, a ordem no HTML não importa.</p>
         </div>
       </div>
       <aside class="notes">
         <h4>Falar</h4>
         <ul>
+          <li>O CSS já tem as três classes prontas. A <code>div</code> começa sem classe nenhuma.</li>
           <li>Um elemento pode ter várias classes, separadas por espaço.</li>
-          <li>Cada classe é um pedaço do visual. Juntando, monta o resultado. É a ideia de peças de Lego.</li>
-          <li>Vantagem: <code>.card</code> reaproveito em todo lugar.</li>
+          <li>Cada classe é um pedaço do visual: <code>caixa</code> (moldura), <code>destaque</code> (fundo), <code>grande</code> (letra). Juntando, monta o resultado. Peças de Lego.</li>
+          <li>Vantagem: <code>.caixa</code> eu reaproveito em todo lugar.</li>
         </ul>
         <h4>Ilustrar no navegador</h4>
         <ul>
-          <li>Marcar e desmarcar os checkboxes e olhar o <code>class=&quot;...&quot;</code> mudando.</li>
+          <li><b>↓ adiciona uma classe por vez</b> (caixa, destaque, grande); ↑ tira a última. O CSS já está pronto com as três regras; só o HTML muda.</li>
         </ul>
         <h4>Erro comum</h4>
         <ul>
@@ -641,16 +682,16 @@
         </ul>
         <h4>Pergunta</h4>
         <ul>
-          <li>O que acontece com <code>class=&quot;card destaque&quot;</code>? (recebe os dois estilos)</li>
+          <li>O que acontece com <code>class=&quot;caixa destaque&quot;</code>? (recebe os dois estilos)</li>
         </ul>
       </aside>
     </section>
 
-    <!-- 6 -->
-    <section class="slide" aria-label="Slide 6">
+    <!-- 7 -->
+    <section class="slide" aria-label="Slide 7">
       <p class="eyebrow">Seletores &middot; Id</p>
       <h2>O <em>id</em>: um nome só</h2>
-      <div class="radar wide" data-page="id" data-presets="div|.card|#vip" data-start=".card" data-target="#vip" data-goal="dar destaque <b>só ao Lucas (VIP)</b>. Os três cartões têm a mesma classe." data-free="1"></div>
+      <div class="radar wide" data-page="id" data-presets="div|.card|#vip" data-blank="1" data-start=".card" data-target="#vip" data-goal="dar destaque <b>só ao Lucas (VIP)</b>. Os três cartões têm a mesma classe." data-free="1"></div>
       <div class="kv wide">
         <div><span class="k">class &middot; .nome</span><span class="v">vários elementos podem ter. Se repete à vontade.</span></div>
         <div><span class="k">id &middot; #nome</span><span class="v">um elemento só, único na página. Como o CPF.</span></div>
@@ -678,11 +719,11 @@
       </aside>
     </section>
 
-    <!-- 7 -->
-    <section class="slide" aria-label="Slide 7">
+    <!-- 8 -->
+    <section class="slide" aria-label="Slide 8">
       <p class="eyebrow">Combinando &middot; Vírgula</p>
       <h2>A vírgula diz <em>&ldquo;e&rdquo;</em></h2>
-      <div class="radar wide" data-page="virgula" data-presets="h1|h2|h1, h2|h1, h2, p" data-start="h1" data-target="h1, h2" data-goal="pintar <b>o título e os subtítulos</b> (h1 e h2) com uma regra só, sem tocar nos parágrafos." data-free="1"></div>
+      <div class="radar wide" data-page="virgula" data-presets="h1|h2|h1, h2|h1, h2, p" data-blank="1" data-start="h1" data-target="h1, h2" data-goal="pintar <b>o título e os subtítulos</b> (h1 e h2) com uma regra só, sem tocar nos parágrafos." data-free="1"></div>
       <aside class="notes">
         <h4>Falar</h4>
         <ul>
@@ -704,11 +745,11 @@
       </aside>
     </section>
 
-    <!-- 8 -->
-    <section class="slide" aria-label="Slide 8">
+    <!-- 9 -->
+    <section class="slide" aria-label="Slide 9">
       <p class="eyebrow">Combinando &middot; Espaço</p>
       <h2>O espaço diz <em>&ldquo;dentro de&rdquo;</em></h2>
-      <div class="radar wide" data-page="espaco" data-presets="a|nav a|main a|footer a" data-start="a" data-target="nav a" data-goal="estilizar <b>só os links do menu</b> (Início e Jogos). Os links do texto e do rodapé ficam como estão." data-free="1"></div>
+      <div class="radar wide" data-page="espaco" data-presets="a|nav a|main a|footer a" data-blank="1" data-start="a" data-target="nav a" data-goal="estilizar <b>só os links do menu</b> (Início e Jogos). Os links do texto e do rodapé ficam como estão." data-free="1"></div>
       <aside class="notes">
         <h4>Falar</h4>
         <ul>
@@ -727,11 +768,11 @@
       </aside>
     </section>
 
-    <!-- 9 -->
-    <section class="slide" aria-label="Slide 9">
+    <!-- 10 -->
+    <section class="slide" aria-label="Slide 10">
       <p class="eyebrow">Bônus &middot; Filho direto</p>
       <h2>O <code>&gt;</code> diz <em>&ldquo;filho direto&rdquo;</em></h2>
-      <div class="radar wide" data-page="filho" data-presets="li|.menu li|.menu > li" data-start=".menu li" data-target=".menu > li" data-goal="destacar <b>só os itens do menu principal</b> (Jogos, Ranking, Contato), sem os subitens Ação e Corrida." data-free="1"></div>
+      <div class="radar wide" data-page="filho" data-presets="li|.menu li|.menu > li" data-blank="1" data-start=".menu li" data-target=".menu > li" data-goal="destacar <b>só os itens do menu principal</b> (Jogos, Ranking, Contato), sem os subitens Ação e Corrida." data-free="1"></div>
       <p class="dim">Espaço: em qualquer nível lá dentro. <code>&gt;</code>: só um nível abaixo.</p>
       <aside class="notes">
         <h4>Falar</h4>
@@ -753,14 +794,14 @@
       </aside>
     </section>
 
-    <!-- 10 -->
-    <section class="slide" aria-label="Slide 10">
+    <!-- 11 -->
+    <section class="slide" data-stepper aria-label="Slide 11">
       <p class="eyebrow">Quando brigam &middot; Ordem</p>
       <h2>Duas regras, <em>um</em> vencedor</h2>
       <div class="demo wide">
         <div class="pane lab">
           <pre class="code big" id="ordCode"></pre>
-          <div class="btns"><button class="btn big" id="ordSwap">Inverter a ordem</button></div>
+          <div class="btns tctl"><button class="btn big" id="ordSwap">Inverter a ordem</button></div>
           <p class="hint" id="ordMsg"></p>
         </div>
         <div class="pane">
@@ -778,7 +819,7 @@
         </ul>
         <h4>Ilustrar no navegador</h4>
         <ul>
-          <li>Apertar &ldquo;Inverter a ordem&rdquo; algumas vezes: a cor troca.</li>
+          <li><b>↓ ou ↑ invertem a ordem</b> das regras: a cor troca.</li>
           <li>No VS Code: mudar a ordem de duas regras e F5.</li>
         </ul>
         <h4>Erro comum</h4>
@@ -788,15 +829,15 @@
       </aside>
     </section>
 
-    <!-- 11 -->
-    <section class="slide" aria-label="Slide 11">
+    <!-- 12 -->
+    <section class="slide" data-stepper aria-label="Slide 12">
       <p class="eyebrow">Quando brigam &middot; Especificidade</p>
       <h2>O <em>ringue</em> dos seletores</h2>
       <div class="demo wide">
         <div class="pane lab">
-          <div class="chk" id="ringChk">
+          <div class="chk tctl" id="ringChk">
             <label><input type="checkbox" data-r="tag" checked> p</label>
-            <label><input type="checkbox" data-r="classe" checked> .destaque</label>
+            <label><input type="checkbox" data-r="classe"> .destaque</label>
             <label><input type="checkbox" data-r="id"> #aviso</label>
           </div>
           <pre class="code big" id="ringCode"></pre>
@@ -821,7 +862,7 @@
         </ul>
         <h4>Ilustrar no navegador</h4>
         <ul>
-          <li>Ligar só <code>p</code>, depois adicionar <code>.destaque</code>, depois <code>#aviso</code>. Ver o vencedor mudando.</li>
+          <li><b>↓ liga uma regra por vez</b>: começa só com <code>p</code>, depois <code>.destaque</code>, depois <code>#aviso</code>. ↑ desliga. Ver o vencedor mudando.</li>
           <li>Abrir F12 &rarr; aba Styles de um site. As regras perdedoras aparecem <b>riscadas</b>.</li>
         </ul>
         <h4>Pergunta</h4>
@@ -831,21 +872,21 @@
       </aside>
     </section>
 
-    <!-- 12 -->
-    <section class="slide" aria-label="Slide 12">
+    <!-- 13 -->
+    <section class="slide" aria-label="Slide 13">
       <p class="eyebrow">Boa prática</p>
       <h2>Quanto mais <em>simples</em>, melhor</h2>
       <div class="demo wide">
         <div class="pane">
           <span class="verdict bad">difícil de ler e de sobrescrever</span>
           <pre class="code big"><span class="ln"><span class="sel">body main section ul li a.link</span> {</span>
-<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">tomato</span>;</span>
+<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">red</span>;</span>
 <span class="ln">}</span></pre>
         </div>
         <div class="pane">
           <span class="verdict ok">uma classe resolve</span>
           <pre class="code big"><span class="ln"><span class="sel">.link</span> {</span>
-<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">tomato</span>;</span>
+<span class="ln">  <span class="prop" data-p="color">color</span>: <span class="v">red</span>;</span>
 <span class="ln">}</span></pre>
         </div>
       </div>
@@ -870,22 +911,22 @@
       </aside>
     </section>
 
-    <!-- 13 -->
-    <section class="slide" aria-label="Slide 13">
+    <!-- 14 -->
+    <section class="slide" aria-label="Slide 14">
       <p class="eyebrow">Pseudo-classes &middot; Hover</p>
       <h2><code>:hover</code> &mdash; quando o mouse passa</h2>
       <div class="demo wide">
         <div class="pane lab">
           <pre class="code big"><span class="ln"><span class="sel">.botao</span> {</span>
-<span class="ln">  <span class="prop" data-p="background-color">background-color</span>: <span class="n">#123f63</span>;</span>
+<span class="ln">  <span class="prop" data-p="background-color">background-color</span>: <span class="v">blue</span>;</span>
 <span class="ln">  <span class="prop" data-p="cursor">cursor</span>: <span class="v">pointer</span>;</span>
 <span class="ln">}</span>
 <span class="ln"><span class="sel"><span class="prop" data-p="hover" data-name=":hover">.botao:hover</span></span> {</span>
-<span class="ln">  <span class="prop" data-p="background-color">background-color</span>: <span class="v">orange</span>;</span>
+<span class="ln">  <span class="prop" data-p="background-color">background-color</span>: <span class="v">red</span>;</span>
 <span class="ln">}</span></pre>
         </div>
         <div class="pane">
-          <div class="sample btnarea"><button class="hv-btn glow-target">Passe o mouse aqui</button></div>
+          <div class="sample btnarea"><button class="hv-btn glow-target">Jogar agora</button></div>
           <p class="hint">Dois-pontos: a regra só vale <b>enquanto</b> o mouse está em cima.</p>
         </div>
       </div>
@@ -915,24 +956,17 @@
       </aside>
     </section>
 
-    <!-- 14 -->
-    <section class="slide" aria-label="Slide 14">
+    <!-- 15 -->
+    <section class="slide" data-stepper aria-label="Slide 15">
       <p class="eyebrow">Pseudo-classes &middot; Animação</p>
       <h2>Suavize com <em>transition</em></h2>
       <div class="demo wide">
         <div class="pane lab">
-          <label class="ctl"><span>transition</span><input type="range" id="trDur" min="0" max="1000" step="50" value="300" data-u="ms"><output></output></label>
-          <label class="ctl"><span>transform</span>
-            <select id="trTf">
-              <option value="none">nenhum</option>
-              <option value="translateY(-8px)">subir (translateY)</option>
-              <option value="scale(1.15)">crescer (scale)</option>
-              <option value="rotate(-4deg)">girar (rotate)</option>
-            </select></label>
+          <label class="ctl tctl"><span>transition</span><input type="range" id="trDur" min="0" max="1000" step="50" value="0" data-u="ms"><output></output></label>
           <pre class="code" id="trCode"></pre>
         </div>
         <div class="pane">
-          <div class="sample btnarea"><button class="tr-btn glow-target" id="trBtn">Passe o mouse aqui</button></div>
+          <div class="sample btnarea"><button class="tr-btn glow-target" id="trBtn">Jogar agora</button></div>
           <p class="hint">O <b>transition</b> vai na regra normal, não no :hover.</p>
         </div>
       </div>
@@ -940,8 +974,8 @@
         <h4>Falar</h4>
         <ul>
           <li><code>transition</code>: diz quanto tempo a mudança leva, em vez de pular de uma vez.</li>
-          <li><code>transform</code>: move, gira ou aumenta sem bagunçar o resto da página.</li>
-          <li>Combinando os dois, qualquer botão fica com cara de jogo.</li>
+          <li>Aqui o botão muda <b>duas coisas juntas</b> no hover: a cor (<code>background-color</code>) e a posição (<code>transform: translateY</code>, sobe 8px).</li>
+          <li>O que a gente mexe é só o <code>transition</code>: o tempo da mudança.</li>
         </ul>
         <h4>Dica do video</h4>
         <ul>
@@ -950,8 +984,8 @@
         </ul>
         <h4>Ilustrar no navegador</h4>
         <ul>
-          <li>Passar o mouse com 0ms, depois com 300ms, depois com 1000ms. Sentir a diferença.</li>
-          <li>Trocar o transform e passar o mouse de novo.</li>
+          <li><b>↓ muda só a duração</b>: 0s (seco), 0.3s, 1s. ↑ volta. Passar o mouse no botão a cada passo.</li>
+          <li>Começa com 0s: cor e posição trocam de uma vez. Depois suaviza.</li>
         </ul>
         <h4>Erro comum</h4>
         <ul>
@@ -960,11 +994,11 @@
       </aside>
     </section>
 
-    <!-- 15 -->
-    <section class="slide" aria-label="Slide 15">
+    <!-- 16 -->
+    <section class="slide" aria-label="Slide 16">
       <p class="eyebrow">Bônus &middot; Posição na lista</p>
       <h2><code>:first-child</code> e <code>:last-child</code></h2>
-      <div class="radar wide" data-page="primeiro" data-presets="li|li:first-child|li:last-child" data-start="li" data-target="li:first-child" data-goal="destacar <b>só o campeão</b> (1º lugar) do ranking, sem criar uma classe nova." data-free="1"></div>
+      <div class="radar wide" data-page="primeiro" data-presets="li|li:first-child|li:last-child" data-blank="1" data-start="li" data-target="li:first-child" data-goal="destacar <b>só o campeão</b> (1º lugar) do ranking, sem criar uma classe nova." data-free="1"></div>
       <aside class="notes">
         <h4>Falar</h4>
         <ul>
@@ -982,8 +1016,8 @@
       </aside>
     </section>
 
-    <!-- 16 -->
-    <section class="slide" aria-label="Slide 16">
+    <!-- 17 -->
+    <section class="slide" aria-label="Slide 17">
       <p class="eyebrow">Fecho &middot; Cola</p>
       <h2>O que levar pra casa</h2>
       <div class="tagtable wide">
@@ -1004,6 +1038,14 @@
         <code class="prop" data-p="cursor">cursor</code><span>o formato do mouse (pointer = mão)</span>
       </div>
       <aside class="notes">
+        <h4>Fala (encerramento)</h4>
+        <ul>
+          <li>Resumindo: hoje a gente viu como escolher quem recebe o estilo. Tag pega todos, classe pega quem tem o nome, id pega um só.</li>
+          <li>Vírgula é &ldquo;este e aquele&rdquo;, espaço é &ldquo;dentro de&rdquo;.</li>
+          <li>Quando duas regras brigam, ganha a mais específica e, empatando, a última.</li>
+          <li>E com dois pontos e hover, mais transition, o botão ganha vida.</li>
+          <li>No próximo vídeo a gente junta tudo isso pra estilizar um site inteiro. Até lá!</li>
+        </ul>
         <h4>Falar</h4>
         <ul>
           <li>Cola da aula. O PDF &ldquo;Guia de referências: propriedades CSS&rdquo; tem o resto.</li>
@@ -1016,8 +1058,8 @@
       </aside>
     </section>
 
-    <!-- 17 -->
-    <section class="slide" aria-label="Slide 17">
+    <!-- 18 -->
+    <section class="slide" aria-label="Slide 18">
       <p class="eyebrow">Mão na massa</p>
       <h2>Escolha quem você quer <em>estilizar</em></h2>
       <ul class="bullets wide">
@@ -1051,7 +1093,7 @@
     <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
     <div class="progress"><div class="progress__fill" id="pfill"></div></div>
     <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
-    <span class="count" id="count">01 / 17</span>
+    <span class="count" id="count">01 / 18</span>
     <button id="btnTheme" aria-label="Alternar tema">tema</button>
   </div>
 </div>
@@ -1071,7 +1113,7 @@
     'valor': 'COMO deve ficar: a cor, o número, a palavra.',
     'chaves': 'As chaves abrem e fecham a regra. Tudo entre elas pertence ao seletor.',
     'pontovirgula': 'Fecha a linha. Sem ele, o navegador se perde e ignora a regra.',
-    'color': 'A cor do TEXTO. Aceita nome (red) ou hex (#16a89c).',
+    'color': 'A cor do TEXTO. Aceita o nome da cor em inglês (red, blue, green, pink...).',
     'background-color': 'A cor de FUNDO. Pinta o conteúdo e o padding, mas nunca a margin.',
     'font-family': 'Qual fonte usar. Sempre escreva uma reserva no fim (Arial, sans-serif), caso a primeira não exista no computador.',
     'font-size': 'Tamanho da letra. 16px é o normal; 40px é um título grandão.',
@@ -1079,7 +1121,7 @@
     'text-align': 'Alinha o texto dentro da caixa: left, center ou right.',
     'width': 'Largura do CONTEÚDO (só o miolo, sem contar padding nem borda).',
     'padding': 'Espaço DENTRO da caixa, entre o conteúdo e a borda. O fundo pinta o padding.',
-    'border': 'A borda, em 3 partes: tamanho, tipo e cor. Ex: 2px solid navy.',
+    'border': 'A borda, em 3 partes: tamanho, tipo e cor. Ex: 2px solid blue.',
     'border-radius': 'Arredonda os cantos. 50% numa caixa quadrada vira um círculo!',
     'margin': 'Espaço FORA da caixa, empurrando os vizinhos. O fundo NÃO pinta a margin.',
     'content': 'O conteúdo: texto, imagem... O tamanho dele é o width (e o height).',
@@ -1152,15 +1194,20 @@
 
   function initRadar(root){
     var presets = (root.getAttribute('data-presets') || '').split('|').filter(Boolean);
-    var sel = root.getAttribute('data-start') || presets[0] || 'p';
+    var sel = root.getAttribute('data-blank') === '1' ? '' : (root.getAttribute('data-start') || presets[0] || 'p');
     var goal = root.getAttribute('data-goal'), target = root.getAttribute('data-target');
     var free = root.getAttribute('data-free') === '1', toggle = root.getAttribute('data-toggle') === '1';
-    root.innerHTML = (goal ? '<div class="goal"><b>Missão:</b> ' + goal + '</div>' : '')
-      + '<div class="rb-bar"><label>seletor:</label><input class="selin" type="text" spellcheck="false" autocomplete="off"' + (free ? '' : ' readonly') + '><span class="btns"></span></div>'
-      + '<pre class="code"></pre><div><div class="sample"><div class="page"></div></div><p class="hint count"></p></div>';
-    var input = $('.selin', root), btns = $('.btns', root), code = $('pre', root), page = $('.page', root), count = $('.count', root);
+    root.innerHTML = ''
+      + '<div class="rb-bar"><label>seletor:</label><input class="selin" type="text" spellcheck="false" autocomplete="off"' + (free ? '' : ' readonly') + '><span class="btns"></span><span class="hint">&uarr; &darr; trocam o seletor</span></div>'
+      + '<div><span class="fname">estilo.css</span><pre class="code csspane"></pre></div>'
+      + '<div><span class="fname">index.html</span><pre class="code htmlpane"></pre></div>'
+      + '<div class="count-wrap"><div class="sample"' + (toggle ? '' : ' hidden') + '><div class="page"></div></div><p class="hint count"></p></div>';
+    var input = $('.selin', root), btns = $('.btns', root), code = $('pre.htmlpane', root), csspane = $('pre.csspane', root), page = $('.page', root), count = $('.count', root), sampleBox = $('.sample', root);
+    var blank = root.getAttribute('data-blank') === '1', states = blank ? [''].concat(presets) : presets;
+    var idx = Math.max(0, states.indexOf(sel));
     page.innerHTML = PAGES[root.getAttribute('data-page')]; input.value = sel;
     var lineOf = [];
+    if (document.body.classList.contains('notes-open')) sampleBox.hidden = false;
 
     function attrs(el){
       var h = '';
@@ -1203,6 +1250,7 @@
       $$('.hit', page).forEach(function(e){ e.classList.remove('hit'); });
       try { hits = $$(input.value.trim() || '#nada-aqui', page); } catch (e){ bad = true; }
       input.classList.toggle('bad', bad);
+      csspane.innerHTML = !input.value.trim() ? '<span class="ln">&nbsp;</span>' : '<span class="ln"><span class="sel">' + esc(input.value.trim() || ' ') + '</span> {</span><span class="ln c">  /*</span><span class="ln c">  estilos aqui</span><span class="ln c">  */</span><span class="ln">}</span>';
       hits.forEach(function(e){ e.classList.add('hit'); });
       $$('.ln', code).forEach(function(l, k){ l.classList.toggle('hit', !!lineOf[k] && hits.indexOf(lineOf[k]) > -1); });
       count.innerHTML = bad ? 'seletor inválido: confira a escrita'
@@ -1211,10 +1259,16 @@
     }
     presets.forEach(function(p){
       var b = document.createElement('button'); b.className = 'btn'; b.textContent = p;
-      b.addEventListener('click', function(){ input.value = p; mark(); });
+      b.addEventListener('click', function(){ input.value = p; idx = presets.indexOf(p); mark(); });
       btns.appendChild(b);
     });
     input.addEventListener('input', mark);
+    root.addEventListener('step', function(e){
+      var cur = states.indexOf(input.value.trim());
+      if (cur > -1) idx = cur; else idx = e.detail > 0 ? -1 : 0;
+      idx = (idx + e.detail + states.length) % states.length;
+      input.value = states[idx]; mark();
+    });
     if (toggle){
       root.classList.add('tog');
       page.addEventListener('click', function(e){
@@ -1230,31 +1284,53 @@
   }
   $$('.radar').forEach(initRadar);
 
+  /* passos com setas: cada slide [data-stepper] recebe o evento 'step' (detail = +1 / -1) */
+  function stepper(id, fn){
+    var sl = $(id).closest('.slide');
+    sl.addEventListener('step', function(e){ fn(e.detail); });
+  }
+
   /* ---------- 2: a dor ---------- */
   (function(){
     var s = $('#dorSample'), b = $('#dorBtn'), m = $('#dorMsg');
-    b.addEventListener('click', function(){
-      var on = s.classList.toggle('on');
+    function set(on){
+      s.classList.toggle('on', on);
       b.textContent = on ? 'Desfazer' : 'Aplicar a regra';
       m.textContent = on ? 'Os TRÊS mudaram. Eu só queria o primeiro!' : 'Queremos destacar só o aviso, o primeiro parágrafo.';
-    });
+    }
+    b.addEventListener('click', function(){ set(!s.classList.contains('on')); });
+    stepper('#dorSample', function(d){ set(d > 0); });
   })();
 
-  /* ---------- 5: várias classes ---------- */
+  /* ---------- 6: várias classes ---------- */
   (function(){
-    var div = $('#mcDiv'), code = $('#mcCode');
+    var div = $('#mcDiv'), code = $('#mcCode'), css = $('#mcCss');
+    var RULES = {
+      caixa: '<span class="ln"><span class="sel">.caixa</span> { <span class="prop" data-p="border">border</span>: <span class="n">3px</span> <span class="v">solid</span> <span class="v">blue</span>; <span class="prop" data-p="padding">padding</span>: <span class="n">14px</span>; }</span>',
+      destaque: '<span class="ln"><span class="sel">.destaque</span> { <span class="prop" data-p="background-color">background-color</span>: <span class="v">pink</span>; }</span>',
+      grande: '<span class="ln"><span class="sel">.grande</span> { <span class="prop" data-p="font-size">font-size</span>: <span class="n">1.7em</span>; }</span>'
+    };
+    css.innerHTML = Object.keys(RULES).map(function(k){ return RULES[k]; }).join('');
+    var boxes = $$('#mcChk input');
     function draw(){
-      var cs = $$('#mcChk input').filter(function(c){ return c.checked; }).map(function(c){ return c.getAttribute('data-c'); });
+      var cs = boxes.filter(function(c){ return c.checked; }).map(function(c){ return c.getAttribute('data-c'); });
       div.className = cs.join(' ');
-      code.innerHTML = L('<span class="t">&lt;div</span> <span class="at">class</span>=<span class="v">"' + cs.join(' ') + '"</span><span class="t">&gt;</span>');
+      code.innerHTML = '<span class="ln"><span class="t">&lt;div</span>' + (cs.length ? ' <span class="at">class</span>=<span class="v">"' + cs.join(' ') + '"</span>' : '') + '<span class="t">&gt;</span>Rodada final no sábado!<span class="t">&lt;/div&gt;</span></span>';
+      
     }
-    $$('#mcChk input').forEach(function(c){ c.addEventListener('change', draw); });
+    boxes.forEach(function(c){ c.addEventListener('change', draw); });
+    stepper('#mcDiv', function(d){
+      var on = boxes.filter(function(c){ return c.checked; }).length;
+      var n = Math.max(0, Math.min(boxes.length, on + d));
+      boxes.forEach(function(c, k){ c.checked = k < n; });
+      draw();
+    });
     draw();
   })();
 
-  /* ---------- 10: ordem ---------- */
+  /* ---------- 11: ordem ---------- */
   (function(){
-    var rules = [['royalblue', 'azul'], ['tomato', 'vermelho']], p = $('#ordP'), code = $('#ordCode'), msg = $('#ordMsg');
+    var rules = [['blue', 'azul'], ['red', 'vermelho']], p = $('#ordP'), code = $('#ordCode'), msg = $('#ordMsg');
     function draw(){
       var h = '';
       rules.forEach(function(r){ h += L('<span class="sel">p</span> { ' + P('color') + ': <span class="v">' + r[0] + '</span>; }'); });
@@ -1263,20 +1339,22 @@
       p.style.color = win[0];
       msg.innerHTML = 'Mesma força: vence a <b>última</b> (' + win[1] + ').';
     }
-    $('#ordSwap').addEventListener('click', function(){ rules.reverse(); draw(); });
+    function swap(){ rules.reverse(); draw(); }
+    $('#ordSwap').addEventListener('click', swap);
+    stepper('#ordP', swap);
     draw();
   })();
 
-  /* ---------- 11: ringue de especificidade ---------- */
+  /* ---------- 12: ringue de especificidade ---------- */
   (function(){
     var R = [
-      { k:'tag', sel:'p', val:'royalblue', pts:1 },
-      { k:'classe', sel:'.destaque', val:'darkorange', pts:10 },
-      { k:'id', sel:'#aviso', val:'seagreen', pts:100 }
+      { k:'tag', sel:'p', val:'blue', pts:1 },
+      { k:'classe', sel:'.destaque', val:'green', pts:10 },
+      { k:'id', sel:'#aviso', val:'red', pts:100 }
     ];
-    var p = $('#ringP'), code = $('#ringCode'), msg = $('#ringMsg');
+    var p = $('#ringP'), code = $('#ringCode'), msg = $('#ringMsg'), boxes = $$('#ringChk input');
     function draw(){
-      var on = {}; $$('#ringChk input').forEach(function(c){ on[c.getAttribute('data-r')] = c.checked; });
+      var on = {}; boxes.forEach(function(c){ on[c.getAttribute('data-r')] = c.checked; });
       var win = null; R.forEach(function(r){ if (on[r.k] && (!win || r.pts > win.pts)) win = r; });
       p.style.color = win ? win.val : '#1a1a1a';
       code.innerHTML = R.map(function(r){
@@ -1285,20 +1363,38 @@
       }).join('');
       msg.innerHTML = win ? 'Vence <b>' + win.sel + '</b> com ' + win.pts + ' ponto' + (win.pts > 1 ? 's' : '') + ', mesmo que esteja em qualquer posição do arquivo.' : 'Nenhuma regra ligada: o parágrafo fica com a cor padrão.';
     }
-    $$('#ringChk input').forEach(function(c){ c.addEventListener('change', draw); });
+    boxes.forEach(function(c){ c.addEventListener('change', draw); });
+    stepper('#ringP', function(d){
+      var on = boxes.filter(function(c){ return c.checked; }).length;
+      var n = Math.max(1, Math.min(boxes.length, on + d));
+      boxes.forEach(function(c, k){ c.checked = k < n; });
+      draw();
+    });
     draw();
   })();
 
-  /* ---------- 14: transition + transform ---------- */
+  /* ---------- 15: transition (cor + posição juntas; só a duração muda) ---------- */
   (function(){
-    var dur = $('#trDur'), tf = $('#trTf'), btn = $('#trBtn'), code = $('#trCode');
+    var dur = $('#trDur'), btn = $('#trBtn'), code = $('#trCode');
     function draw(){
-      btn.style.setProperty('--dur', dur.value / 1000 + 's'); btn.style.setProperty('--tf', tf.value);
-      code.innerHTML = L('<span class="sel">.botao</span> {') + L('  ' + P('transition') + ': <span class="n">' + dur.value / 1000 + 's</span>;') + L('}')
-        + L('<span class="sel">.botao:hover</span> {') + L('  ' + P('transform') + ': <span class="v">' + tf.value + '</span>;') + L('}');
+      btn.style.setProperty('--dur', dur.value / 1000 + 's'); btn.style.setProperty('--tf', 'translateY(-8px)');
+      code.innerHTML = L('<span class="sel">.botao</span> {')
+        + L('  ' + P('background-color') + ': <span class="v">blue</span>;')
+        + L('  ' + P('transition') + ': <span class="n">' + dur.value / 1000 + 's</span>;')
+        + L('}')
+        + L('<span class="sel">.botao:hover</span> {')
+        + L('  ' + P('background-color') + ': <span class="v">red</span>;')
+        + L('  ' + P('transform') + ': <span class="v">translateY(-8px)</span>;')
+        + L('}');
       outs();
     }
-    dur.addEventListener('input', draw); tf.addEventListener('change', draw);
+    dur.addEventListener('input', draw);
+    var STEPS = [0, 300, 1000], k = 0;
+    stepper('#trBtn', function(d){
+      k = Math.max(0, Math.min(STEPS.length - 1, k + d));
+      dur.value = STEPS[k]; draw();
+    });
+    dur.value = STEPS[0];
     draw();
   })();
 
@@ -1346,9 +1442,14 @@
     if (!pop){ panel.hidden = false; return; }
     var d = pop.document; d.title = 'Notas do professor';
     d.head.innerHTML = '<meta charset="utf-8"><style>body{font:16px/1.5 system-ui,sans-serif;background:#0c1f2e;color:#e4ecf3;padding:1rem 1.3rem}h4{font:500 12px monospace;letter-spacing:.1em;text-transform:uppercase;color:#f4ac4a;margin:1.1rem 0 .2rem}ul{margin:0;padding-left:1.2rem}li{margin:.25rem 0}code{background:#123047;padding:.05em .35em;border-radius:4px}.np-h{font:12px monospace;color:#93a6b5}</style>';
-    panel.hidden = true; updateNotes();
+    panel.hidden = true; syncNotesMode(); updateNotes();
   }
 
+  function syncNotesMode(){
+    var open = !panel.hidden;
+    document.body.classList.toggle('notes-open', open);
+    $$('.radar .sample').forEach(function(sm){ if (!sm.closest('.radar').classList.contains('tog')) sm.hidden = !open; });
+  }
   function render(){
     slides.forEach(function(s, x){ s.classList.toggle('active', x === i); s.setAttribute('aria-hidden', x === i ? 'false' : 'true'); });
     pfill.style.width = ((i+1)/total*100) + '%';
@@ -1368,12 +1469,16 @@
 
   document.addEventListener('keydown', function(e){
     var t = e.target, tag = t && t.tagName;
-    if (e.key === 'Escape'){ if (document.activeElement) document.activeElement.blur(); panel.hidden = true; return; }
+    if (e.key === 'Escape'){ if (document.activeElement) document.activeElement.blur(); panel.hidden = true; syncNotesMode(); return; }
     if (tag === 'TEXTAREA' || tag === 'SELECT' || (tag === 'INPUT' && t.type !== 'range' && t.type !== 'color')) return;
     if (tag === 'INPUT' && t.type === 'range' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
     if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
-    if (e.key === 'n' || e.key === 'N'){ panel.hidden = !panel.hidden; return; }
+    if (e.key === 'n' || e.key === 'N'){ panel.hidden = !panel.hidden; syncNotesMode(); return; }
     if (e.key === 'p' || e.key === 'P'){ openPop(); return; }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      var rd = slides[i].hasAttribute('data-stepper') ? slides[i] : $('.radar', slides[i]);
+      if (rd){ e.preventDefault(); rd.dispatchEvent(new CustomEvent('step', { detail: e.key === 'ArrowDown' ? 1 : -1 })); return; }
+    }
     if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ' || e.key === 'ArrowDown'){ e.preventDefault(); next(); }
     else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp'){ e.preventDefault(); prev(); }
     else if (e.key === 'Home'){ e.preventDefault(); go(0); }
