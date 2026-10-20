@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Introdução a Deploy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    color-scheme: dark;
+    /* paleta: navy #123f63 / slate #8fa3c4 / teal #16a89c / lime #bcd230 / orange #f2a63b */
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+    --font-display:"Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --font-body:"Barlow", system-ui, -apple-system, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      color-scheme: light;
+      --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+      --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+      --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg:#eef1f5; --bg-elev:#ffffff; --ink:#123049; --ink-dim:#5a6b7a; --line:#d3dbe3;
+    --accent:#0e857b; --accent-ink:#ffffff; --amber:#b26a12; --lime:#7d8f16; --slate:#5f7292;
+    --shadow:0 16px 40px -20px rgba(18,40,64,.24);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0c1f2e; --bg-elev:#123047; --ink:#e4ecf3; --ink-dim:#93a6b5; --line:#244056;
+    --accent:#2ec9bd; --accent-ink:#06231f; --amber:#f4ac4a; --lime:#c4da3c; --slate:#a9bce0;
+    --shadow:0 18px 50px -18px rgba(0,0,0,.65);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:clamp(15px,1.1vw,18px); line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  .deck{ position:fixed; inset:0; display:grid; grid-template-rows:1fr auto; }
+  .stage{ position:relative; overflow:hidden; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; gap:clamp(1rem,2.4vh,1.9rem);
+    padding:clamp(2rem,6vw,5.5rem) clamp(1.6rem,7vw,7rem) clamp(3.2rem,8vh,5rem);
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .34s ease, transform .34s ease, visibility 0s linear .34s;
+    overflow-y:auto;
+  }
+  .slide.active{
+    opacity:1; visibility:visible; transform:none;
+    transition:opacity .38s ease, transform .38s ease;
+  }
+  .slide > *{ max-width:60ch; }
+  .slide .wide{ max-width:min(1080px,92vw); }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0; display:flex; align-items:center; gap:.6rem;
+  }
+  .eyebrow::before{ content:""; width:1.8rem; height:2px; background:var(--accent); display:inline-block; }
+
+  h1,h2{ font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.02; text-transform:uppercase; letter-spacing:.005em; }
+  h1{ font-size:clamp(2.9rem,9vw,6.2rem); }
+  h2{ font-size:clamp(2rem,5vw,3.6rem); }
+  h2 em, h1 em{ font-style:normal; color:var(--accent); }
+
+  .slide p{ margin:0; }
+  strong{ font-weight:600; color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+  .subtitle{ font-family:var(--font-mono); color:var(--ink-dim); font-size:clamp(.95rem,1.6vw,1.15rem); letter-spacing:.02em; }
+
+  code, kbd{
+    font-family:var(--font-mono); font-size:.92em;
+    background:var(--bg-elev); border:1px solid var(--line); border-radius:5px;
+    padding:.1em .45em;
+  }
+
+  ul.bullets{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.7rem; font-size:clamp(1.05rem,1.9vw,1.35rem); }
+  ul.bullets li{ display:flex; gap:.7rem; align-items:baseline; }
+  ul.bullets li::before{ content:"▸"; color:var(--accent); flex:none; }
+
+  .callout{
+    border-left:3px solid var(--amber); background:var(--bg-elev);
+    padding:1rem 1.2rem; border-radius:0 10px 10px 0; font-size:clamp(1.02rem,1.8vw,1.3rem);
+  }
+  .callout.good{ border-color:var(--accent); }
+
+  .trio{ display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .trio > div{
+    background:var(--bg-elev); border:1px solid var(--line); border-top:4px solid var(--c,var(--accent));
+    border-radius:12px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.5rem;
+  }
+  .trio .k{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:1.6rem; line-height:1; }
+  .trio .tags{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink-dim); }
+  .trio .t1{ --c:var(--accent); } .trio .t2{ --c:var(--amber); } .trio .t3{ --c:var(--lime); }
+  .trio .price{ font-family:var(--font-mono); font-size:.9rem; margin-top:auto; color:var(--c); }
+
+  /* footer chrome */
+  .chrome{
+    display:flex; align-items:center; gap:1rem;
+    padding:.55rem clamp(1rem,4vw,2.4rem); border-top:1px solid var(--line);
+    background:var(--bg); font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim);
+    z-index:10;
+  }
+  .chrome .label{ letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progress{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; min-width:60px; }
+  .progress__fill{ height:100%; background:var(--accent); width:0; transition:width .35s ease; }
+  .chrome .count{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .chrome button{
+    font:inherit; color:var(--ink-dim); background:var(--bg-elev); border:1px solid var(--line);
+    border-radius:7px; padding:.3em .7em; cursor:pointer;
+  }
+  .chrome button:hover{ color:var(--ink); border-color:var(--accent); }
+  .chrome button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .zones{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+  .zone{ pointer-events:auto; border:none; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; }
+  .zone:focus, .zone:focus-visible{ outline:none; }
+  .zone.prev{ width:28%; }
+  .zone.spacer{ flex:1; cursor:default; pointer-events:none; }
+  .zone.next{ width:40%; }
+
+  .brandbar{ position:absolute; left:0; right:0; top:0; height:5px; display:flex; z-index:8; }
+  .brandbar i{ flex:1; }
+  .brandbar i:nth-child(1){ background:var(--accent); }
+  .brandbar i:nth-child(2){ background:var(--lime); }
+  .brandbar i:nth-child(3){ background:var(--amber); }
+
+  .slide aside.notes{ display:none; }
+
+  /* ===== o diagrama do deploy (montado em estados com ↓) ===== */
+  .dg{ width:100%; max-width:min(960px,88vw); height:auto; max-height:62vh; display:block; color:var(--ink); }
+  .dg .ico{ fill:none; stroke:currentColor; stroke-width:4; stroke-linejoin:round; stroke-linecap:round; }
+  .dg .ico .fill{ fill:currentColor; stroke:none; }
+  .dg .arrow{ fill:none; stroke:var(--accent); stroke-width:5; stroke-linecap:round; }
+  .dg .arrowhead{ fill:var(--accent); }
+  .dg text{ font-family:var(--font-mono); fill:var(--ink-dim); font-size:22px; }
+  .dg text.big{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; fill:var(--amber); font-size:54px; letter-spacing:.02em; }
+  .dg text.code{ fill:var(--accent); font-size:24px; font-weight:500; }
+  .dg .pill rect{ fill:var(--bg-elev); stroke:var(--lime); stroke-width:3; }
+  .dg .pill text{ fill:var(--lime); font-size:22px; }
+  .dg [data-s]{ opacity:0; transition:opacity .45s ease, transform .45s ease; }
+  .dg [data-s].on{ opacity:1; }
+  .dg .hl{ transition:color .3s ease, filter .3s ease; }
+  .dg .hl.lit{ color:var(--amber); filter:drop-shadow(0 0 10px color-mix(in srgb, var(--amber) 70%, transparent)); }
+  .dg .hl.lit text{ fill:var(--amber); }
+
+  .dgwrap{ display:grid; gap:1.4rem; grid-template-columns:1fr; align-items:start; }
+  @media (min-width:1000px){ .dgwrap{ grid-template-columns:1.6fr 1fr; } }
+  .lgs{ display:flex; flex-direction:column; gap:.9rem; font-size:clamp(1.05rem,1.8vw,1.35rem); }
+  .lg{ margin:0; opacity:0; transform:translateY(6px); transition:opacity .3s, transform .3s; }
+  .lg.on{ opacity:1; transform:none; }
+  .lg b{ font-family:var(--font-display); text-transform:uppercase; font-size:1.5em; display:block; line-height:1.05; }
+  .lg .n{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-dim); letter-spacing:.1em; }
+  .lg.l1 b{ color:var(--accent); } .lg.l2 b{ color:var(--amber); } .lg.l3 b{ color:var(--lime); }
+
+  /* dois caminhos da versão */
+  .duo{ display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+  .duo > div{ background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem; display:flex; flex-direction:column; gap:.6rem; }
+  .duo .k{ font-family:var(--font-display); font-weight:700; text-transform:uppercase; font-size:1.7rem; line-height:1; }
+  .duo .flow{ font-family:var(--font-mono); font-size:.95rem; color:var(--ink-dim); }
+  .duo .flow b{ color:var(--accent); font-weight:500; }
+
+  /* barras de endereço */
+  .urls{ display:flex; flex-direction:column; gap:.8rem; }
+  .url{ display:flex; align-items:center; gap:.8rem; background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:.55rem 1.1rem; font-family:var(--font-mono); font-size:clamp(.95rem,1.7vw,1.2rem); }
+  .url::before{ content:"🔒"; font-size:.9em; }
+  .url .tag{ margin-left:auto; font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; padding:.2em .7em; border-radius:999px; }
+  .url .free{ background:color-mix(in srgb, var(--accent) 22%, transparent); color:var(--accent); }
+  .url .paid{ background:color-mix(in srgb, var(--amber) 22%, transparent); color:var(--amber); }
+  .url .sub{ color:var(--ink-dim); }
+
+  .two{ display:grid; gap:1.4rem; grid-template-columns:1fr; align-items:start; }
+  @media (min-width:900px){ .two{ grid-template-columns:1fr 1fr; } }
+
+  /* anotações do professor */
+  #notesPanel{
+    position:fixed; right:12px; bottom:52px; width:min(390px,92vw); max-height:72vh; overflow:auto; z-index:40;
+    background:var(--bg-elev); border:1px solid var(--amber); border-radius:12px; padding:.9rem 1.05rem;
+    box-shadow:var(--shadow); font-size:.9rem; line-height:1.45;
+  }
+  #notesPanel[hidden]{ display:none; }
+  #notesPanel .np-h{ font-family:var(--font-mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:.4rem; }
+  #notesPanel h4{ margin:.7rem 0 .2rem; font-family:var(--font-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); font-weight:500; }
+  #notesPanel ul{ margin:0; padding-left:1.1rem; } #notesPanel li{ margin:.15rem 0; }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide, .slide.active, .progress__fill, .dg [data-s], .lg{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="brandbar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="zones" aria-hidden="true">
+      <button class="zone prev" id="zprev" tabindex="-1" aria-label="Slide anterior"></button>
+      <span class="zone spacer"></span>
+      <button class="zone next" id="znext" tabindex="-1" aria-label="Próximo slide"></button>
+    </div>
+
+    <!-- 1 -->
+    <section class="slide" aria-label="Slide 1" data-part="Deploy">
+      <p class="eyebrow">Publicação</p>
+      <h1>Introdução a <em>deploy</em></h1>
+      <p class="subtitle">Do seu computador pra qualquer tela</p>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>&ldquo;Vocês já sabem fazer site. Agora falta o último passo: colocar ele no ar.&rdquo;</li>
+          <li>&ldquo;Hoje é o mapa. Nas próximas aulas, a gente publica de verdade.&rdquo;</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>0:00 &rarr; 0:40</li></ul>
+      </aside>
+    </section>
+
+    <!-- 2: o diagrama se monta -->
+    <section class="slide" aria-label="Slide 2" data-part="O que é deploy">
+      <p class="eyebrow">O que é</p>
+      <h2>O que é <em>deploy</em>?</h2>
+      <div class="wide" id="dgBuild" data-steps></div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul><li>4 estados: notebook sozinho &rarr; ↓ arquivo + servidor + seta &rarr; ↓ &ldquo;hospedagem&rdquo; + quem acessa &rarr; ↓ a palavra <b>deploy</b> na seta.</li></ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>1: &ldquo;Esse é o <b>ambiente local</b>: o computador de vocês. Foi aqui que vocês fizeram tudo até agora. Só vocês veem.&rdquo;</li>
+          <li>2: &ldquo;Pra outra pessoa ver, o projeto precisa ir pra outro computador: um <b>servidor</b>, que fica ligado o tempo todo.&rdquo;</li>
+          <li>3: &ldquo;Esse servidor é a <b>hospedagem</b>. Agora qualquer um, de qualquer tela, acessa.&rdquo; (lembrar da aula de responsividade)</li>
+          <li>4: &ldquo;Essa seta, levar o projeto do seu PC pro servidor, tem nome: <b>deploy</b>.&rdquo;</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>0:40 &rarr; 3:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 3: os 3 componentes -->
+    <section class="slide" aria-label="Slide 3" data-part="Os 3 componentes">
+      <p class="eyebrow">O mapa</p>
+      <h2>Deploy tem <em>3 peças</em></h2>
+      <div class="dgwrap wide" id="dgParts" data-steps>
+        <div class="dgslot"></div>
+        <div class="lgs">
+          <p class="lg l1" data-i="1"><span class="n">01</span><b>Versão</b>O que vai pro ar. Na mão ou pelo Git.</p>
+          <p class="lg l2" data-i="2"><span class="n">02</span><b>Hospedagem</b>O computador que guarda e entrega o site.</p>
+          <p class="lg l3" data-i="3"><span class="n">03</span><b>Domínio</b>O nome que a pessoa digita.</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Com ↓ (só você)</h4>
+        <ul><li>Mesmo desenho do slide anterior. Cada ↓ acende uma peça: o arquivo (versão) &rarr; o servidor (hospedagem) &rarr; aparece o nome em cima do servidor (domínio).</li></ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>&ldquo;Todo deploy, de qualquer site do mundo, tem essas 3 peças.&rdquo;</li>
+          <li>&ldquo;Cada uma é uma escolha que vocês vão fazer. Vamos ver uma por uma.&rdquo;</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>3:00 &rarr; 4:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 4: versão -->
+    <section class="slide" aria-label="Slide 4" data-part="1. Versão">
+      <p class="eyebrow">Peça 1 &middot; Versão</p>
+      <h2>Qual versão <em>vai pro ar</em>?</h2>
+      <div class="duo wide">
+        <div>
+          <span class="k">Na mão</span>
+          <p class="flow">pasta do projeto &rarr; <b>arrastar</b> / <b>enviar</b> os arquivos</p>
+          <p>Rápido. Mas é você quem lembra qual é a versão certa.</p>
+        </div>
+        <div>
+          <span class="k">Pelo Git</span>
+          <p class="flow"><b>git push</b> &rarr; branch <b>main</b> &rarr; site atualiza sozinho</p>
+          <p>A versão no ar é sempre a da <code>main</code>.</p>
+        </div>
+      </div>
+      <div class="callout good wide">
+        <p><strong>Produção</strong> = a versão que o público vê. Com Git: <strong>produção = <code>main</code></strong>.</p>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>&ldquo;Na mão: você pega a pasta e manda. Funciona, mas se mandar a pasta errada, foi a errada pro ar.&rdquo;</li>
+          <li>&ldquo;Pelo Git, que vocês já conhecem: o que estiver na <code>main</code> é o que está no ar. Deu <code>push</code>, atualizou.&rdquo;</li>
+          <li>Palavra nova: <b>produção</b>. &ldquo;Quando alguém fala &lsquo;subiu pra produção&rsquo;, quer dizer: está no ar, o público já vê.&rdquo;</li>
+          <li>Gancho: &ldquo;Na próxima aula a gente faz dos dois jeitos.&rdquo;</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>4:00 &rarr; 6:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 5: hospedagem -->
+    <section class="slide" aria-label="Slide 5" data-part="2. Hospedagem">
+      <p class="eyebrow">Peça 2 &middot; Hospedagem</p>
+      <h2>O projeto decide <em>o servidor</em></h2>
+      <div class="trio wide">
+        <div class="t1">
+          <span class="k">HTML, CSS, JS</span><span class="tags">site estático</span>
+          <p>Só entrega os arquivos. <strong>É o de vocês.</strong></p>
+          <p class="dim">GitHub Pages, Netlify, Vercel</p>
+          <span class="price">grátis</span>
+        </div>
+        <div class="t2">
+          <span class="k">PHP / WordPress</span><span class="tags">servidor Apache</span>
+          <p>Hospedagem &ldquo;compartilhada&rdquo;, com painel.</p>
+          <p class="dim">Hostinger, Locaweb, HostGator&hellip;</p>
+          <span class="price">mensalidade</span>
+        </div>
+        <div class="t3">
+          <span class="k">Node</span><span class="tags">código rodando no servidor</span>
+          <p>Login, banco de dados, pagamento.</p>
+          <p class="dim">Render, Railway, servidor próprio</p>
+          <span class="price">grátis limitado / pago</span>
+        </div>
+      </div>
+      <div class="callout wide">
+        <p><strong>E o meu PC?</strong> Até dá, mas teria que ficar ligado 24h e exposto na internet. Não vale.</p>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>&ldquo;Não existe um servidor só. O tipo do projeto decide o tipo de hospedagem.&rdquo;</li>
+          <li>Estático: &ldquo;é tudo o que vocês fizeram até agora. O servidor só entrega os arquivos, por isso tem de graça.&rdquo;</li>
+          <li>Apache: &ldquo;se um dia alguém pedir um WordPress, ou vocês virem um &lsquo;painel de hospedagem&rsquo;, é esse aqui. É pago por mês.&rdquo;</li>
+          <li>Node: &ldquo;quando o site precisa rodar código no servidor, tipo login. Isso é mais pra frente.&rdquo;</li>
+          <li>&ldquo;Vocês não precisam disso agora. Só saibam que existe, pra não ficarem perdidos.&rdquo;</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li><kbd>F12</kbd> &rarr; <b>Network</b> &rarr; recarregar &rarr; clicar no primeiro item &rarr; <b>Headers</b> &rarr; procurar <code>server</code>.</li>
+          <li>Testar 3 ou 4 sites antes de gravar (ex.: um site do governo, um blog WordPress, um <code>.github.io</code>, um <code>.vercel.app</code>). Aparecem <code>Apache</code>, <code>nginx</code>, <code>GitHub.com</code>, <code>Vercel</code>.</li>
+          <li>&ldquo;Todo site que vocês abrem está em algum servidor desses.&rdquo;</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>6:00 &rarr; 9:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 6: domínio -->
+    <section class="slide" aria-label="Slide 6" data-part="3. Domínio">
+      <p class="eyebrow">Peça 3 &middot; Domínio</p>
+      <h2>O nome que <em>a pessoa digita</em></h2>
+      <div class="two wide">
+        <div class="urls">
+          <p class="url">meusite<span class="sub">.github.io</span><span class="tag free">grátis</span></p>
+          <p class="url">meusite<span class="sub">.netlify.app</span><span class="tag free">grátis</span></p>
+          <p class="url">meusite<span class="sub">.vercel.app</span><span class="tag free">grátis</span></p>
+          <p class="url">meusite<span class="sub">.com.br</span><span class="tag paid">pago por ano</span></p>
+        </div>
+        <ul class="bullets">
+          <li><span>Toda hospedagem grátis <strong>já te dá um nome</strong>.</span></li>
+          <li><span>Domínio próprio é <strong>opcional</strong>.</span></li>
+          <li><span>Ele é <strong>alugado por ano</strong>, não comprado pra sempre.</span></li>
+          <li><span><code>.com.br</code>: registro.br</span></li>
+        </ul>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>&ldquo;Os três primeiros vêm de graça junto com a hospedagem. Funciona igualzinho.&rdquo;</li>
+          <li>&ldquo;O último é um domínio só seu. Fica mais profissional, mas é pago, e todo ano.&rdquo;</li>
+          <li>&ldquo;Não parou de pagar? Perde o nome. Alguém pode registrar depois.&rdquo;</li>
+          <li>Domínio &ne; hospedagem: &ldquo;um é o endereço, o outro é a casa. Se paga separado.&rdquo;</li>
+        </ul>
+        <h4>Ilustrar no navegador</h4>
+        <ul>
+          <li>Abrir <code>registro.br</code> e pesquisar um nome (o da escola, o de um aluno, um bem engraçado). Mostrar &ldquo;disponível&rdquo; e o preço. <b>Não comprar.</b></li>
+          <li>Pesquisar um famoso (ex.: <code>google.com.br</code>): aparece como ocupado.</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>9:00 &rarr; 11:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 7: taxas -->
+    <section class="slide" aria-label="Slide 7" data-part="Taxas">
+      <p class="eyebrow">Quanto custa</p>
+      <h2>Taxas e <em>pegadinhas</em></h2>
+      <div class="two wide">
+        <div class="trio" style="grid-template-columns:1fr">
+          <div class="t1"><span class="k">R$ 0</span><span class="tags">site estático + nome grátis</span></div>
+          <div class="t3"><span class="k">≈ R$ 40 / ano</span><span class="tags">domínio .com.br</span></div>
+          <div class="t2"><span class="k">≈ R$ 10–40 / mês</span><span class="tags">hospedagem compartilhada</span></div>
+        </div>
+        <ul class="bullets">
+          <li><span><strong>1º ano barato</strong>, renovação bem mais cara</span></li>
+          <li><span>&ldquo;Domínio grátis&rdquo; que só vale no 1º ano</span></li>
+          <li><span>Renovação automática no cartão</span></li>
+          <li><span>Cadeado (HTTPS) vendido à parte em alguns planos</span></li>
+          <li><span class="dim">Valores aproximados, 2026</span></li>
+        </ul>
+      </div>
+      <aside class="notes">
+        <h4>Antes de gravar</h4>
+        <ul><li>Conferir o preço atual do <code>.com.br</code> no registro.br e tirar print de 2 páginas de planos (preço promocional e preço de renovação).</li></ul>
+        <h4>Falar</h4>
+        <ul>
+          <li>&ldquo;Pra tudo que vocês fizeram no curso: zero reais.&rdquo;</li>
+          <li>&ldquo;Quando for pagar, leiam o preço da <b>renovação</b>, não o do primeiro mês.&rdquo;</li>
+          <li>&ldquo;O cadeado do navegador nos serviços grátis vem automático. Se alguém quiser cobrar por ele, desconfie.&rdquo;</li>
+          <li>Não recomendar nenhuma empresa. Mostrar duas lado a lado.</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>11:00 &rarr; 13:00</li></ul>
+      </aside>
+    </section>
+
+    <!-- 8: recap -->
+    <section class="slide" aria-label="Slide 8" data-part="Recap">
+      <p class="eyebrow">Recap</p>
+      <h2>As 3 peças <em>do deploy</em></h2>
+      <div class="two wide">
+        <ul class="bullets">
+          <li><span><strong>Deploy</strong>: levar o projeto do seu PC pro servidor</span></li>
+          <li><span><strong>Versão</strong>: na mão ou Git. Produção = <code>main</code></span></li>
+          <li><span><strong>Hospedagem</strong>: estático (grátis), Apache, Node</span></li>
+          <li><span><strong>Domínio</strong>: grátis junto ou próprio, pago por ano</span></li>
+        </ul>
+        <div class="callout">
+          <p><strong>Mini-desafio</strong></p>
+          <p>Escolha qual projeto seu vai pro ar na próxima aula.</p>
+          <p class="dim">Bônus: no registro.br, o nome que você quer está livre?</p>
+        </div>
+      </div>
+      <aside class="notes">
+        <h4>Falar</h4>
+        <ul>
+          <li>Passar rápido pelas 4 linhas.</li>
+          <li>Gancho: &ldquo;Na próxima aula, o site de vocês vai pro ar. De três jeitos diferentes.&rdquo;</li>
+        </ul>
+        <h4>Tempo</h4>
+        <ul><li>13:00 &rarr; 14:00</li></ul>
+      </aside>
+    </section>
+
+  </div>
+
+  <div class="chrome">
+    <span class="label" id="partLabel">Deploy</span>
+    <button id="btnPrev" aria-label="Slide anterior">&larr;</button>
+    <div class="progress"><div class="progress__fill" id="pfill"></div></div>
+    <button id="btnNext" aria-label="Próximo slide">&rarr;</button>
+    <span class="count" id="count">01 / 08</span>
+    <button id="btnTheme" aria-label="Alternar tema">tema</button>
+  </div>
+</div>
+
+<div id="notesPanel" hidden></div>
+
+<script>
+(function(){
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+  /* ---------- o diagrama: notebook à esquerda, servidor no topo, quem acessa à direita (canto inferior direito livre pra câmera) ---------- */
+  function diagram(id){
+    var m = id + '-ah';
+    return '<svg class="dg" viewBox="0 0 1000 470" role="img" aria-label="Diagrama do deploy">'
+      + '<defs><marker id="' + m + '" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path class="arrowhead" d="M0 0 L10 5 L0 10 Z"/></marker></defs>'
+
+      /* notebook (ambiente local) */
+      + '<g class="hl" data-p="local"><g class="ico" transform="translate(70 250)">'
+      +   '<rect x="0" y="0" width="170" height="105" rx="8"/>'
+      +   '<path d="M-22 118 H192 L176 138 H-6 Z"/>'
+      + '</g><text x="155" y="425" text-anchor="middle">ambiente local</text></g>'
+
+      /* seta do deploy + arquivo */
+      + '<g data-s="1"><path class="arrow" d="M262 250 L415 150" marker-end="url(#' + m + ')"/></g>'
+      + '<g class="hl" data-p="versao" data-s="1"><g class="ico" transform="translate(270 140)">'
+      +   '<path d="M0 0 H44 L64 20 V84 H0 Z"/><path d="M44 0 V20 H64"/>'
+      + '</g><text class="code" x="302" y="200" text-anchor="middle">&lt;/&gt;</text></g>'
+
+      /* servidor */
+      + '<g class="hl" data-p="host" data-s="1"><g class="ico" transform="translate(440 70)">'
+      +   '<rect x="0" y="0" width="130" height="36" rx="7"/><rect x="0" y="46" width="130" height="36" rx="7"/><rect x="0" y="92" width="130" height="36" rx="7"/>'
+      +   '<path d="M18 18 H66 M18 64 H66 M18 110 H66"/>'
+      +   '<circle class="fill" cx="96" cy="18" r="4"/><circle class="fill" cx="112" cy="18" r="4"/>'
+      +   '<circle class="fill" cx="96" cy="64" r="4"/><circle class="fill" cx="112" cy="64" r="4"/>'
+      +   '<circle class="fill" cx="96" cy="110" r="4"/><circle class="fill" cx="112" cy="110" r="4"/>'
+      + '</g><text x="505" y="232" text-anchor="middle" data-s="2">hospedagem</text></g>'
+
+      /* domínio (só no slide das 3 peças) */
+      + '<g class="pill" data-p="dominio" data-s="9"><rect x="395" y="14" width="220" height="40" rx="20"/><text x="505" y="42" text-anchor="middle">meusite.com.br</text></g>'
+
+      /* quem acessa */
+      + '<g data-s="2">'
+      +   '<path class="arrow" d="M590 110 L760 60" marker-start="url(#' + m + ')" marker-end="url(#' + m + ')"/>'
+      +   '<path class="arrow" d="M590 140 L760 160" marker-start="url(#' + m + ')" marker-end="url(#' + m + ')"/>'
+      +   '<path class="arrow" d="M590 170 L760 270" marker-start="url(#' + m + ')" marker-end="url(#' + m + ')"/>'
+      +   '<g class="ico" transform="translate(790 20)"><rect x="0" y="0" width="46" height="82" rx="8"/><path d="M17 70 H29"/></g>'
+      +   '<g class="ico" transform="translate(785 130)"><rect x="0" y="0" width="100" height="62" rx="6"/><path d="M-12 72 H112"/></g>'
+      +   '<g class="ico" transform="translate(785 235)"><rect x="0" y="0" width="34" height="74" rx="5"/><rect x="48" y="4" width="86" height="56" rx="5"/><path d="M78 60 V72 M64 74 H106"/></g>'
+      + '</g>'
+
+      /* a palavra */
+      + '<text class="big" x="395" y="300" text-anchor="middle" data-s="3">deploy</text>'
+      + '</svg>';
+  }
+
+  /* slide 2: cada ↓ acrescenta uma parte */
+  (function(){
+    var root = $('#dgBuild'), k = 0, max = 3;
+    root.innerHTML = diagram('b');
+    function paint(){ $$('[data-s]', root).forEach(function(n){ n.classList.toggle('on', +n.getAttribute('data-s') <= k); }); }
+    root.addEventListener('step', function(e){ k = Math.max(0, Math.min(max, k + e.detail)); paint(); });
+    paint();
+  })();
+
+  /* slide 3: desenho completo, cada ↓ acende uma peça */
+  (function(){
+    var root = $('#dgParts'), k = 0, max = 3, map = { 1:'versao', 2:'host', 3:'dominio' };
+    $('.dgslot', root).innerHTML = diagram('p');
+    $$('[data-s]', root).forEach(function(n){ if (+n.getAttribute('data-s') <= 3) n.classList.add('on'); });
+    var dom = $('[data-p="dominio"]', root);
+    function paint(){
+      $$('[data-i]', root).forEach(function(n){ n.classList.toggle('on', +n.getAttribute('data-i') <= k); });
+      $$('.hl', root).forEach(function(n){ n.classList.toggle('lit', map[k] === n.getAttribute('data-p')); });
+      dom.classList.toggle('on', k >= 3);
+    }
+    root.addEventListener('step', function(e){ k = Math.max(0, Math.min(max, k + e.detail)); paint(); });
+    paint();
+  })();
+
+  /* ---------- navegação + anotações ---------- */
+  var slides = $$('.slide'), total = slides.length, i = 0;
+  var pfill = $('#pfill'), count = $('#count'), partLabel = $('#partLabel'), panel = $('#notesPanel');
+  var pop = null;
+  function pad(n){ return (n<10?'0':'') + n; }
+  function notesHTML(){ var n = slides[i].querySelector('aside.notes'); return n ? n.innerHTML : '<h4>Sem anotações</h4>'; }
+  function updateNotes(){
+    panel.innerHTML = '<div class="np-h">Só você vê &middot; slide ' + (i+1) + ' &middot; N fecha &middot; P abre janela</div>' + notesHTML();
+    if (pop && !pop.closed){ pop.document.body.innerHTML = '<div class="np-h">Slide ' + (i+1) + ' / ' + total + '</div>' + notesHTML(); }
+  }
+  function openPop(){
+    pop = window.open('', 'deploynotas', 'width=520,height=720');
+    if (!pop){ panel.hidden = false; return; }
+    var d = pop.document; d.title = 'Notas do professor';
+    d.head.innerHTML = '<meta charset="utf-8"><style>body{font:16px/1.5 system-ui,sans-serif;background:#0c1f2e;color:#e4ecf3;padding:1rem 1.3rem}h4{font:500 12px monospace;letter-spacing:.1em;text-transform:uppercase;color:#f4ac4a;margin:1.1rem 0 .2rem}ul{margin:0;padding-left:1.2rem}li{margin:.25rem 0}code,kbd{background:#123047;padding:.05em .35em;border-radius:4px}.np-h{font:12px monospace;color:#93a6b5}</style>';
+    panel.hidden = true; updateNotes();
+  }
+  function render(){
+    slides.forEach(function(s, x){ s.classList.toggle('active', x === i); s.setAttribute('aria-hidden', x === i ? 'false' : 'true'); });
+    pfill.style.width = ((i+1)/total*100) + '%';
+    count.textContent = pad(i+1) + ' / ' + pad(total);
+    partLabel.textContent = slides[i].getAttribute('data-part') || 'Deploy';
+    if (history.replaceState) history.replaceState(null, '', '#' + (i+1));
+    updateNotes();
+  }
+  function go(n){ var nx = Math.max(0, Math.min(total-1, n)); if (nx === i) return; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); i = nx; render(); }
+  function next(){ go(i+1); } function prev(){ go(i-1); }
+
+  function onKey(key){
+    if (key === 'Escape'){ panel.hidden = true; return; }
+    if (key === 'n' || key === 'N'){ panel.hidden = !panel.hidden; return; }
+    if (key === 'p' || key === 'P'){ openPop(); return; }
+    if (key === 'ArrowDown' || key === 'ArrowUp'){
+      var st = $('[data-steps]', slides[i]);
+      if (st){ st.dispatchEvent(new CustomEvent('step', { detail: key === 'ArrowDown' ? 1 : -1 })); return; }
+    }
+    if (key === 'ArrowRight' || key === 'PageDown' || key === ' ' || key === 'ArrowDown') next();
+    else if (key === 'ArrowLeft' || key === 'PageUp' || key === 'ArrowUp') prev();
+    else if (key === 'Home') go(0);
+    else if (key === 'End') go(total-1);
+  }
+  document.addEventListener('keydown', function(e){
+    var t = e.target, tag = t && t.tagName;
+    if (e.key === 'Escape'){ onKey('Escape'); return; }
+    if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT') return;
+    if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+    if (/^(Arrow|Page|Home|End| )/.test(e.key)) e.preventDefault();
+    onKey(e.key);
+  });
+  $('#btnNext').addEventListener('click', next);
+  $('#btnPrev').addEventListener('click', prev);
+  $('#znext').addEventListener('click', function(){ this.blur(); next(); });
+  $('#zprev').addEventListener('click', function(){ this.blur(); prev(); });
+  var docRoot = document.documentElement;
+  $('#btnTheme').addEventListener('click', function(){
+    var cur = docRoot.getAttribute('data-theme');
+    var isDark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    docRoot.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  if (!isNaN(start) && start >= 1 && start <= total) i = start - 1;
+  render();
+})();
+</script>
+
+</body>
+</html>
