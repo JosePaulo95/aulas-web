@@ -1,0 +1,21 @@
+body { background: #0c1f2e; }
+
+#c1 { justify-content: space-evenly; }
+
+#c2 { flex-direction: column-reverse; }
+
+#c3 { flex-direction: column; justify-content: space-between; align-items: center; }
+
+#c4 { justify-content: center; align-items: center; }
+
+#c5 { justify-content: flex-end; align-items: flex-end; }
+
+#c6 .caixa { flex: 1; }
+#c6 .caixa:nth-child(2) { flex: 2; }
+
+#c7 .caixa:nth-child(3) { background: #ffffff; }
+
+#c8 { flex-wrap: wrap; }
+#c8 .caixa { width: 8vw; height: 8vw; }
+
+#tudo { display: flex; flex-wrap: wrap; }
